@@ -299,6 +299,8 @@ public class ProcessMaster implements ProcessMasterMBean {
         public void run() {
             currentlyMonitoredProcesses = getProcessSnapshot();
             Set<MonitoredProcessDiff> monitoredProcessDiffs = compareProcessSets(startingSnapshot, currentlyMonitoredProcesses);
+            // TODO escalate diffs
+            startingSnapshot = currentlyMonitoredProcesses;
         }
 
     }

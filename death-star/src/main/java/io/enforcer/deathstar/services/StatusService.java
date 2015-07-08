@@ -160,7 +160,7 @@ public class StatusService {
     private static class StatusMonitor implements Runnable {
         @Override
         public void run() {
-            logger.log(Level.INFO, "status checker thread run started");
+            logger.log(Level.FINE, "status checker thread run started");
 
             for(Status status : statusStore.values()) {
                 if(statusIsStale(status)) {
