@@ -2,6 +2,10 @@ package io.enforcer.xwing;
 
 /**
  * Created by kaveh on 2/24/2015.
+ *
+ * This class represents a change in a monitored processes' state.
+ * Changes could be triggered when a process that was previously
+ * running stops or a new process starts.
  */
 public class MonitoredProcessDiff {
 

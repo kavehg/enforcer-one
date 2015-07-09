@@ -1,9 +1,13 @@
 package io.enforcer.xwing;
 
+import java.util.Set;
+
 /**
  * Created by kaveh on 2/24/2015.
  */
 public interface ProcessMasterMBean {
-    public void logCurrentState();
-    public void stopScheduler();
+    void logCurrentState();
+    void stopScheduler();
+    Set<Integer> getProblematicProcessIds();
+    Set<String> getIgnoredProcesses();
 }

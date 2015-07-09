@@ -48,6 +48,14 @@ public class ProcessMaster implements ProcessMasterMBean {
     private Set<String> ignoredProcesses;
 
     /**
+     * This set contains any process IDs that we are having problems
+     * with. This includes processes that have no main class
+     * according to jps. Processes in this set get logged and
+     * ignored going forward.
+     */
+    private Set<Integer> problematicProcessIds;
+
+    /**
      * The periodic monitoring task is run by this scheduler
      */
     private ScheduledExecutorService scheduler;
@@ -65,6 +73,8 @@ public class ProcessMaster implements ProcessMasterMBean {
      * @param getInitialProcessSnapshot should the process master initialize itself
      */
     public ProcessMaster(Boolean getInitialProcessSnapshot, Properties propertiesOverride) {
+        problematicProcessIds = new HashSet<>();
+
         if(propertiesOverride == null)
             loadConfiguration();
         else
@@ -111,6 +121,20 @@ public class ProcessMaster implements ProcessMasterMBean {
     public void logCurrentState() {
         logger.log(Level.INFO, dumpConfiguration());
         logger.log(Level.INFO, dumpCurrentState());
+    }
+
+    /**
+     * @return current list of processes that are ignored by the monitor
+     */
+    public Set<String> getIgnoredProcesses() {
+        return ignoredProcesses;
+    }
+
+    /**
+     * @return current list of problematic process IDs
+     */
+    public Set<Integer> getProblematicProcessIds() {
+        return problematicProcessIds;
     }
 
     /**
@@ -241,10 +265,13 @@ public class ProcessMaster implements ProcessMasterMBean {
         else
             logger.log(Level.WARNING, "could not get process id for string: {0}", jpsString);
 
-        if(tokenizer.hasMoreTokens())
+        // TODO refactor and separate problematic process id from string conversion
+        if(tokenizer.hasMoreTokens()) {
             mainClass = tokenizer.nextToken();
-        else
+        } else if(!problematicProcessIds.contains(processId)) {
+            problematicProcessIds.add(processId);
             logger.log(Level.WARNING, "could not get main class for string: {0}", jpsString);
+        }
 
         return new MonitoredProcess(processId, mainClass);
     }
@@ -310,9 +337,13 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * @param start
-     * @param current
-     * @return
+     * Use simple set operations to compare currently running processes
+     * to what was running previously and determine if any processes
+     * were added.
+     *
+     * @param start     starting set of processes
+     * @param current   currently running processes
+     * @return  set of added processes
      */
     private Set<MonitoredProcessDiff> checkForAdditions(Set<MonitoredProcess> start, Set<MonitoredProcess> current) {
         HashSet<MonitoredProcess> currentProcesses = new HashSet<>(current);
@@ -321,9 +352,13 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * @param start
-     * @param current
-     * @return
+     * Use simple set operations to compare currently running processes
+     * to what was running previously and determine if any processes
+     * were terminated
+     *
+     * @param start     starting set of processes
+     * @param current   currently running processes
+     * @return  set of removed processes
      */
     private Set<MonitoredProcessDiff> checkForRemovals(Set<MonitoredProcess> start, Set<MonitoredProcess> current) {
         HashSet<MonitoredProcess> startingProcesses = new HashSet<>(start);
@@ -332,9 +367,11 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * @param processes
-     * @param stateChange
-     * @return
+     * Create diff objects representing changes in process states
+     *
+     * @param processes     processes for which diffs need to be created
+     * @param stateChange   how the processes have changed
+     * @return  objects representing process differences
      */
     private Set<MonitoredProcessDiff> convertProcessesToDiffs(Set<MonitoredProcess> processes, ProcessStateChanges stateChange) {
         HashSet<MonitoredProcessDiff> processDiffs = new HashSet<>();
@@ -365,6 +402,7 @@ public class ProcessMaster implements ProcessMasterMBean {
             currentlyMonitoredProcesses = getProcessSnapshot();
             Set<MonitoredProcessDiff> monitoredProcessDiffs = compareProcessSets(startingSnapshot, currentlyMonitoredProcesses);
             // TODO escalate diffs
+            logger.log(Level.FINE, "Identified differences: " + monitoredProcessDiffs);
             startingSnapshot = currentlyMonitoredProcesses;
         }
 

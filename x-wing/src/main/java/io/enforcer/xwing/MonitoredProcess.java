@@ -2,6 +2,9 @@ package io.enforcer.xwing;
 
 /**
  * Created by kaveh on 2/23/2015.
+ *
+ * This class represents a running process that we are currently
+ * watching.
  */
 public class MonitoredProcess {
 
