@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -13,6 +14,7 @@ public class ProcessMasterTest {
 
     private Set<Integer> startSet;
     private Set<MonitoredProcess> start;
+    private Properties properties;
     private ProcessMaster processMaster;
 
     @Before
@@ -27,8 +29,11 @@ public class ProcessMasterTest {
         start.add(new MonitoredProcess(2, "Main Two"));
         start.add(new MonitoredProcess(3, "Main Three"));
 
-        processMaster = new ProcessMaster(false);
-        processMaster.overrideStartingState(start);
+        properties = new Properties();
+        properties.setProperty("ignored", "IgnoreThisMainClass,IgnoreThatMainClass");
+
+        processMaster = new ProcessMaster(false, properties);
+        processMaster.setInitialProcessSnapshot(start);
     }
 
     @After
@@ -76,6 +81,9 @@ public class ProcessMasterTest {
         assertEquals(expectedResultSet, endSet);
     }
 
+    /**
+     * Make sure that a removed process shows up in diffs
+     */
     @Test
     public void testProcessRemovals() {
         HashSet<MonitoredProcess> end = new HashSet<>();
@@ -90,6 +98,9 @@ public class ProcessMasterTest {
         assertEquals(expectedDiffs, processDiffs);
     }
 
+    /**
+     * Make sure that an added process shows up in diffs
+     */
     @Test
     public void testProcessAddition() {
         HashSet<MonitoredProcess> end = new HashSet<>();
@@ -102,6 +113,23 @@ public class ProcessMasterTest {
 
         HashSet<MonitoredProcessDiff> expectedDiffs = new HashSet<>();
         expectedDiffs.add(new MonitoredProcessDiff(4, "Main Four", ProcessStateChanges.ADDED));
+
+        assertEquals(expectedDiffs, processDiffs);
+    }
+
+    /**
+     * Make sure that an ignored process does NOT show in diffs
+     */
+    @Test
+    public void testIgnoredProcesses() {
+        HashSet<MonitoredProcess> end = new HashSet<>();
+        end.add(new MonitoredProcess(1, "IgnoreThisMainClass"));
+        end.add(new MonitoredProcess(2, "IgnoreThatMainClass"));
+        end.addAll(start);
+
+        Set<MonitoredProcessDiff> processDiffs = processMaster.compareProcessSets(start, end);
+
+        HashSet<MonitoredProcessDiff> expectedDiffs = new HashSet<>();
 
         assertEquals(expectedDiffs, processDiffs);
     }

@@ -23,7 +23,7 @@ public class ProcessMaster implements ProcessMasterMBean {
     private static final Logger logger = Logger.getLogger(ProcessMaster.class.getName());
 
     /**
-     * This file should be on the classpath and contains
+     * This config file should be on the classpath and contains
      * various configuration parameters
      */
     private static final String configFileName = "config.properties";
@@ -40,6 +40,14 @@ public class ProcessMaster implements ProcessMasterMBean {
     private Properties properties;
 
     /**
+     * These processes will be ignored by the process monitor.
+     * They can be defined in the property file by setting the
+     * 'ignored' property equal to a comma separated list of
+     * main classes that should be ignored
+     */
+    private Set<String> ignoredProcesses;
+
+    /**
      * The periodic monitoring task is run by this scheduler
      */
     private ScheduledExecutorService scheduler;
@@ -47,15 +55,23 @@ public class ProcessMaster implements ProcessMasterMBean {
     /**
      * Using this constructor, the process master will not
      * initialize itself but will rather wait to be handed the
-     * starting set of monitored processes via the overrideStartingState method
+     * starting set of monitored processes via the setInitialProcessSnapshot
+     * method. Similarly, it is possible to override the properties
+     * instead of reading them from the configuration file.
      *
      * This is useful for unit testing the process master and
      * is not intended to be used for actual operation
      *
      * @param getInitialProcessSnapshot should the process master initialize itself
      */
-    public ProcessMaster(Boolean getInitialProcessSnapshot) {
-        loadConfiguration();
+    public ProcessMaster(Boolean getInitialProcessSnapshot, Properties propertiesOverride) {
+        if(propertiesOverride == null)
+            loadConfiguration();
+        else
+            this.properties = propertiesOverride;
+
+        initIgnoredProcesses();
+
         if(getInitialProcessSnapshot)
             initProcessList();
     }
@@ -66,7 +82,7 @@ public class ProcessMaster implements ProcessMasterMBean {
      * is meant to be used for actual operation
      */
     public ProcessMaster() {
-        this(true);
+        this(true, null);
     }
 
     /**
@@ -82,10 +98,10 @@ public class ProcessMaster implements ProcessMasterMBean {
      * the ProcessMaster an initial list of processes. This is
      * useful for unit testing of the process master.
      *
-     * @param initialProcessSnapshot initial snapshot of processes
+     * @param processSnapshot initial snapshot of processes
      */
-    public void overrideStartingState(Set<MonitoredProcess> initialProcessSnapshot) {
-        currentlyMonitoredProcesses = initialProcessSnapshot;
+    public void setInitialProcessSnapshot(Set<MonitoredProcess> processSnapshot) {
+        currentlyMonitoredProcesses = processSnapshot;
     }
 
     /**
@@ -128,6 +144,22 @@ public class ProcessMaster implements ProcessMasterMBean {
             properties.load(inputStream);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "could not load properties from input stream", e);
+        }
+    }
+
+    /**
+     * Checks for the 'ignored' property in the config file and
+     * adds all the processes that are to be ignored to a set
+     */
+    private void initIgnoredProcesses() {
+        ignoredProcesses = new HashSet<>();
+        String ignored = properties.getProperty("ignored");
+        if(ignored != null) {
+            StringTokenizer st = new StringTokenizer(ignored, ",");
+            while(st.hasMoreTokens()) {
+                ignoredProcesses.add(st.nextToken());
+            }
+            logger.log(Level.INFO, "Ignoring the following processes: " + ignoredProcesses);
         }
     }
 
@@ -180,8 +212,12 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * @param stringProcesses
-     * @return
+     * Takes a list of strings which are returned by the jps command
+     * and turns them into a set of MonitoredProcess objects using the
+     * convertJPSString() method
+     *
+     * @param stringProcesses list of strings returned by jps
+     * @return collection of MonitoredProcess objects representing the passed in strings
      */
     private Set<MonitoredProcess> convertStringsToProcess(List<String> stringProcesses) {
         return stringProcesses.stream()
@@ -190,8 +226,11 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * @param jpsString
-     * @return
+     * Takes the output of the jps command and turns it into
+     * a MonitoredProcess object
+     *
+     * @param jpsString one line of jps output
+     * @return an instance of the MonitoredProcess class
      */
     private MonitoredProcess convertJPSString(String jpsString) {
         StringTokenizer tokenizer = new StringTokenizer(jpsString, " ");
@@ -211,7 +250,10 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * @return
+     * Run the jps command and determine which java processes are
+     * currently running.
+     *
+     * @return list of strings returned by jps
      */
     private List<String> getListOfProcessStrings() {
         ArrayList<String> listOfProcessStrings = new ArrayList<>();
@@ -230,18 +272,41 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * @param start
-     * @param current
-     * @return
+     * Compares two sets of processes and determines the difference
+     * between the starting set and the current set.
+     * The differences are returned in the form of a set of process
+     * differences.
+     *
+     * @param start     set of monitored processes that we started with
+     * @param current   set of monitored processes that we ended with
+     * @return differences between the two input sets
      */
     public Set<MonitoredProcessDiff> compareProcessSets(Set<MonitoredProcess> start, Set<MonitoredProcess> current) {
 
         Set<MonitoredProcessDiff> additions = checkForAdditions(start, current);
         Set<MonitoredProcessDiff> removals = checkForRemovals(start, current);
 
+        // combine additions and removals
         additions.addAll(removals);
 
+        // filter main classes that are to be ignored
+        filterProcesses(additions);
+
         return additions; // actually additions + removals
+    }
+
+    /**
+     * Given a list of processes, check if any are to be ignored
+     * according to the 'ignored' property in the config file.
+     * If yes, remove from set.
+     * @param processesToBeFiltered
+     */
+    private void filterProcesses(Set<MonitoredProcessDiff> processesToBeFiltered) {
+        Set<MonitoredProcessDiff> processDiffsToIgnore = processesToBeFiltered.stream().filter(
+                diff -> ignoredProcesses.contains(diff.getMainClass())
+        ).collect(Collectors.toSet());
+
+        processesToBeFiltered.removeAll(processDiffsToIgnore);
     }
 
     /**
