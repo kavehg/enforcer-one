@@ -4,6 +4,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Created by kaveh on 2/24/2015.
+ *
+ * A report is submitted by an x-wing to notify the death star
+ * that a process on its host has changed state.
  */
 @XmlRootElement
 public class Report {

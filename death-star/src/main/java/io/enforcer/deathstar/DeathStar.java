@@ -9,6 +9,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -17,6 +20,7 @@ import java.util.logging.Logger;
 public class DeathStar {
 
     private static final Logger logger = Logger.getLogger(DeathStar.class.getName());
+    private static final ConsoleHandler consoleHandler = new ConsoleHandler();
 
     // Base URI the Grizzly HTTP server will listen on
     public static final String API_BASE_URI = "http://localhost:8080/api/";
@@ -27,7 +31,7 @@ public class DeathStar {
      */
     public static HttpServer startServer() throws IOException {
         // create a resource config that scans for JAX-RS resources and providers
-        // in io.enforcer.deathstar package
+        // in the specified package
         final ResourceConfig rc = new ResourceConfig().packages("io.enforcer.deathstar.rest");
 
         // create and start a new instance of grizzly http server
@@ -47,6 +51,18 @@ public class DeathStar {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+        // Remove default loggers
+        Logger globalLogger = Logger.getLogger("");
+        Handler[] handlers = globalLogger.getHandlers();
+        for(Handler handler : handlers) {
+            globalLogger.removeHandler(handler);
+        }
+
+        // configure console logger & set levels
+        consoleHandler.setLevel(Level.ALL);
+        globalLogger.addHandler(consoleHandler);
+        globalLogger.setLevel(Level.ALL);
+
         final HttpServer server = startServer();
         System.out.println(
                 String.format("REST api started with WADL available at "

@@ -4,6 +4,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Created by kaveh on 2/24/2015.
+ *
+ * A status is periodically submitted by all x-wings and
+ * is comparable to a heartbeat by which the x-wings
+ * regularly check in with the death star and notify it
+ * that they are still monitoring the server that they
+ * are running on.
  */
 @XmlRootElement
 public class Status {

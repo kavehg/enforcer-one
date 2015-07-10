@@ -260,12 +260,14 @@ public class ProcessMaster implements ProcessMasterMBean {
         StringTokenizer tokenizer = new StringTokenizer(jpsString, " ");
         Integer processId = 0;
         String mainClass = "UNKNOWN";
+
+        // determine the pid
         if(tokenizer.hasMoreTokens())
             processId = Integer.parseInt(tokenizer.nextToken());
         else
             logger.log(Level.WARNING, "could not get process id for string: {0}", jpsString);
 
-        // TODO refactor and separate problematic process id from string conversion
+        // determine the main class
         if(tokenizer.hasMoreTokens()) {
             mainClass = tokenizer.nextToken();
         } else if(!problematicProcessIds.contains(processId)) {
