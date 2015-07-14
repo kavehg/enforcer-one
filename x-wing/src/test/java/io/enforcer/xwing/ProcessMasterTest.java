@@ -16,6 +16,7 @@ public class ProcessMasterTest {
     private Set<MonitoredProcess> start;
     private Properties properties;
     private ProcessMaster processMaster;
+    private XWingConfiguration config;
 
     @Before
     public void setUp() throws Exception {
@@ -32,7 +33,9 @@ public class ProcessMasterTest {
         properties = new Properties();
         properties.setProperty("ignored", "IgnoreThisMainClass,IgnoreThatMainClass");
 
-        processMaster = new ProcessMaster(false, properties);
+        config = new XWingConfiguration(properties);
+
+        processMaster = new ProcessMaster(false, config);
         processMaster.setInitialProcessSnapshot(start);
     }
 

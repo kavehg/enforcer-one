@@ -1,7 +1,5 @@
 package io.enforcer.xwing;
 
-import javax.management.*;
-import java.lang.management.ManagementFactory;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -14,6 +12,7 @@ public class XWing {
 
     private static final Logger logger = Logger.getLogger(XWing.class.getName());
     private static final ConsoleHandler consoleHandler = new ConsoleHandler();
+    private static final XWingConfiguration config = new XWingConfiguration(null);
 
     private ProcessMaster processMaster;
 
@@ -39,20 +38,13 @@ public class XWing {
         // start the process master and monitor
         processMaster = new ProcessMaster();
         processMaster.startProcessMonitoring();
-
-        // register mbean for jmx monitoring
-        try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("io.enforcer.xwing:type=ProcessMaster");
-            mbs.registerMBean(processMaster, name);
-        } catch (   MalformedObjectNameException | NotCompliantMBeanException |
-                    InstanceAlreadyExistsException | MBeanRegistrationException e) {
-            logger.log(Level.SEVERE, "could not register mbean", e);
-        }
     }
 
     private void run() {
         processMaster.logCurrentState();
     }
 
+    public static XWingConfiguration getConfig() {
+        return config;
+    }
 }

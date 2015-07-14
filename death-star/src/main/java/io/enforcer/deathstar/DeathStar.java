@@ -25,11 +25,13 @@ public class DeathStar {
     // Base URI the Grizzly HTTP server will listen on
     public static final String API_BASE_URI = "http://localhost:8080/api/";
 
+    private static StatusService statusService;
+
     /**
      * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
      * @return Grizzly HTTP server.
      */
-    public static HttpServer startServer() throws IOException {
+    public static HttpServer startHttpServer() throws IOException {
         // create a resource config that scans for JAX-RS resources and providers
         // in the specified package
         final ResourceConfig rc = new ResourceConfig().packages("io.enforcer.deathstar.rest");
@@ -59,17 +61,28 @@ public class DeathStar {
         }
 
         // configure console logger & set levels
-        consoleHandler.setLevel(Level.ALL);
+        consoleHandler.setLevel(Level.INFO);
         globalLogger.addHandler(consoleHandler);
-        globalLogger.setLevel(Level.ALL);
+        globalLogger.setLevel(Level.INFO);
 
-        final HttpServer server = startServer();
+        statusService = new StatusService(5, 5);
+        statusService.startStatusMonitoring();
+
+        final HttpServer server = startHttpServer();
         System.out.println(
                 String.format("REST api started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop service...", API_BASE_URI));
         System.in.read();
         server.stop();
-        StatusService.stopService();
+        statusService.stopService();
+    }
+
+    /**
+     * Obtain reference to status service
+     * @return status service instance
+     */
+    public static StatusService getStatusService() {
+        return statusService;
     }
 }
 

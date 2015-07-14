@@ -1,5 +1,6 @@
 package io.enforcer.deathstar.rest;
 
+import io.enforcer.deathstar.DeathStar;
 import io.enforcer.deathstar.pojos.Status;
 import io.enforcer.deathstar.services.StatusService;
 
@@ -22,7 +23,7 @@ public class StatusResource {
     private StatusService statusService;
 
     public StatusResource() {
-        this.statusService = new StatusService();
+        this.statusService = DeathStar.getStatusService();
     }
 
     /**
@@ -39,7 +40,7 @@ public class StatusResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Status roundTrip(Status s) {
-        logger.log(Level.FINE, "received status update: {0}", s);
+        logger.log(Level.INFO, "received status update: {0}", s);
         statusService.addStatusUpdate(s);
         return s;
     }

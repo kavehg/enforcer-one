@@ -19,13 +19,13 @@ public class ReportResourceTest {
     @Before
     public void setUp() throws Exception {
         // start the server
-        server = DeathStar.startServer();
+        server = DeathStar.startHttpServer();
         // create the client
         Client c = ClientBuilder.newClient();
 
         // uncomment the following line if you want to enable
         // support for JSON in the client (you also have to uncomment
-        // dependency on jersey-media-json module in pom.xml and DeathStar.startServer())
+        // dependency on jersey-media-json module in pom.xml and DeathStar.startHttpServer())
         // --
         // c.configuration().enable(new org.glassfish.jersey.media.json.JsonJaxbFeature());
 
@@ -42,7 +42,7 @@ public class ReportResourceTest {
      */
     @Test
     public void testGetIt() {
-        String responseMsg = target.path("myresource").request().get(String.class);
+        String responseMsg = target.path("status").request().get(String.class);
         assertEquals("Got it!", responseMsg);
     }
 }

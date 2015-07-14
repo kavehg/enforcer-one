@@ -1,6 +1,7 @@
 package io.enforcer.deathstar.pojos;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.time.Instant;
 
 /**
  * Created by kaveh on 2/24/2015.
@@ -36,6 +37,10 @@ public class Status {
 
     public String getTimeStamp() {
         return timeStamp;
+    }
+
+    public Instant getTimeStampInstant() {
+        return Instant.parse(timeStamp);
     }
 
     @Override

@@ -1,9 +1,10 @@
 package io.enforcer.xwing;
 
+import javax.management.*;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,21 +24,15 @@ public class ProcessMaster implements ProcessMasterMBean {
     private static final Logger logger = Logger.getLogger(ProcessMaster.class.getName());
 
     /**
-     * This config file should be on the classpath and contains
-     * various configuration parameters
+     * Configuration properties
      */
-    private static final String configFileName = "config.properties";
+    private XWingConfiguration config;
 
     /**
      * This set contains all processes that are being monitored
      * and is being periodically updated by the monitoring thread
      */
     private Set<MonitoredProcess> currentlyMonitoredProcesses;
-
-    /**
-     * Properties loaded from configuration file
-     */
-    private Properties properties;
 
     /**
      * These processes will be ignored by the process monitor.
@@ -72,18 +67,28 @@ public class ProcessMaster implements ProcessMasterMBean {
      *
      * @param getInitialProcessSnapshot should the process master initialize itself
      */
-    public ProcessMaster(Boolean getInitialProcessSnapshot, Properties propertiesOverride) {
+    public ProcessMaster(Boolean getInitialProcessSnapshot, XWingConfiguration configOverride) {
         problematicProcessIds = new HashSet<>();
 
-        if(propertiesOverride == null)
-            loadConfiguration();
+        if(configOverride != null)
+            this.config = configOverride;
         else
-            this.properties = propertiesOverride;
+            this.config = XWing.getConfig();
 
         initIgnoredProcesses();
 
         if(getInitialProcessSnapshot)
             initProcessList();
+
+        // register mbean for jmx monitoring
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            ObjectName name = new ObjectName("io.enforcer.xwing:type=ProcessMaster");
+            mbs.registerMBean(this, name);
+        } catch (   MalformedObjectNameException | NotCompliantMBeanException |
+                InstanceAlreadyExistsException | MBeanRegistrationException e) {
+            logger.log(Level.SEVERE, "could not register mbean", e);
+        }
     }
 
     /**
@@ -115,11 +120,9 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * This method outputs the configuration as well as the current
-     * list of monitored processes to the logs
+     * This method outputs the list of monitored processes to the logs
      */
     public void logCurrentState() {
-        logger.log(Level.INFO, dumpConfiguration());
         logger.log(Level.INFO, dumpCurrentState());
     }
 
@@ -154,30 +157,12 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * Loads properties from the config file
-     */
-    private void loadConfiguration() {
-        properties = new Properties();
-        InputStream inputStream = null;
-
-        inputStream = ProcessMaster.class.getClassLoader().getResourceAsStream(configFileName);
-        if(inputStream == null)
-            logger.log(Level.SEVERE, "could not load config file: {0}", configFileName);
-
-        try {
-            properties.load(inputStream);
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "could not load properties from input stream", e);
-        }
-    }
-
-    /**
      * Checks for the 'ignored' property in the config file and
      * adds all the processes that are to be ignored to a set
      */
     private void initIgnoredProcesses() {
         ignoredProcesses = new HashSet<>();
-        String ignored = properties.getProperty("ignored");
+        String ignored = config.getProperty("ignored");
         if(ignored != null) {
             StringTokenizer st = new StringTokenizer(ignored, ",");
             while(st.hasMoreTokens()) {
@@ -185,21 +170,6 @@ public class ProcessMaster implements ProcessMasterMBean {
             }
             logger.log(Level.INFO, "Ignoring the following processes: " + ignoredProcesses);
         }
-    }
-
-    /**
-     * @return String representation of the properties loaded from config file
-     */
-    private String dumpConfiguration() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n");
-        for(String key : properties.stringPropertyNames()) {
-            sb.append("\t");
-            sb.append(key);
-            sb.append(" : ");
-            sb.append(properties.getProperty(key));
-        }
-        return sb.toString();
     }
 
     /**
