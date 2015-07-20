@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 
 /**
- * Created by kaveh on 2/24/2015.
+ * Created by kavehg on 2/24/2015.
  *
  * A status is periodically submitted by all x-wings and
  * is comparable to a heartbeat by which the x-wings

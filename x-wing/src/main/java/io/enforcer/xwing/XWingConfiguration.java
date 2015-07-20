@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by ghahrk2 on 7/14/2015.
+ * Created by kavehg on 7/14/2015.
  */
 public class XWingConfiguration {
 

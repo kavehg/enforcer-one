@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by kaveh on 2/24/2015.
+ * Created by kavehg on 2/24/2015.
  */
 public class StatusService {
 
@@ -284,7 +284,7 @@ public class StatusService {
                     markStatusDelinquent(status);
                     // TODO escalate
                 } else {
-                    logger.log(Level.FINE, "status OK: {0}", status);
+                    logger.log(Level.FINER, "status OK: {0}", status);
                 }
             }
 

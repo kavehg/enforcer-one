@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by ghahrk2 on 7/14/2015.
+ * Created by kavehg on 7/14/2015.
  */
 public class StatusServiceTest {
 
