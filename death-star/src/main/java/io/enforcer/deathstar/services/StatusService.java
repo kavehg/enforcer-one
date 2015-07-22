@@ -284,7 +284,7 @@ public class StatusService {
                     markStatusDelinquent(status);
                     // TODO escalate
                 } else {
-                    logger.log(Level.FINE, "status OK: {0}", status);
+                    logger.log(Level.FINER, "status OK: {0}", status);
                 }
             }
 

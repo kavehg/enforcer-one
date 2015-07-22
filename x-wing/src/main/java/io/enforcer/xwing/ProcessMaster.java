@@ -1,7 +1,10 @@
 package io.enforcer.xwing;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import javax.management.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
@@ -41,6 +44,15 @@ public class ProcessMaster implements ProcessMasterMBean {
      * main classes that should be ignored
      */
     private Set<String> ignoredProcesses;
+
+    /**
+     * These processes will be included and searched for by the
+     * process monitor. They can be defined in the property file
+     * by setting the 'included' property equal to a comma
+     * separated list of strings that identify the processes that
+     * we are interested in
+     */
+    private Set<String> includedProcesses;
 
     /**
      * This set contains any process IDs that we are having problems
@@ -199,10 +211,33 @@ public class ProcessMaster implements ProcessMasterMBean {
      * @return a snapshot of monitored processes
      */
     private Set<MonitoredProcess> getProcessSnapshot() {
+        if(SystemUtils.IS_OS_WINDOWS)
+            return getProcessSnapshotOnWindows();
+        else if(SystemUtils.IS_OS_LINUX)
+            return getProcessSnapshotOnLinux();
+
         HashSet<MonitoredProcess> monitoredProcesses = new HashSet<>();
         List<String> processStrings = getListOfProcessStrings();
         monitoredProcesses.addAll(convertStringsToProcess(processStrings));
         return monitoredProcesses;
+    }
+
+    /**
+     * todo
+     * @return
+     */
+    private Set<MonitoredProcess> getProcessSnapshotOnWindows() {
+
+        return null;
+    }
+
+    /**
+     * todo
+     * @return
+     */
+    private Set<MonitoredProcess> getProcessSnapshotOnLinux() {
+
+        return null;
     }
 
     /**
@@ -256,6 +291,9 @@ public class ProcessMaster implements ProcessMasterMBean {
      */
     private List<String> getListOfProcessStrings() {
         ArrayList<String> listOfProcessStrings = new ArrayList<>();
+        File javaHome = SystemUtils.getJavaHome();
+        System.out.println(javaHome);
+        String jps = javaHome.getAbsolutePath() + File.separator + ".." + File.separator + "jps";
         try {
             String line;
 //            Process p = Runtime.getRuntime().exec("jps");
