@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Created by kaveh on 2/23/2015.
+ * Created by kavehg on 2/23/2015.
  */
 public class ProcessMaster implements ProcessMasterMBean {
 
@@ -258,7 +258,9 @@ public class ProcessMaster implements ProcessMasterMBean {
         ArrayList<String> listOfProcessStrings = new ArrayList<>();
         try {
             String line;
-            Process p = Runtime.getRuntime().exec("jps");
+//            Process p = Runtime.getRuntime().exec("jps");
+            ProcessBuilder pb = new ProcessBuilder("jps");
+            Process p = pb.start();
             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
             while ((line = input.readLine()) != null) {
                 listOfProcessStrings.add(line);

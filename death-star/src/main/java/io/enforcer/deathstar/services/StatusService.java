@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by kaveh on 2/24/2015.
+ * Created by kavehg on 2/24/2015.
  */
 public class StatusService {
 
