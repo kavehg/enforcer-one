@@ -11,7 +11,6 @@
 
     <artifactId>x-wing</artifactId>
 
-</project>
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>
