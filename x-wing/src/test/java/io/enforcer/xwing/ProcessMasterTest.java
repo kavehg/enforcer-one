@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ProcessMasterTest {
 
@@ -32,10 +33,11 @@ public class ProcessMasterTest {
 
         properties = new Properties();
         properties.setProperty("ignored", "IgnoreThisMainClass,IgnoreThatMainClass");
+        properties.setProperty("included", "IncludeThis,IncludeThat");
 
         config = new XWingConfiguration(properties);
 
-        processMaster = new ProcessMaster(false, config);
+        processMaster = new ProcessMaster(false, config, false);
         processMaster.setInitialProcessSnapshot(start);
     }
 
@@ -135,5 +137,25 @@ public class ProcessMasterTest {
         HashSet<MonitoredProcessDiff> expectedDiffs = new HashSet<>();
 
         assertEquals(expectedDiffs, processDiffs);
+    }
+
+    /**
+     * Included processes defined in config file are correctly included
+     */
+    @Test
+    public void testIncludedPropertiesFromConfig() {
+        assertTrue(processMaster.getIncludedProcesses().contains("IncludeThis"));
+        assertTrue(processMaster.getIncludedProcesses().contains("IncludeThat"));
+    }
+
+    /**
+     * Empty config results in no processes included
+     */
+    @Test
+    public void testIncludedPropertiesFromConfigEmpty() {
+        Properties props = new Properties();
+        XWingConfiguration config = new XWingConfiguration(props);
+        ProcessMaster pm = new ProcessMaster(false, config, false);
+        assertTrue(pm.getIncludedProcesses().isEmpty());
     }
 }

@@ -79,7 +79,9 @@ public class ProcessMaster implements ProcessMasterMBean {
      *
      * @param getInitialProcessSnapshot should the process master initialize itself
      */
-    public ProcessMaster(Boolean getInitialProcessSnapshot, XWingConfiguration configOverride) {
+    public ProcessMaster(Boolean getInitialProcessSnapshot,
+                         XWingConfiguration configOverride,
+                         Boolean registerJMXMBean) {
         problematicProcessIds = new HashSet<>();
 
         if(configOverride != null)
@@ -92,14 +94,16 @@ public class ProcessMaster implements ProcessMasterMBean {
         if(getInitialProcessSnapshot)
             initProcessList();
 
-        // register mbean for jmx monitoring
-        try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("io.enforcer.xwing:type=ProcessMaster");
-            mbs.registerMBean(this, name);
-        } catch (   MalformedObjectNameException | NotCompliantMBeanException |
-                InstanceAlreadyExistsException | MBeanRegistrationException e) {
-            logger.log(Level.SEVERE, "could not register mbean", e);
+        if(registerJMXMBean) {
+            // register mbean for jmx monitoring
+            try {
+                MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+                ObjectName name = new ObjectName("io.enforcer.xwing:type=ProcessMaster");
+                mbs.registerMBean(this, name);
+            } catch (MalformedObjectNameException | NotCompliantMBeanException |
+                    InstanceAlreadyExistsException | MBeanRegistrationException e) {
+                logger.log(Level.SEVERE, "could not register mbean", e);
+            }
         }
     }
 
@@ -109,7 +113,7 @@ public class ProcessMaster implements ProcessMasterMBean {
      * is meant to be used for actual operation
      */
     public ProcessMaster() {
-        this(true, null);
+        this(true, null, true);
     }
 
     /**
@@ -237,7 +241,45 @@ public class ProcessMaster implements ProcessMasterMBean {
      */
     private Set<MonitoredProcess> getProcessSnapshotOnLinux() {
 
+        Set<MonitoredProcess> monitoredProcesses = new HashSet<>();
+
+
         return null;
+    }
+
+    /**
+     * Create a set of strings from the 'included' property in the config
+     * file and store in includedProcesses. If already created, just return
+     * the set
+     *
+     * @return set of strings representing processes that are to be included
+     */
+    public Set<String> getIncludedProcesses() {
+        // return the set if already created
+        if (this.includedProcesses != null)
+            return this.includedProcesses;
+
+        // if first time, create the set and populate from config
+        this.includedProcesses = new HashSet<>();
+        String included = config.getProperty("included");
+
+        if (included == null || included.isEmpty()) {
+            logger.log(Level.INFO, "No processes appear to be included for monitoring in the " +
+                    "config file. Use property 'included'");
+            return includedProcesses;
+        }
+
+        StringTokenizer st = new StringTokenizer(included, ",");
+        if (!st.hasMoreTokens()) {
+            logger.log(Level.FINE, "No processes appear to be included for monitoring in the " +
+                    "config file. Use property 'included' and separate entries by commas");
+            return includedProcesses;
+        }
+
+        while (st.hasMoreTokens())
+            includedProcesses.add(st.nextToken());
+
+        return includedProcesses;
     }
 
     /**
