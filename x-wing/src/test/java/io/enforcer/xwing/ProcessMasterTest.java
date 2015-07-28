@@ -37,7 +37,7 @@ public class ProcessMasterTest {
 
         config = new XWingConfiguration(properties);
 
-        processMaster = new ProcessMaster(false, config, false);
+        processMaster = new ProcessMaster(false, config, false, false);
         processMaster.setInitialProcessSnapshot(start);
     }
 
@@ -155,7 +155,7 @@ public class ProcessMasterTest {
     public void testIncludedPropertiesFromConfigEmpty() {
         Properties props = new Properties();
         XWingConfiguration config = new XWingConfiguration(props);
-        ProcessMaster pm = new ProcessMaster(false, config, false);
+        ProcessMaster pm = new ProcessMaster(false, config, false, false);
         assertTrue(pm.getIncludedProcesses().isEmpty());
     }
 }

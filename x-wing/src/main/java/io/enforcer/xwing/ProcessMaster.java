@@ -1,12 +1,9 @@
 package io.enforcer.xwing;
 
+import io.enforcer.deathstar.DeathStarClient;
 import org.apache.commons.lang3.SystemUtils;
 
 import javax.management.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -35,7 +32,7 @@ public class ProcessMaster implements ProcessMasterMBean {
      * This set contains all processes that are being monitored
      * and is being periodically updated by the monitoring thread
      */
-    private Set<MonitoredProcess> currentlyMonitoredProcesses;
+    private Set<MonitoredProcess> currentProcessSnapshot;
 
     /**
      * These processes will be ignored by the process monitor.
@@ -68,20 +65,34 @@ public class ProcessMaster implements ProcessMasterMBean {
     private ScheduledExecutorService scheduler;
 
     /**
-     * Using this constructor, the process master will not
-     * initialize itself but will rather wait to be handed the
-     * starting set of monitored processes via the setInitialProcessSnapshot
-     * method. Similarly, it is possible to override the properties
-     * instead of reading them from the configuration file.
+     * Our connection to the death star
+     */
+    private DeathStarClient deathStar;
+
+    /**
+     * Using this constructor, the process master will determine
+     * the starting set of live processes by itself. This constructor
+     * is meant to be used for production operation
+     */
+    public ProcessMaster() {
+        this(true, null, true, true);
+    }
+
+    /**
+     * Using this constructor, the process master can skip initializing itself
+     * and rather wait to be handed the starting set of monitored processes via
+     * the setInitialProcessSnapshot method. Similarly, it is possible to override
+     * the properties instead of reading them from the configuration file.
      *
-     * This is useful for unit testing the process master and
-     * is not intended to be used for actual operation
+     * This is useful for unit testing the process master and is not intended to
+     * be used for actual operation
      *
      * @param getInitialProcessSnapshot should the process master initialize itself
      */
     public ProcessMaster(Boolean getInitialProcessSnapshot,
                          XWingConfiguration configOverride,
-                         Boolean registerJMXMBean) {
+                         Boolean registerJMXMBean,
+                         Boolean connectToDeathStar) {
         problematicProcessIds = new HashSet<>();
 
         if(configOverride != null)
@@ -89,7 +100,10 @@ public class ProcessMaster implements ProcessMasterMBean {
         else
             this.config = XWing.getConfig();
 
-        initIgnoredProcesses();
+        if(connectToDeathStar)
+            deathStar = connectToDeathStar();
+
+        ignoredProcesses = initIgnoredProcesses();
 
         if(getInitialProcessSnapshot)
             initProcessList();
@@ -108,20 +122,36 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * Using this constructor, the process master will determine
-     * the starting set of live processes by itself. This constructor
-     * is meant to be used for actual operation
-     */
-    public ProcessMaster() {
-        this(true, null, true);
-    }
-
-    /**
      * Allows clients of this class to determine when to start the
      * process monitor. This is useful for unit testing.
      */
     public void startProcessMonitoring() {
         startScheduler();
+    }
+
+    /**
+     * Retrieves death star connection details from configuration and
+     * returns an instance of the DeathStarClient
+     *
+     * @return death star connection
+     */
+    private DeathStarClient connectToDeathStar() {
+        String deathStarHost = config.getProperty("deathStarHost");
+        String deathStarPort = config.getProperty("deathStarPort");
+        Integer deathStarPortInt = null;
+
+        if(deathStarHost == null) {
+            logger.log(Level.SEVERE, "Could not find deathStarHost in the configuration");
+            return null;
+        }
+
+        if(deathStarPort == null) {
+            logger.log(Level.SEVERE, "Could not find deathStarPort in the configuration");
+            return null;
+        } else {
+            deathStarPortInt = Integer.parseInt(deathStarPort);
+            return new DeathStarClient(deathStarHost, deathStarPortInt);
+        }
     }
 
     /**
@@ -132,7 +162,7 @@ public class ProcessMaster implements ProcessMasterMBean {
      * @param processSnapshot initial snapshot of processes
      */
     public void setInitialProcessSnapshot(Set<MonitoredProcess> processSnapshot) {
-        currentlyMonitoredProcesses = processSnapshot;
+        currentProcessSnapshot = processSnapshot;
     }
 
     /**
@@ -176,8 +206,8 @@ public class ProcessMaster implements ProcessMasterMBean {
      * Checks for the 'ignored' property in the config file and
      * adds all the processes that are to be ignored to a set
      */
-    private void initIgnoredProcesses() {
-        ignoredProcesses = new HashSet<>();
+    private Set<String> initIgnoredProcesses() {
+        Set<String> ignoredProcesses = new HashSet<>();
         String ignored = config.getProperty("ignored");
         if(ignored != null) {
             StringTokenizer st = new StringTokenizer(ignored, ",");
@@ -186,6 +216,7 @@ public class ProcessMaster implements ProcessMasterMBean {
             }
             logger.log(Level.INFO, "Ignoring the following processes: " + ignoredProcesses);
         }
+        return ignoredProcesses;
     }
 
     /**
@@ -194,7 +225,7 @@ public class ProcessMaster implements ProcessMasterMBean {
     private String dumpCurrentState() {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        for(MonitoredProcess process : currentlyMonitoredProcesses) {
+        for(MonitoredProcess process : currentProcessSnapshot) {
             sb.append("\t");
             sb.append(process.toString());
             sb.append("\n");
@@ -204,35 +235,42 @@ public class ProcessMaster implements ProcessMasterMBean {
 
     /**
      * Gets a snapshot of all running processes and initializes the
-     * currentlyMonitoredProcesses set
+     * currentProcessSnapshot set
      */
     private void initProcessList() {
-        currentlyMonitoredProcesses = new HashSet<>();
-        currentlyMonitoredProcesses.addAll(getProcessSnapshot());
+        currentProcessSnapshot = new HashSet<>();
+        currentProcessSnapshot.addAll(getProcessSnapshot());
     }
 
     /**
+     * Checks the OS and identifies processes that are to be monitored
+     * using the included property from the config file
+     *
      * @return a snapshot of monitored processes
      */
     private Set<MonitoredProcess> getProcessSnapshot() {
         if(SystemUtils.IS_OS_WINDOWS)
             return getProcessSnapshotOnWindows();
-        else if(SystemUtils.IS_OS_LINUX)
-            return getProcessSnapshotOnLinux();
 
-        HashSet<MonitoredProcess> monitoredProcesses = new HashSet<>();
-        List<String> processStrings = getListOfProcessStrings();
-        monitoredProcesses.addAll(convertStringsToProcess(processStrings));
-        return monitoredProcesses;
+        return getProcessSnapshotOnLinux();
     }
 
     /**
-     * todo
-     * @return
+     * Gets a list of included process names from the configuration and
+     * retrieves the matching processes for each string using the tasklist
+     * command
+     *
+     * @return a collection of all matching processes
      */
     private Set<MonitoredProcess> getProcessSnapshotOnWindows() {
+        HashSet<MonitoredProcess> matchingProcesses = new HashSet<>();
+        WindowsProcessFinder finder = new WindowsProcessFinder();
 
-        return null;
+        for(String processFilter : getIncludedProcesses()) {
+            matchingProcesses.addAll(finder.getMatchingProcesses(processFilter));
+        }
+
+        return matchingProcesses;
     }
 
     /**
@@ -283,76 +321,6 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * Takes a list of strings which are returned by the jps command
-     * and turns them into a set of MonitoredProcess objects using the
-     * convertJPSString() method
-     *
-     * @param stringProcesses list of strings returned by jps
-     * @return collection of MonitoredProcess objects representing the passed in strings
-     */
-    private Set<MonitoredProcess> convertStringsToProcess(List<String> stringProcesses) {
-        return stringProcesses.stream()
-                .map(this::convertJPSString)
-                .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    /**
-     * Takes the output of the jps command and turns it into
-     * a MonitoredProcess object
-     *
-     * @param jpsString one line of jps output
-     * @return an instance of the MonitoredProcess class
-     */
-    private MonitoredProcess convertJPSString(String jpsString) {
-        StringTokenizer tokenizer = new StringTokenizer(jpsString, " ");
-        Integer processId = 0;
-        String mainClass = "UNKNOWN";
-
-        // determine the pid
-        if(tokenizer.hasMoreTokens())
-            processId = Integer.parseInt(tokenizer.nextToken());
-        else
-            logger.log(Level.WARNING, "could not get process id for string: {0}", jpsString);
-
-        // determine the main class
-        if(tokenizer.hasMoreTokens()) {
-            mainClass = tokenizer.nextToken();
-        } else if(!problematicProcessIds.contains(processId)) {
-            problematicProcessIds.add(processId);
-            logger.log(Level.WARNING, "could not get main class for string: {0}", jpsString);
-        }
-
-        return new MonitoredProcess(processId, mainClass);
-    }
-
-    /**
-     * Run the jps command and determine which java processes are
-     * currently running.
-     *
-     * @return list of strings returned by jps
-     */
-    private List<String> getListOfProcessStrings() {
-        ArrayList<String> listOfProcessStrings = new ArrayList<>();
-        File javaHome = SystemUtils.getJavaHome();
-        System.out.println(javaHome);
-        String jps = javaHome.getAbsolutePath() + File.separator + ".." + File.separator + "jps";
-        try {
-            String line;
-//            Process p = Runtime.getRuntime().exec("jps");
-            ProcessBuilder pb = new ProcessBuilder("jps");
-            Process p = pb.start();
-            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            while ((line = input.readLine()) != null) {
-                listOfProcessStrings.add(line);
-            }
-            input.close();
-        } catch (IOException ioException) {
-            logger.log(Level.SEVERE, ioException.toString(), ioException);
-        }
-        return listOfProcessStrings;
-    }
-
-    /**
      * Compares two sets of processes and determines the difference
      * between the starting set and the current set.
      * The differences are returned in the form of a set of process
@@ -380,7 +348,8 @@ public class ProcessMaster implements ProcessMasterMBean {
      * Given a list of processes, check if any are to be ignored
      * according to the 'ignored' property in the config file.
      * If yes, remove from set.
-     * @param processesToBeFiltered
+     *
+     * @param processesToBeFiltered processes that will be checked
      */
     private void filterProcesses(Set<MonitoredProcessDiff> processesToBeFiltered) {
         Set<MonitoredProcessDiff> processDiffsToIgnore = processesToBeFiltered.stream().filter(
@@ -445,7 +414,7 @@ public class ProcessMaster implements ProcessMasterMBean {
         /**
          * let's remember the state prior to starting our monitoring run
          */
-        private Set<MonitoredProcess> startingSnapshot = currentlyMonitoredProcesses;
+        private Set<MonitoredProcess> startingSnapshot = currentProcessSnapshot;
 
         /**
          * get an updated snapshot of running processes and compare to
@@ -453,11 +422,11 @@ public class ProcessMaster implements ProcessMasterMBean {
          */
         @Override
         public void run() {
-            currentlyMonitoredProcesses = getProcessSnapshot();
-            Set<MonitoredProcessDiff> monitoredProcessDiffs = compareProcessSets(startingSnapshot, currentlyMonitoredProcesses);
+            currentProcessSnapshot = getProcessSnapshot();
+            Set<MonitoredProcessDiff> processDiffs = compareProcessSets(startingSnapshot, currentProcessSnapshot);
             // TODO escalate diffs
-            logger.log(Level.FINE, "Identified differences: " + monitoredProcessDiffs);
-            startingSnapshot = currentlyMonitoredProcesses;
+            logger.log(Level.FINE, "Identified differences: " + processDiffs);
+            startingSnapshot = currentProcessSnapshot;
         }
 
     }

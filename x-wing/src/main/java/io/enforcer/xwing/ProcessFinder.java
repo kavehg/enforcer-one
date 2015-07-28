@@ -13,5 +13,5 @@ public interface ProcessFinder {
      * @param searchFilter string by which to filter processes
      * @return process Ids matching search filter
      */
-    Set<Integer> getMatchingProcessIds(String searchFilter);
+    Set<MonitoredProcess> getMatchingProcesses(String searchFilter);
 }

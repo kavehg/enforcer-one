@@ -8,7 +8,7 @@ import java.util.Set;
 public class LinuxProcessFinder implements ProcessFinder {
 
     @Override
-    public Set<Integer> getMatchingProcessIds(String searchFilter) {
+    public Set<MonitoredProcess> getMatchingProcesses(String searchFilter) {
 
         // run ps
 
