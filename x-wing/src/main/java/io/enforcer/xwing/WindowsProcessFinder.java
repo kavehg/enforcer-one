@@ -25,15 +25,33 @@ public class WindowsProcessFinder implements ProcessFinder {
     private static final Logger logger = Logger.getLogger(WindowsProcessFinder.class.getName());
 
     /**
+     * Specialized finder used for java processes
+     */
+    private JavaProcessFinder javaProcessFinder;
+
+    /**
+     * Constructor
+     */
+    public WindowsProcessFinder() {
+        javaProcessFinder = new JavaProcessFinder();
+    }
+
+    /**
      * Returns the process identifiers that match the provided search string.
      * This is achieved by executing the search command and subsequently
      * extracting process details from each returned line.
+     *
+     * If the provided search string (which comes from the 'included' property
+     * in the config) is "java" then the JavaProcessFinder is used.
      *
      * @param searchFilter string by which to filter processes
      * @return matching process identifiers
      */
     @Override
     public Set<MonitoredProcess> getMatchingProcesses(String searchFilter) {
+        if(searchFilter.equalsIgnoreCase("java"))
+            return javaProcessFinder.getMatchingProcesses(searchFilter);
+
         Set<String> commandOutput = executeSearchCommand(searchFilter);
         return extractProcessDetails(commandOutput);
     }
