@@ -10,6 +10,7 @@ public class MonitoredProcess {
 
     private Integer processId;
     private String mainClass;
+    private String arguments;
 
     public MonitoredProcess(Integer processId, String mainClass) {
         this.processId = processId;
@@ -22,6 +23,14 @@ public class MonitoredProcess {
 
     public String getMainClass() {
         return mainClass;
+    }
+
+    public String getArguments() {
+        return arguments;
+    }
+
+    public void setArguments(String arguments) {
+        this.arguments = arguments;
     }
 
     @Override
