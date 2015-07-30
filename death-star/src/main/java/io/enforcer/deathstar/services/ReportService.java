@@ -17,15 +17,36 @@ public class ReportService {
      */
     private static final Logger logger = Logger.getLogger(ReportService.class.getName());
 
-    private static final Set<Report> reports;
+    /**
+     * The report store is a collection of all reports that have been
+     * received
+     */
+    private final Set<Report> reportStore;
 
-    static {
-        reports = new HashSet<>();
+    /**
+     * Constructor
+     */
+    public ReportService() {
+        reportStore = new HashSet<>();
     }
 
+    /**
+     * Add a report to the report service
+     *
+     * @param report to be added
+     */
     public void addReport(Report report) {
         logger.log(Level.INFO, "received a report from an x-wing: {0}", report);
-        reports.add(report);
+        reportStore.add(report);
+    }
+
+    /**
+     * Returns the number of reports that have been received
+     *
+     * @return number of received reports
+     */
+    public Integer numberOfReceivedReports() {
+        return reportStore.size();
     }
 
 }
