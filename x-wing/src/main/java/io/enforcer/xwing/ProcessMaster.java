@@ -1,6 +1,7 @@
 package io.enforcer.xwing;
 
 import io.enforcer.deathstar.DeathStarClient;
+import io.enforcer.deathstar.pojos.Report;
 import org.apache.commons.lang3.SystemUtils;
 
 import javax.management.*;
@@ -418,7 +419,7 @@ public class ProcessMaster implements ProcessMasterMBean {
     private class ProcessMonitor implements Runnable {
 
         /**
-         * let's remember the state prior to starting our monitoring run
+         * Remember the state prior to starting our monitoring run
          */
         private Set<MonitoredProcess> startingSnapshot = currentProcessSnapshot;
 
@@ -430,9 +431,30 @@ public class ProcessMaster implements ProcessMasterMBean {
         public void run() {
             currentProcessSnapshot = getProcessSnapshot();
             Set<MonitoredProcessDiff> processDiffs = compareProcessSets(startingSnapshot, currentProcessSnapshot);
-            // TODO escalate diffs
+
             logger.log(Level.FINE, "Identified differences: " + processDiffs);
+
+            // TODO add batch send to death star API
+            for(MonitoredProcessDiff diff : processDiffs) {
+                deathStar.sendReport(convertDiffToReport(diff));
+            }
+
             startingSnapshot = currentProcessSnapshot;
+        }
+
+        /**
+         * Converts a process change to a report to be sent to the death star
+         *
+         * @param diff state change in monitored processes
+         * @return report to be sent to death star
+         */
+        private Report convertDiffToReport(MonitoredProcessDiff diff) {
+            return new Report(
+                    diff.getProcessId(),
+                    diff.getMainClass(),
+                    diff.getStateChange().name(),
+                    "localhost",
+                    "2015-07-31T00:00:00Z");
         }
 
     }

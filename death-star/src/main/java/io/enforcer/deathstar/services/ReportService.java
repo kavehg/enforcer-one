@@ -3,7 +3,6 @@ package io.enforcer.deathstar.services;
 import io.enforcer.deathstar.pojos.Action;
 import io.enforcer.deathstar.pojos.Report;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
