@@ -274,15 +274,21 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * todo
-     * @return
+     * Gets a list of included process names from the configuration and
+     * retrieves the matching processes for each string using the tasklist
+     * command
+     *
+     * @return a collection of all matching processes
      */
     private Set<MonitoredProcess> getProcessSnapshotOnLinux() {
+        Set<MonitoredProcess> matchingProcesses = new HashSet<>();
+        LinuxProcessFinder processFinder = new LinuxProcessFinder();
 
-        Set<MonitoredProcess> monitoredProcesses = new HashSet<>();
+        for(String processFilter : getIncludedProcesses()) {
+            matchingProcesses.addAll(processFinder.getMatchingProcesses(processFilter));
+        }
 
-
-        return null;
+        return matchingProcesses;
     }
 
     /**

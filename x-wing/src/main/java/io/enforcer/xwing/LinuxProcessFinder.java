@@ -20,12 +20,53 @@ public class LinuxProcessFinder implements ProcessFinder {
      */
     private static final Logger logger = Logger.getLogger(LinuxProcessFinder.class.getName());
 
+    /**
+     * Specialized finder used for java processes
+     */
+    private JavaProcessFinder javaProcessFinder;
+
+    /**
+     * Constructor
+     */
+    public LinuxProcessFinder() {
+        javaProcessFinder = new JavaProcessFinder();
+    }
+
+    /**
+     * Returns the process identifiers that match the provided search string.
+     * This is achieved by executing the search command and subsequently
+     * extracting process details from each returned line.
+     *
+     * If the provided search string (which comes from the 'included' property
+     * in the config) is "java" then the JavaProcessFinder is used.
+     *
+     * @param searchFilter string by which to filter processes
+     * @return matching process identifiers
+     */
     @Override
     public Set<MonitoredProcess> getMatchingProcesses(String searchFilter) {
+        if(searchFilter.equalsIgnoreCase("java"))
+            return javaProcessFinder.getMatchingProcesses(searchFilter);
 
-        // run ps
+        Set<String> commandOutput = executeSearchCommand(searchFilter);
+        return extractProcessDetails(commandOutput);
+    }
 
-        return null;
+    /**
+     * Given the output of the search command, extract the process details
+     * of the matching processes
+     *
+     * @param commandOutput the result of the executed search command
+     * @return
+     */
+    private Set<MonitoredProcess> extractProcessDetails(Set<String> commandOutput) {
+        HashSet<MonitoredProcess> extractedProcesses = new HashSet<>();
+        for(String line : commandOutput) {
+            MonitoredProcess monitoredProcess = convertPsString(line);
+            if(monitoredProcess != null)
+                extractedProcesses.add(monitoredProcess);
+        }
+        return extractedProcesses;
     }
 
     /**
