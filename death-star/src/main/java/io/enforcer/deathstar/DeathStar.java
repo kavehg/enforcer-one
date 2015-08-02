@@ -40,8 +40,8 @@ public class DeathStar {
         // exposing the Jersey application at API_BASE_URI
         HttpServer httpServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(API_BASE_URI), rc);
 
-        // serve static content from the resources/www directory
-        HttpHandler httpHandler = new CLStaticHttpHandler(HttpServer.class.getClassLoader(), "www/");
+        // serve static content from the resources/client directory
+        HttpHandler httpHandler = new CLStaticHttpHandler(HttpServer.class.getClassLoader(), "client/");
         httpServer.getServerConfiguration().addHttpHandler(httpHandler, "/");
 
         return httpServer;

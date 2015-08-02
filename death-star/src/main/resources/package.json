@@ -1,0 +1,28 @@
+{
+  "name": "enforcer",
+  "version": "0.0.0",
+  "description": "Enforcer One - Process Monitoring",
+  "private": true,
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "karma start --single-run --browsers Chrome client/tests/karma.conf.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/angularjs-in-action/angello.git"
+  },
+  "devDependencies": {
+    "karma": "~0.12",
+    "karma-chrome-launcher": "~0.1",
+    "karma-cli": "0.0.4",
+    "karma-jasmine": "^0.2.2",
+    "karma-ng-html2js-preprocessor": "^0.1.2"
+  },
+  "contributors": [
+    "Kaveh Ghahremani <kaveh.ghahremani@gmail.com> (http://kaveh.ghahremani.me/)"
+  ],
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
