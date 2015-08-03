@@ -20,13 +20,20 @@
     <script src="vendor/angular.js"></script>
     <script src="vendor/angular-route.js"></script>
     <script src="src/enforcer/Enforcer.js"></script>
-
+    <script src="src/enforcer/dashboard/Dashboard.js"></script>
+    <script src="src/enforcer/dashboard/controllers/DashboardController.js"></script>
+    <script src="src/enforcer/app/App.js"></script>
+    <script src="src/enforcer/app/controllers/MainController.js"></script>
 </head>
-<body>
-    Test:
-    <input type="text" ng-model="sometext" />
-
-    <h1>Hello {{ sometext }}</h1>
-
+<body ng-controller="MainCtrl as main">
+    <div class="navbar navbar-fixed-top navbar-default">
+        <div class="navbar-header">
+            <a class="logo navbar-brand" href="#/">
+                <img src="assets/img/enforcer-one-small-logo.png">
+            </a>
+        </div>
+    </div>
+    <div ng-view=""></div>
+    <div class="modal"></div>
 </body>
 </html>

@@ -1,5 +1,6 @@
 var myModule = angular.module('enforcer',[
-    'ngRoute'
+    'ngRoute',
+    'Enforcer.Dashboard'
 ]);
 
 myModule.config(function($routeProvider) {
