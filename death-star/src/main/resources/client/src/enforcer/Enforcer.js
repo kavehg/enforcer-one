@@ -1,5 +1,6 @@
-var myModule = angular.module('enforcer',[
+var myModule = angular.module('Enforcer',[
     'ngRoute',
+    'Enforcer.Common',
     'Enforcer.Dashboard'
 ]);
 
@@ -10,5 +11,6 @@ myModule.config(function($routeProvider) {
             controller: 'DashboardCtrl',
             controllerAs: 'dashboard'
         })
+        .otherwise({redirectTo: '/'});
 });
 

@@ -1,3 +1,23 @@
-<div>
-    Hello!
+<div class="list-area">
+    <div class="list-wrapper">
+        <ul class="list"
+            ng-repeat="status in dashboard.statuses">
+            <h3 class="status">{{status.name}}</h3>
+            <hr/>
+            <li class="report"
+                ng-repeat="report in dashboard.reports | filter: {status:status.name}">
+                <article>
+                    <div>
+                        <p class="title">{{report.processId}} [{{report.host}}]</p>
+                    </div>
+                    <div class="type-bar {{report.status}}"></div>
+                    <div>
+                        <p class="report-details"><strong>{{report.command}}</strong></p>
+                        <p class="report-details"><strong>{{report.stateChange}}</strong></p>
+                        <p class="report-details pull-right">{{report.timeStamp}}</p>
+                    </div>
+                </article>
+            </li>
+        </ul>
+    </div>
 </div>

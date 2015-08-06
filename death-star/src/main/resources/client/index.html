@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="enforcer">
+<html ng-app="Enforcer">
 <head lang="en">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
@@ -20,16 +20,18 @@
     <script src="vendor/angular.js"></script>
     <script src="vendor/angular-route.js"></script>
     <script src="src/enforcer/Enforcer.js"></script>
-    <script src="src/enforcer/dashboard/Dashboard.js"></script>
-    <script src="src/enforcer/dashboard/controllers/DashboardController.js"></script>
     <script src="src/enforcer/app/App.js"></script>
     <script src="src/enforcer/app/controllers/MainController.js"></script>
+    <script src="src/enforcer/dashboard/Dashboard.js"></script>
+    <script src="src/enforcer/dashboard/controllers/DashboardController.js"></script>
+
 </head>
 <body ng-controller="MainCtrl as main">
     <div class="navbar navbar-fixed-top navbar-default">
         <div class="navbar-header">
             <a class="logo navbar-brand" href="#/">
-                <img src="assets/img/enforcer-one-small-logo.png">
+                <!--<img src="assets/img/enforcer-one-small-logo.png">-->
+                <h3 id="logo"><strong>Enforcer One</strong></h3>
             </a>
         </div>
     </div>

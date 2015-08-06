@@ -1,6 +1,7 @@
 package io.enforcer.deathstar;
 
 import io.enforcer.deathstar.services.StatusService;
+import io.enforcer.deathstar.ws.WebSocketServer;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -26,6 +27,8 @@ public class DeathStar {
     public static final String API_BASE_URI = "http://localhost:8080/api/";
 
     private static StatusService statusService;
+
+    private static WebSocketServer webSocketServer;
 
     /**
      * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
@@ -61,7 +64,7 @@ public class DeathStar {
         }
 
         // configure console logger & set levels
-        consoleHandler.setLevel(Level.INFO);
+        consoleHandler.setLevel(Level.FINE);
         globalLogger.addHandler(consoleHandler);
         globalLogger.setLevel(Level.ALL);
 
@@ -69,10 +72,9 @@ public class DeathStar {
         statusService.startStatusMonitoring();
 
         final HttpServer server = startHttpServer();
-        System.out.println(
-                String.format("REST api started with WADL available at "
-                + "%sapplication.wadl\nHit enter to stop service...", API_BASE_URI));
-        System.in.read();
+        // will block on the web socket server
+        webSocketServer = new WebSocketServer(9090);
+
         server.stop();
         statusService.stopService();
     }
@@ -83,6 +85,14 @@ public class DeathStar {
      */
     public static StatusService getStatusService() {
         return statusService;
+    }
+
+    /**
+     * Obtain reference to web socket server
+     * @return web socket server
+     */
+    public static WebSocketServer getWebSocketServer() {
+        return webSocketServer;
     }
 }
 

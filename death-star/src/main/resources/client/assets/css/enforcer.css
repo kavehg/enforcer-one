@@ -1,0 +1,86 @@
+html,
+html,
+body {
+    background-color: #222222;
+}
+
+#logo {
+    margin-top: -2px;
+    color: #222222;
+}
+
+.list {
+    list-style-type: none;
+    float: left;
+    margin: 35px 5px 80px;
+    padding: 4px 3px 3px 3px;
+    position: relative;
+    width: 300px;
+}
+
+.list-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.list-wrapper {
+    padding: 10px;
+    display: inline-flex;
+}
+
+.navbar {
+    background-color: #999999;
+    -moz-box-shadow: 0 7px 30px 2px #000;
+    -webkit-box-shadow: 0 7px 30px 2px #000;
+    box-shadow: 0 7px 30px 2px #000;
+}
+
+.status {
+    color: #FAF4ED;
+}
+
+.report article {
+    background-image: url(../img/note-bg.png);
+    height: 145px;
+    padding: 10px;
+    margin: 3px;
+    cursor: pointer;
+}
+
+.report .title {
+    font-size: 24px;
+    margin: 0 0 0px;
+}
+
+.report:hover {
+    opacity: 0.9;
+}
+
+.type-bar {
+    height: 5px;
+    width: 100%;
+}
+
+.New {
+    background-color: #000000;
+}
+
+.Acknowledged {
+    background-color: #ffff00;
+}
+
+.Escalated {
+    background-color: #ff0000;
+}
+
+.History {
+    background-color: #808080;
+}
+
+.report-details {
+    margin: 4px 0 0;
+}

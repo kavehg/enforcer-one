@@ -1,9 +1,12 @@
 package io.enforcer.deathstar.services;
 
+import io.enforcer.deathstar.DeathStar;
 import io.enforcer.deathstar.pojos.Action;
 import io.enforcer.deathstar.pojos.Report;
+import io.enforcer.deathstar.ws.WebSocketServer;
 
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
@@ -29,10 +32,25 @@ public class ReportService {
     private final ConcurrentHashMap<Report, ConcurrentLinkedDeque<Action>> reportStore;
 
     /**
+     * Hold a reference to the websocket server in order to broadcast events
+     * to all web clients
+     */
+    private final WebSocketServer webSocketServer;
+
+    /**
+     * Reports that are meant to be broadcast to all http/websocket
+     * clients are placed on this queue and picked up by the publishing
+     * thread.
+     */
+    private final ArrayBlockingQueue<Report> broadcastQueue;
+
+    /**
      * Constructor
      */
     public ReportService() {
         reportStore = new ConcurrentHashMap<>();
+        webSocketServer = DeathStar.getWebSocketServer();
+        broadcastQueue = new ArrayBlockingQueue<>(1000);
     }
 
     /**
@@ -49,6 +67,8 @@ public class ReportService {
             logger.log(Level.INFO, "This report was already present in the store and is being ignored: {0}", report);
             return existingValueForReport;
         }
+        // add report to broadcast queue
+        broadcastQueue.add(report);
         return null;
     }
 
