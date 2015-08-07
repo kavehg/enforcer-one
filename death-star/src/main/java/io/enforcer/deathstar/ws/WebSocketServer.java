@@ -33,11 +33,12 @@ import java.util.logging.Logger;
  *
  * http://localhost:<PORT>/websocket
  */
-public final class WebSocketServer {
+public final class WebSocketServer implements Runnable {
 
     private static final Logger logger = Logger.getLogger(WebSocketServer.class.getName());
     static final boolean SSL = System.getProperty("ssl") != null;
-    private final WebSocketServerHandler webSocketServerHandler;
+    private WebSocketServerHandler webSocketServerHandler;
+    private final Integer port;
 
     /**
      * Creates an instance of the web socket server on the specified port
@@ -45,6 +46,20 @@ public final class WebSocketServer {
      * @param port used for web socket
      */
     public WebSocketServer(Integer port) {
+        this.port = port;
+    }
+
+    /**
+     * Publish a web socket frame to all web socket clients
+     *
+     * @param message to be broadcast
+     */
+    public void broadcastToAllClients(String message) {
+        webSocketServerHandler.broadcast(message);
+    }
+
+    @Override
+    public void run() {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         webSocketServerHandler = new WebSocketServerHandler();
@@ -64,14 +79,5 @@ public final class WebSocketServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }
-
-    /**
-     * Publish a web socket frame to all web socket clients
-     *
-     * @param message to be broadcast
-     */
-    public void broadcastToAllClients(String message) {
-        webSocketServerHandler.broadcast(message);
     }
 }

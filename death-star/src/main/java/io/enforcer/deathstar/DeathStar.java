@@ -2,6 +2,7 @@ package io.enforcer.deathstar;
 
 import io.enforcer.deathstar.services.StatusService;
 import io.enforcer.deathstar.ws.WebSocketServer;
+import javassist.bytecode.analysis.Executor;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -10,6 +11,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -72,8 +75,10 @@ public class DeathStar {
         statusService.startStatusMonitoring();
 
         final HttpServer server = startHttpServer();
-        // will block on the web socket server
         webSocketServer = new WebSocketServer(9090);
+
+        ExecutorService webSocketServerThread = Executors.newSingleThreadExecutor();
+        webSocketServerThread.submit(webSocketServer);
 
         server.stop();
         statusService.stopService();
