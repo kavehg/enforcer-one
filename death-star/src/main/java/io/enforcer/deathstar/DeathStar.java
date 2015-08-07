@@ -64,7 +64,7 @@ public class DeathStar {
         }
 
         // configure console logger & set levels
-        consoleHandler.setLevel(Level.FINE);
+        consoleHandler.setLevel(Level.INFO);
         globalLogger.addHandler(consoleHandler);
         globalLogger.setLevel(Level.ALL);
 

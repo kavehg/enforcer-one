@@ -6,9 +6,7 @@ import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.ws.WebSocketServer;
 
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,12 +43,35 @@ public class ReportService {
     private final ArrayBlockingQueue<Report> broadcastQueue;
 
     /**
+     * The periodic monitoring task is run by this scheduler
+     */
+    private ExecutorService broadcastExecutor;
+
+    /**
      * Constructor
      */
     public ReportService() {
         reportStore = new ConcurrentHashMap<>();
         webSocketServer = DeathStar.getWebSocketServer();
         broadcastQueue = new ArrayBlockingQueue<>(1000);
+        broadcastExecutor = Executors.newSingleThreadExecutor();
+        startBroadcastThread();
+    }
+
+    /**
+     * Starts the broadcast thread
+     */
+    private void startBroadcastThread() {
+        broadcastExecutor.execute(new WebsocketBrodacastThread());
+        logger.log(Level.INFO, "Websocket broadcast executor started");
+    }
+
+    /**
+     * Stops the broadcast thread
+     */
+    private void stopBroadcastThread() {
+        broadcastExecutor.shutdown();
+        logger.log(Level.INFO, "Websocket broadcast thread stopped");
     }
 
     /**
@@ -67,7 +88,8 @@ public class ReportService {
             logger.log(Level.INFO, "This report was already present in the store and is being ignored: {0}", report);
             return existingValueForReport;
         }
-        // add report to broadcast queue
+        // add report to broadcast queue where it will be picked up by
+        // the WebsocketBroadcastThread
         broadcastQueue.add(report);
         return null;
     }
@@ -100,4 +122,33 @@ public class ReportService {
         return reportStore.keySet();
     }
 
+    /**
+     * The broadcast thread is responsible for pushing received report
+     * events to all web clients for the purpose of updating the dashboard
+     */
+    private class WebsocketBrodacastThread implements Runnable {
+
+        /**
+         * class logger
+         */
+        private final Logger logger = Logger.getLogger(WebsocketBrodacastThread.class.getName());
+
+        /**
+         * constructor
+         */
+        public WebsocketBrodacastThread() {
+            logger.log(Level.INFO, "Websocket broadcast thread started");
+        }
+
+        /**
+         * Takes reports placed on the broadcast queue and publishes them out to
+         * websocket clients for the purpose of updating the dashboard
+         */
+        @Override
+        public void run() {
+            logger.log(Level.INFO, "Broadcast thread waiting for update");
+            webSocketServer.broadcastToAllClients(broadcastQueue.poll().toString()); // todo json
+            logger.log(Level.INFO, "Report event published to websocket clients: ");
+        }
+    }
 }
