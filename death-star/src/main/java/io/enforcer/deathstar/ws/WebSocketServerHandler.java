@@ -17,23 +17,24 @@ package io.enforcer.deathstar.ws;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderUtil;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
-import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.netty.handler.codec.http.HttpMethod.GET;
-import static io.netty.handler.codec.http.HttpResponseStatus.*;
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
@@ -43,9 +44,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private static final Logger logger = Logger.getLogger(WebSocketServerHandler.class.getName());
     private static final String WEBSOCKET_PATH = "/websocket";
-    private static final ChannelGroup allActiveChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     private WebSocketServerHandshaker handshaker;
+
+    public WebSocketServerHandler() {
+        super();
+        logger.log(Level.WARNING, "WebsocketServerHandler initialized " + this.toString());
+    }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, Object msg) {
@@ -82,7 +87,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
             handshaker.handshake(ctx.channel(), req);
-            allActiveChannels.add(ctx.channel());
             logger.log(Level.FINE, "web socket client connected: " + ctx.channel());
         }
     }
@@ -92,7 +96,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         // Check for closing frame
         if (frame instanceof CloseWebSocketFrame) {
             handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-            allActiveChannels.remove(ctx.channel());
             logger.log(Level.FINE, "web socket client disconnected: " + ctx.channel());
             return;
         }
@@ -134,16 +137,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         ctx.close();
     }
 
-    /**
-     * Broadcast a web socket message to all active clients
-     *
-     * @param message to be sent
-     */
-    public void broadcast(String message) {
-        for(Channel channel : allActiveChannels) {
-            channel.write(new TextWebSocketFrame(message));
-        }
-    }
 
     private static String getWebSocketLocation(FullHttpRequest req) {
         String location =  req.headers().get(HOST) + WEBSOCKET_PATH;

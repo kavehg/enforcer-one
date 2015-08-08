@@ -59,7 +59,7 @@ public class DeathStarClient {
     }
 
     public static void main(String[] args) {
-        DeathStarClient client = new DeathStarClient("localhost", 8080);
+        DeathStarClient client = new DeathStarClient("localhost", 8000);
         Status status = new Status(1, "host", "2015-07-12T21:45:32Z");
         Report report = new Report(1, "command", "ADDED", "hostABC", "2015-07-29T00:00:00Z");
         long start = System.nanoTime();

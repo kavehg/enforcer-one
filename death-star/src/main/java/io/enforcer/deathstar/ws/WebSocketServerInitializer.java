@@ -15,14 +15,19 @@
  */
 package io.enforcer.deathstar.ws;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
-import io.netty.handler.ssl.SslContext;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -31,23 +36,40 @@ import java.util.logging.Logger;
 public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private static final Logger logger = Logger.getLogger(WebSocketServerInitializer.class.getName());
-    private final SslContext sslCtx;
-    private final WebSocketServerHandler webSocketHandler;
+    private static final ChannelGroup allActiveChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-    public WebSocketServerInitializer(SslContext sslCtx, WebSocketServerHandler handler) {
-        this.sslCtx = sslCtx;
-        this.webSocketHandler = handler;
+    /**
+     * Creates the server initializer
+     */
+    public WebSocketServerInitializer() {
+        logger.log(Level.FINE, "WebSocketServerInitializer created ", this.toString());
     }
 
+    /**
+     * Initializes each communication channel and sets up the
+     * channel pipeline
+     *
+     * @param ch channel to initialize
+     * @throws Exception if problems with channel setup
+     */
     @Override
     public void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        if (sslCtx != null) {
-            pipeline.addLast(sslCtx.newHandler(ch.alloc()));
-        }
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new HttpObjectAggregator(65536));
         pipeline.addLast(new WebSocketServerCompressionHandler());
-        pipeline.addLast(webSocketHandler);
+        pipeline.addLast(new WebSocketServerHandler());
+        allActiveChannels.add(ch);
+    }
+
+    /**
+     * Broadcast a web socket message to all active clients
+     *
+     * @param message to be sent
+     */
+    public void broadcast(String message) {
+        for(Channel channel : allActiveChannels) {
+            channel.write(new TextWebSocketFrame(message));
+        }
     }
 }

@@ -37,6 +37,7 @@ public class ReportResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Report roundTrip(Report report) {
+        logger.log(Level.INFO, "Received a report: ", report);
         reportService.addReport(report);
         return report;
     }

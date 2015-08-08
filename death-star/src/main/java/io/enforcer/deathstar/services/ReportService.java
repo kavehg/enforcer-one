@@ -147,7 +147,7 @@ public class ReportService {
         @Override
         public void run() {
             logger.log(Level.INFO, "Broadcast thread waiting for update");
-            webSocketServer.broadcastToAllClients(broadcastQueue.poll().toString()); // todo json
+            webSocketServer.broadcastToAllWebSocketClients(broadcastQueue.poll().toString()); // todo json
             logger.log(Level.INFO, "Report event published to websocket clients: ");
         }
     }

@@ -432,14 +432,17 @@ public class ProcessMaster implements ProcessMasterMBean {
             currentProcessSnapshot = getProcessSnapshot();
             Set<MonitoredProcessDiff> processDiffs = compareProcessSets(startingSnapshot, currentProcessSnapshot);
 
-            logger.log(Level.FINE, "Identified differences: " + processDiffs);
+            if(!processDiffs.isEmpty()) {
+                logger.log(Level.INFO, "Identified differences: " + processDiffs);
 
-            // TODO add batch send to death star API
-            for(MonitoredProcessDiff diff : processDiffs) {
-                deathStar.sendReport(convertDiffToReport(diff));
+                // TODO add batch send to death star API
+                for(MonitoredProcessDiff diff : processDiffs) {
+                    deathStar.sendReport(convertDiffToReport(diff));
+                }
+                startingSnapshot = currentProcessSnapshot;
+            } else {
+                logger.log(Level.FINE, "No process differences identified");
             }
-
-            startingSnapshot = currentProcessSnapshot;
         }
 
         /**

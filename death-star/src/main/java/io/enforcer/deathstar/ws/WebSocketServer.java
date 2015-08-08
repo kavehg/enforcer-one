@@ -37,8 +37,8 @@ public final class WebSocketServer implements Runnable {
 
     private static final Logger logger = Logger.getLogger(WebSocketServer.class.getName());
     static final boolean SSL = System.getProperty("ssl") != null;
-    private WebSocketServerHandler webSocketServerHandler;
     private final Integer port;
+    private final WebSocketServerInitializer webSocketServerInitializer;
 
     /**
      * Creates an instance of the web socket server on the specified port
@@ -47,28 +47,32 @@ public final class WebSocketServer implements Runnable {
      */
     public WebSocketServer(Integer port) {
         this.port = port;
+        this.webSocketServerInitializer = new WebSocketServerInitializer();
     }
 
     /**
-     * Publish a web socket frame to all web socket clients
+     * Sends a message to all active channels
      *
-     * @param message to be broadcast
+     * @param message to be sent to all connected websocket clients
      */
-    public void broadcastToAllClients(String message) {
-        webSocketServerHandler.broadcast(message);
+    public void broadcastToAllWebSocketClients(String message) {
+        webSocketServerInitializer.broadcast(message);
     }
 
+    /**
+     * Runs the websocket server
+     */
     @Override
     public void run() {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        webSocketServerHandler = new WebSocketServerHandler();
+
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new WebSocketServerInitializer(null, webSocketServerHandler));
+                    .childHandler(webSocketServerInitializer);
 
             Channel ch = b.bind(port).sync().channel();
 
