@@ -71,7 +71,7 @@ public class StatusService {
         statusStore = new ConcurrentHashMap<>();
         delinquentHosts = new ConcurrentHashMap<>();
         scheduler = Executors.newSingleThreadScheduledExecutor();
-        logger.log(Level.INFO, "status service initialized");
+        logger.log(Level.FINE, "status service instantiated: {0}", this);
     }
 
     /**

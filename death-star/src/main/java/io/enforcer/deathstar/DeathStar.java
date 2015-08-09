@@ -1,5 +1,6 @@
 package io.enforcer.deathstar;
 
+import io.enforcer.deathstar.services.ReportService;
 import io.enforcer.deathstar.services.StatusService;
 import io.enforcer.deathstar.ws.WebSocketServer;
 import javassist.bytecode.analysis.Executor;
@@ -30,6 +31,8 @@ public class DeathStar {
     public static final String API_BASE_URI = "http://localhost:8000/api/";
 
     private static StatusService statusService;
+
+    private static ReportService reportService;
 
     private static WebSocketServer webSocketServer;
 
@@ -71,22 +74,29 @@ public class DeathStar {
         globalLogger.addHandler(consoleHandler);
         globalLogger.setLevel(Level.ALL);
 
+        // start http service & webSockets
+        final HttpServer server = startHttpServer();
+        webSocketServer = new WebSocketServer(9090);
+        ExecutorService webSocketServerExecutor = Executors.newSingleThreadExecutor();
+        webSocketServerExecutor.submit(webSocketServer);
+
+        // status service
         statusService = new StatusService(5, 5);
         statusService.startStatusMonitoring();
 
-        final HttpServer server = startHttpServer();
-        webSocketServer = new WebSocketServer(9090);
+        // report service
+        reportService = new ReportService();
+        reportService.startBroadcastThread();
 
-        ExecutorService webSocketServerThread = Executors.newSingleThreadExecutor();
-        webSocketServerThread.submit(webSocketServer);
-
+        // wait todo: handle service stop & CTRL+C
         try {
             Thread.sleep(Long.MAX_VALUE);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            server.stop();
+            statusService.stopService();
         }
-        server.stop();
-        statusService.stopService();
     }
 
     /**
@@ -95,6 +105,14 @@ public class DeathStar {
      */
     public static StatusService getStatusService() {
         return statusService;
+    }
+
+    /**
+     * Obtain reference to report service
+     * @return report service instance
+     */
+    public static ReportService getReportService() {
+        return reportService;
     }
 
     /**

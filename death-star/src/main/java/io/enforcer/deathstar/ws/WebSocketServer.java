@@ -48,6 +48,7 @@ public final class WebSocketServer implements Runnable {
     public WebSocketServer(Integer port) {
         this.port = port;
         this.webSocketServerInitializer = new WebSocketServerInitializer();
+        logger.log(Level.FINE, "webSocket server instantiated {0} ", this);
     }
 
     /**
@@ -60,7 +61,7 @@ public final class WebSocketServer implements Runnable {
     }
 
     /**
-     * Runs the websocket server
+     * Runs the webSocket server
      */
     @Override
     public void run() {
@@ -78,7 +79,7 @@ public final class WebSocketServer implements Runnable {
 
             ch.closeFuture().sync();
         } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, "Problems with websocket connection", e);
+            logger.log(Level.SEVERE, "Problems with webSocket connection", e);
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

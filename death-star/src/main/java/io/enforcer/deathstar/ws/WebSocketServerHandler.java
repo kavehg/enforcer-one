@@ -47,9 +47,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private WebSocketServerHandshaker handshaker;
 
+    /**
+     * Handler for webSockets
+     */
     public WebSocketServerHandler() {
         super();
-        logger.log(Level.WARNING, "WebsocketServerHandler initialized " + this.toString());
+        logger.log(Level.FINE, "WebSocketServerHandler instantiated: {0}", this);
     }
 
     @Override

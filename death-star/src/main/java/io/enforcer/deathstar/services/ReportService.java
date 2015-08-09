@@ -55,13 +55,13 @@ public class ReportService {
         webSocketServer = DeathStar.getWebSocketServer();
         broadcastQueue = new ArrayBlockingQueue<>(1000);
         broadcastExecutor = Executors.newSingleThreadExecutor();
-        startBroadcastThread();
+        logger.log(Level.FINE, "ReportService instantiated: {0}", this);
     }
 
     /**
      * Starts the broadcast thread
      */
-    private void startBroadcastThread() {
+    public void startBroadcastThread() {
         broadcastExecutor.execute(new WebsocketBrodacastThread());
         logger.log(Level.INFO, "Websocket broadcast executor started");
     }
@@ -146,9 +146,16 @@ public class ReportService {
          */
         @Override
         public void run() {
-            logger.log(Level.INFO, "Broadcast thread waiting for update");
-            webSocketServer.broadcastToAllWebSocketClients(broadcastQueue.poll().toString()); // todo json
-            logger.log(Level.INFO, "Report event published to websocket clients: ");
+            logger.log(Level.FINE, "Broadcast thread waiting for update");
+
+            try {
+                Report pollResult = broadcastQueue.take();
+                webSocketServer.broadcastToAllWebSocketClients(pollResult.toString()); // todo json
+                logger.log(Level.FINE, "Report event published to websocket clients: ");
+            } catch (InterruptedException e) {
+                logger.log(Level.WARNING, "Broadcast queue thread got interrupted", e);
+            }
+
         }
     }
 }

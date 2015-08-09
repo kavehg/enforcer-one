@@ -1,5 +1,6 @@
 package io.enforcer.deathstar.rest;
 
+import io.enforcer.deathstar.DeathStar;
 import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.services.ReportService;
 
@@ -19,10 +20,17 @@ public class ReportResource {
      */
     private static final Logger logger = Logger.getLogger(ReportResource.class.getName());
 
+    /**
+     * Reference to the report store
+     */
     private ReportService reportService;
 
+    /**
+     * Instantiate REST resource
+     */
     public ReportResource() {
-        this.reportService = new ReportService();
+        this.reportService = DeathStar.getReportService();
+        logger.log(Level.FINE, "report service instantiated: {0}", this);
     }
 
     @GET

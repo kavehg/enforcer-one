@@ -20,10 +20,17 @@ public class StatusResource {
      */
     private static final Logger logger = Logger.getLogger(StatusResource.class.getName());
 
+    /**
+     * Reference to the status store
+     */
     private StatusService statusService;
 
+    /**
+     * Instantiate REST resource for statuses
+     */
     public StatusResource() {
         this.statusService = DeathStar.getStatusService();
+        logger.log(Level.FINE, "Status resource instantiated: {0}", this);
     }
 
     /**

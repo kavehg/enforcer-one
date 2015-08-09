@@ -42,7 +42,7 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
      * Creates the server initializer
      */
     public WebSocketServerInitializer() {
-        logger.log(Level.FINE, "WebSocketServerInitializer created ", this.toString());
+        logger.log(Level.FINE, "WebSocketServerInitializer instantiated: {0}", this);
     }
 
     /**
@@ -70,6 +70,7 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
     public void broadcast(String message) {
         for(Channel channel : allActiveChannels) {
             channel.write(new TextWebSocketFrame(message));
+            channel.flush();
         }
     }
 }
