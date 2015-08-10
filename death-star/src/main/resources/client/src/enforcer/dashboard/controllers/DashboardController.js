@@ -1,5 +1,5 @@
 angular.module('Enforcer.Dashboard')
-    .controller('DashboardCtrl', function($scope) {
+    .controller('DashboardCtrl', function($scope, WebSocketService) {
 
         var dashboard = this;
 

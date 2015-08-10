@@ -359,9 +359,14 @@ public class ProcessMaster implements ProcessMasterMBean {
      * @param processesToBeFiltered processes that will be checked
      */
     private void filterProcesses(Set<MonitoredProcessDiff> processesToBeFiltered) {
-        Set<MonitoredProcessDiff> processDiffsToIgnore = processesToBeFiltered.stream().filter(
-                diff -> ignoredProcesses.contains(diff.getMainClass())
-        ).collect(Collectors.toSet());
+        Set<MonitoredProcessDiff> processDiffsToIgnore = new HashSet<>();
+
+        for(MonitoredProcessDiff diff : processesToBeFiltered) {
+            processDiffsToIgnore.addAll(
+                    ignoredProcesses.stream().filter(
+                            processToIgnore -> diff.getMainClass().contains(processToIgnore)
+                    ).map(processToIgnore -> diff).collect(Collectors.toList()));
+        }
 
         processesToBeFiltered.removeAll(processDiffsToIgnore);
     }

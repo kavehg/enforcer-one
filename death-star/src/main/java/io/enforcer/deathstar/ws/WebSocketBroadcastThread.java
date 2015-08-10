@@ -1,5 +1,7 @@
 package io.enforcer.deathstar.ws;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.enforcer.deathstar.DeathStar;
 import io.enforcer.deathstar.pojos.Report;
 
@@ -24,11 +26,17 @@ public class WebSocketBroadcastThread implements Runnable {
     private final Logger logger = Logger.getLogger(WebSocketBroadcastThread.class.getName());
 
     /**
+     * Jackson json serializer
+     */
+    private final ObjectMapper jsonMapper;
+
+    /**
      * constructor
      */
     public WebSocketBroadcastThread(ArrayBlockingQueue<Report> broadcastQueue) {
         this.broadcastQueue = broadcastQueue;
-        logger.log(Level.INFO, "WebSocket broadcast thread instantiated: {0}", this);
+        this.jsonMapper = new ObjectMapper();
+        logger.log(Level.FINE, "WebSocket broadcast thread instantiated: {0}", this);
     }
 
     /**
@@ -39,12 +47,15 @@ public class WebSocketBroadcastThread implements Runnable {
     public void run() {
         while (true) { // todo: sane stoppage
             try {
-                logger.log(Level.INFO, "Broadcast thread waiting for update");
-                Report pollResult = broadcastQueue.take();
-                DeathStar.getWebSocketServer().broadcastToAllWebSocketClients(pollResult.toString()); // todo json
-                logger.log(Level.INFO, "Report event published to websocket clients: ");
+                logger.log(Level.FINE, "Broadcast thread waiting for update");
+                Report reportToBroadcast = broadcastQueue.take();
+                String jsonString = jsonMapper.writeValueAsString(reportToBroadcast);
+                DeathStar.getWebSocketServer().broadcastToAllWebSocketClients(jsonString);
+                logger.log(Level.FINE, "Broadcast thread published an event to all webSocket clients: {0}", jsonString);
             } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Broadcast queue thread got interrupted", e);
+                logger.log(Level.WARNING, "WebSocket broadcast thread got interrupted", e);
+            } catch (JsonProcessingException e) {
+                logger.log(Level.WARNING, "Problems converting report to json", e);
             }
         }
     }

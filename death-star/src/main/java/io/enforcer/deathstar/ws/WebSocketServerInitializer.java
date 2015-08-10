@@ -35,7 +35,14 @@ import java.util.logging.Logger;
  */
 public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
+    /**
+     * Class logger
+     */
     private static final Logger logger = Logger.getLogger(WebSocketServerInitializer.class.getName());
+
+    /**
+     * Data structure to hold a reference to all active webSocket client channels
+     */
     private static final ChannelGroup allActiveChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     /**
@@ -68,7 +75,7 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
      * @param message to be sent
      */
     public void broadcast(String message) {
-        logger.log(Level.INFO, "brodcasting to {0} webSocket clients", allActiveChannels.size());
+        logger.log(Level.FINE, "broadcasting to {0} webSocket clients", allActiveChannels.size());
         for(Channel channel : allActiveChannels) {
             channel.write(new TextWebSocketFrame(message));
             channel.flush();
