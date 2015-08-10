@@ -3,6 +3,7 @@ package io.enforcer.deathstar.services;
 import io.enforcer.deathstar.DeathStar;
 import io.enforcer.deathstar.pojos.Action;
 import io.enforcer.deathstar.pojos.Report;
+import io.enforcer.deathstar.ws.WebSocketBroadcastThread;
 import io.enforcer.deathstar.ws.WebSocketServer;
 
 import java.util.Set;
@@ -30,31 +31,24 @@ public class ReportService {
     private final ConcurrentHashMap<Report, ConcurrentLinkedDeque<Action>> reportStore;
 
     /**
-     * Hold a reference to the websocket server in order to broadcast events
-     * to all web clients
-     */
-    private final WebSocketServer webSocketServer;
-
-    /**
      * Reports that are meant to be broadcast to all http/websocket
      * clients are placed on this queue and picked up by the publishing
      * thread.
      */
-    private final ArrayBlockingQueue<Report> broadcastQueue;
+    private final ArrayBlockingQueue<Report> reportBroadcastQueue;
 
     /**
      * The periodic monitoring task is run by this scheduler
      */
-    private ExecutorService broadcastExecutor;
+    private ExecutorService reportBroadcastExecutor;
 
     /**
      * Constructor
      */
     public ReportService() {
         reportStore = new ConcurrentHashMap<>();
-        webSocketServer = DeathStar.getWebSocketServer();
-        broadcastQueue = new ArrayBlockingQueue<>(1000);
-        broadcastExecutor = Executors.newSingleThreadExecutor();
+        reportBroadcastQueue = new ArrayBlockingQueue<>(1000);
+        reportBroadcastExecutor = Executors.newSingleThreadExecutor();
         logger.log(Level.FINE, "ReportService instantiated: {0}", this);
     }
 
@@ -62,16 +56,16 @@ public class ReportService {
      * Starts the broadcast thread
      */
     public void startBroadcastThread() {
-        broadcastExecutor.execute(new WebsocketBrodacastThread());
-        logger.log(Level.INFO, "Websocket broadcast executor started");
+        reportBroadcastExecutor.execute(new WebSocketBroadcastThread(reportBroadcastQueue));
+        logger.log(Level.INFO, "WebSocket broadcast executor started");
     }
 
     /**
      * Stops the broadcast thread
      */
     private void stopBroadcastThread() {
-        broadcastExecutor.shutdown();
-        logger.log(Level.INFO, "Websocket broadcast thread stopped");
+        reportBroadcastExecutor.shutdown();
+        logger.log(Level.INFO, "WebSocket broadcast thread stopped");
     }
 
     /**
@@ -89,8 +83,8 @@ public class ReportService {
             return existingValueForReport;
         }
         // add report to broadcast queue where it will be picked up by
-        // the WebsocketBroadcastThread
-        broadcastQueue.add(report);
+        // the WebSocketBroadcastThread
+        reportBroadcastQueue.add(report);
         return null;
     }
 
@@ -122,40 +116,4 @@ public class ReportService {
         return reportStore.keySet();
     }
 
-    /**
-     * The broadcast thread is responsible for pushing received report
-     * events to all web clients for the purpose of updating the dashboard
-     */
-    private class WebsocketBrodacastThread implements Runnable {
-
-        /**
-         * class logger
-         */
-        private final Logger logger = Logger.getLogger(WebsocketBrodacastThread.class.getName());
-
-        /**
-         * constructor
-         */
-        public WebsocketBrodacastThread() {
-            logger.log(Level.INFO, "Websocket broadcast thread started");
-        }
-
-        /**
-         * Takes reports placed on the broadcast queue and publishes them out to
-         * websocket clients for the purpose of updating the dashboard
-         */
-        @Override
-        public void run() {
-            logger.log(Level.FINE, "Broadcast thread waiting for update");
-
-            try {
-                Report pollResult = broadcastQueue.take();
-                webSocketServer.broadcastToAllWebSocketClients(pollResult.toString()); // todo json
-                logger.log(Level.FINE, "Report event published to websocket clients: ");
-            } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Broadcast queue thread got interrupted", e);
-            }
-
-        }
-    }
 }

@@ -38,13 +38,24 @@ import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
- * Handles handshakes and messages - From netty examples
+ * Handles handshakes and messages - Modified version of the
+ * webSocket handler from netty examples
  */
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
+    /**
+     * Class logger
+     */
     private static final Logger logger = Logger.getLogger(WebSocketServerHandler.class.getName());
+
+    /**
+     * Path on which webSocket requests will be handled
+     */
     private static final String WEBSOCKET_PATH = "/websocket";
 
+    /**
+     * Conducts the webSocket handshake
+     */
     private WebSocketServerHandshaker handshaker;
 
     /**
@@ -55,6 +66,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         logger.log(Level.FINE, "WebSocketServerHandler instantiated: {0}", this);
     }
 
+    /**
+     * Invoked each time a request is received
+     *
+     * @param ctx handler context
+     * @param msg message received
+     */
     @Override
     public void messageReceived(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof FullHttpRequest) {
@@ -64,11 +81,23 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
     }
 
+    /**
+     * Invoked when the read is complete
+     *
+     * @param ctx handler context
+     */
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
     }
 
+    /**
+     * Handles and incoming request and checks if its an http request
+     * or if we can initiate the webSocket protocol handshake
+     *
+     * @param ctx handler context
+     * @param req http request
+     */
     private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
         // Handle a bad request.
         if (!req.decoderResult().isSuccess()) {
@@ -94,6 +123,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
     }
 
+    /**
+     * Invoked once we determine that the http request is using the webSocket
+     * protocol
+     *
+     * @param ctx handler context
+     * @param frame webSocket frame
+     */
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
 
         // Check for closing frame
@@ -117,6 +153,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         ctx.channel().write(new TextWebSocketFrame(request.toUpperCase()));
     }
 
+    /**
+     * Sends http response to clients
+     *
+     * @param ctx handler context
+     * @param req http request
+     * @param res http response
+     */
     private static void sendHttpResponse(
             ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
         // Generate an error page if response getStatus code is not OK (200).
@@ -134,19 +177,25 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
     }
 
+    /**
+     * Invoked in case any exceptions in processing the http request
+     * @param ctx handler context
+     * @param cause cause of the exception
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         ctx.close();
     }
 
-
+    /**
+     * Constructs the webSocket URL
+     *
+     * @param req http request
+     * @return webSocket URL
+     */
     private static String getWebSocketLocation(FullHttpRequest req) {
         String location =  req.headers().get(HOST) + WEBSOCKET_PATH;
-        if (WebSocketServer.SSL) {
-            return "wss://" + location;
-        } else {
-            return "ws://" + location;
-        }
+        return "ws://" + location;
     }
 }

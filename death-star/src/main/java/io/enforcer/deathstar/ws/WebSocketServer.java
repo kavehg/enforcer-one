@@ -27,17 +27,25 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * From netty examples
+ * Modified version of the Netty WebSocket example. Added the
+ * ability to broadcast to all connected clients.
  *
- * A HTTP server which serves Web Socket requests at:
- *
- * http://localhost:<PORT>/websocket
  */
 public final class WebSocketServer implements Runnable {
 
+    /**
+     * Class logger
+     */
     private static final Logger logger = Logger.getLogger(WebSocketServer.class.getName());
-    static final boolean SSL = System.getProperty("ssl") != null;
+
+    /**
+     * Port on which the WebSocket server will run
+     */
     private final Integer port;
+
+    /**
+     * Initializes the netty channel using handlers
+     */
     private final WebSocketServerInitializer webSocketServerInitializer;
 
     /**

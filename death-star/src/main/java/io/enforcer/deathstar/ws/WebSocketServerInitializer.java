@@ -68,6 +68,7 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
      * @param message to be sent
      */
     public void broadcast(String message) {
+        logger.log(Level.INFO, "brodcasting to {0} webSocket clients", allActiveChannels.size());
         for(Channel channel : allActiveChannels) {
             channel.write(new TextWebSocketFrame(message));
             channel.flush();
