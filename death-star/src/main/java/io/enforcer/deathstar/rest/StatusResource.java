@@ -40,15 +40,17 @@ public class StatusResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Status getIt() {
+
         return new Status(123, "host123", "2012-02-12T23:45:32Z");
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Status roundTrip(Status s) {
-        logger.log(Level.INFO, "received status update: {0}", s);
-        statusService.addStatusUpdate(s);
-        return s;
+    public Status roundTrip(Status status) {
+        logger.log(Level.INFO, "Recieved status update: {0}", status);
+        statusService.addStatusUpdate(status);
+        return status;
     }
+
 }

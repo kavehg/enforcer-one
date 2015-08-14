@@ -1,16 +1,15 @@
 package io.enforcer.deathstar.services;
 
+import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.pojos.Status;
+import io.enforcer.deathstar.ws.WebSocketBroadcastThread;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,6 +61,18 @@ public class StatusService {
     private final ScheduledExecutorService scheduler;
 
     /**
+     * The periodic monitoring task is run by this scheduler
+     */
+    private ExecutorService statusBroadcastExecutor;
+
+    /**
+     * Reports that are meant to be broadcast to all http/websocket
+     * clients are placed on this queue and picked up by the publishing
+     * thread.
+     */
+    private final ArrayBlockingQueue<Status> statusBroadcastQueue;
+
+    /**
      * Create an instance of the status service and initialize
      * the internal store and scheduler
      */
@@ -71,6 +82,10 @@ public class StatusService {
         statusStore = new ConcurrentHashMap<>();
         delinquentHosts = new ConcurrentHashMap<>();
         scheduler = Executors.newSingleThreadScheduledExecutor();
+
+        statusBroadcastQueue = new ArrayBlockingQueue<>(1000);
+        statusBroadcastExecutor = Executors.newSingleThreadExecutor();
+
         logger.log(Level.FINE, "status service instantiated: {0}", this);
     }
 
@@ -115,9 +130,10 @@ public class StatusService {
      * @param status incoming status update from
      */
     public void addStatusUpdate(Status status) {
-        logger.log(Level.FINE, "storing incoming status update {0}", status);
+        logger.log(Level.INFO, "storing incoming status update {0}", status);
         Status oldStatus = statusStore.put(status.getHost(), status);
-        logger.log(Level.FINE, "status stored: {0}, old status: {1}", new Object[]{status, oldStatus});
+        logger.log(Level.INFO, "status stored: {0}, old status: {1}", new Object[]{status, oldStatus});
+        statusBroadcastQueue.add(status);
     }
 
     /**
@@ -184,8 +200,11 @@ public class StatusService {
     private boolean statusIsStale(Status status) {
         // last reported time stamp
         Instant parsedTimeStamp = null;
-        try {
+        return false;
+        /*try {
+            logger.log(Level.INFO, "Parsed tstamp: " + Instant.parse(status.getTimeStamp()));
             parsedTimeStamp = Instant.parse(status.getTimeStamp());
+
         } catch (java.time.format.DateTimeParseException e) {
             logger.log(Level.WARNING, "problems parsing incoming dates", e);
             return true; // blindly say its stale since we cannot parse
@@ -207,7 +226,7 @@ public class StatusService {
             return true;
         }
 
-        return false;
+        return false;*/
     }
 
     /**
@@ -269,6 +288,22 @@ public class StatusService {
     }
 
     /**
+     * Starts the broadcast thread
+     */
+    public void startBroadcastThread() {
+        statusBroadcastExecutor.execute(new WebSocketBroadcastThread(statusBroadcastQueue, 1));
+        logger.log(Level.INFO, "WebSocket broadcast executor started");
+    }
+
+    /**
+     * Stops the broadcast thread
+     */
+    private void stopBroadcastThread() {
+        statusBroadcastExecutor.shutdown();
+        logger.log(Level.INFO, "WebSocket broadcast thread stopped");
+    }
+
+    /**
      * Thread responsible for the periodic checking of
      * status updates, and escalation if status updates
      * are stale
@@ -279,12 +314,16 @@ public class StatusService {
             logger.log(Level.FINE, "status checker thread run started");
 
             for(Status status : statusStore.values()) {
+                logger.log(Level.INFO, "statusIsStale(status) = ", statusIsStale(status));
                 if(statusIsStale(status)) {
                     logger.log(Level.INFO, "escalating stale status: {0}", status);
                     markStatusDelinquent(status);
                     // TODO escalate
                 } else {
                     logger.log(Level.FINER, "status OK: {0}", status);
+                    // add status to broadcast queue where it will be picked up by
+                    // the WebSocketBroadcastThread
+                    statusBroadcastQueue.add(status);
                 }
             }
 

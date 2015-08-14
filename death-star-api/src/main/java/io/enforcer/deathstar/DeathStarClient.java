@@ -11,6 +11,10 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -49,8 +53,10 @@ public class DeathStarClient {
     }
 
     public void sendStatus(Status status) {
-        Status postResult = statusAPI.request(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(status, MediaType.APPLICATION_JSON_TYPE), Status.class);
+        /*Status postResult = statusAPI.request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(status, MediaType.APPLICATION_JSON_TYPE), Status.class);*/
+        statusAPI.request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(status, MediaType.APPLICATION_JSON_TYPE), Report.class);
     }
 
     public void sendReport(Report report) {
@@ -60,12 +66,75 @@ public class DeathStarClient {
 
     public static void main(String[] args) {
         DeathStarClient client = new DeathStarClient("localhost", 8000);
-        Status status = new Status(1, "host", "2015-07-12T21:45:32Z");
-        Report report = new Report(1, "command", "ADDED", "hostABC", "2015-07-29T00:00:00Z");
+
+        Report report = new Report(152, "command", "REMOVED", "hostABCC", Instant.now().toString());
+        Status status1 = new Status(399, "localhost", Instant.now().toString());
+        Status status2 = new Status(401, "hostabed", Instant.now().toString());
+
         long start = System.nanoTime();
-//        client.sendStatus(status);
         client.sendReport(report);
+        //client.sendStatus(status1);
+        //client.sendStatus(status2);
+
+        statusTesting(client);
+
         long elapsed = System.nanoTime() - start;
+
         System.out.println("Took: " + TimeUnit.MILLISECONDS.convert(elapsed, TimeUnit.NANOSECONDS) + " ms");
     }
+
+
+    // Sends status updates for numerous mock x-wings
+    public static void statusTesting(DeathStarClient c) {
+
+        DeathStarClient client = c;
+
+        int i = 0;
+
+        Status status1 = new Status(399, "localhost", Instant.now().toString());
+        Status status2 = new Status(401, "hostabed", Instant.now().toString());
+        ArrayList<Status> statuses = new ArrayList<Status>();
+        statuses.add(status1);
+        statuses.add(status2);
+
+        // 10 iterations
+        while (i < 6){
+
+            // every 2 iterations, create new status, aka new x-wing
+            if ((i % 2) == 0)
+            {
+                Status s = new Status((int)(Math.random() * 5000), "localhost", Instant.now().toString());
+                statuses.add(s);
+            }
+
+            // try to delay the last pass by 10 seconds
+            if (i == 5)
+            {
+                // sleep for 10 seconds
+                try {
+                    Thread.sleep(10000);                 //1000 milliseconds is one second.
+                } catch(InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+            // send all statuses but update the timestamp
+            for (int j=0; j < statuses.size(); j++)
+            {
+                Status s = new Status(statuses.get(j).getXWingId(), statuses.get(j).host, Instant.now().toString());
+
+                client.sendStatus(s);
+            }
+
+            // sleep for 2 seconds
+            try {
+                Thread.sleep(2000);                 //1000 milliseconds is one second.
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+
+            i++;
+        }
+    }
+
 }

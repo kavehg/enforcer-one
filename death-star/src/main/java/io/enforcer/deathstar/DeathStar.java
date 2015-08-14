@@ -82,7 +82,8 @@ public class DeathStar {
 
         // status service
         statusService = new StatusService(5, 5);
-        statusService.startStatusMonitoring();
+        //statusService.startStatusMonitoring();
+        statusService.startBroadcastThread();
 
         // report service
         reportService = new ReportService();

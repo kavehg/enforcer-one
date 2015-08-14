@@ -1,23 +1,118 @@
-<div class="list-area">
-    <div class="list-wrapper">
-        <ul class="list"
-            ng-repeat="status in dashboard.statuses">
-            <h3 class="status">{{status.name}}</h3>
-            <hr/>
-            <li class="report"
-                ng-repeat="report in dashboard.reports | filter: {status:status.name}">
-                <article>
-                    <div>
-                        <p class="title">{{report.processId}} [{{report.host}}]</p>
+
+<div class="container">
+    <div class="row">
+
+        <!--<a class="waves-effect waves-light btn" ng-click="punch()">punch</a>-->
+
+        <!-- New Column -->
+        <div ng-drop="true" ng-drop-success="onDropCompleteNew($data,$event)" class="col s3">
+            <ul class="list" id="newList">
+                <h5 class="grey-text text-darken-1">New</h5>
+                <div class="grey darken-1 horizline"></div>
+
+                <li class="report" ng-center-anchor="true" ng-repeat="report in new | filter: {status:status.name}">
+
+                    <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
+                        <div class="card-content black-text">
+                            <span class="card-title black-text"><strong>{{report.processId}} | [{{report.host}}]</strong></span>
+                            <div class="type-bar blue"></div>
+                            <p>{{report.mainClass}}</p>
+                            <p>{{report.processStateChange}}</p>
+                            <p class="right-align">{{report.timeStamp}}</p>
+                        </div>
                     </div>
-                    <div class="type-bar {{report.status}}"></div>
-                    <div>
-                        <p class="report-details"><strong>{{report.command}}</strong></p>
-                        <p class="report-details"><strong>{{report.stateChange}}</strong></p>
-                        <p class="report-details pull-right">{{report.timeStamp}}</p>
+
+                </li>
+            </ul>
+        </div>
+
+        <!-- Acknowledged Column -->
+        <div ng-drop="true" ng-drop-success="onDropCompleteAcknowledged($data,$event)" class="col s3">
+            <ul class="list" id="acknowledgedList">
+                <h5 class="grey-text text-darken-1">Acknowledged</h5>
+                <div class="grey darken-1 horizline"></div>
+
+                <li class="report" ng-center-anchor="true" ng-repeat="report in acknowledged | filter: {status:status.name}">
+
+                    <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
+                        <div class="card-content black-text">
+                            <span class="card-title black-text"><strong>{{report.processId}} | [{{report.host}}]</strong></span>
+                            <div class="type-bar green"></div>
+                            <p>{{report.mainClass}}</p>
+                            <p>{{report.processStateChange}}</p>
+                            <p class="right-align">{{report.timeStamp}}</p>
+                        </div>
                     </div>
-                </article>
-            </li>
-        </ul>
+
+                </li>
+            </ul>
+        </div>
+
+        <!-- Escalated Column -->
+        <div ng-drop="true" ng-drop-success="onDropCompleteEscalated($data,$event)" class="col s3">
+            <ul class="list" id="escalatedList">
+                <h5 class="grey-text text-darken-1">Escalated</h5>
+                <div class="grey darken-1 horizline"></div>
+
+                <li class="report" ng-center-anchor="true" ng-repeat="report in escalated | filter: {status:status.name}">
+
+                    <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
+                        <div class="card-content black-text">
+                            <span class="card-title black-text"><strong>{{report.processId}} | [{{report.host}}]</strong></span>
+                            <div class="type-bar red"></div>
+                            <p>{{report.mainClass}}</p>
+                            <p>{{report.processStateChange}}</p>
+                            <p class="right-align">{{report.timeStamp}}</p>
+                        </div>
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <!-- History Column -->
+        <div ng-drop="true" ng-drop-success="onDropCompleteHistory($data,$event)" class="col s3">
+            <ul class="list" id="historyList">
+                <h5 class="grey-text text-darken-1">History</h5>
+                <div class="grey darken-1 horizline"></div>
+
+                <li class="report" ng-center-anchor="true" ng-repeat="report in history | filter: {status:status.name}">
+
+                    <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
+                        <div class="card-content black-text">
+                            <span class="card-title black-text"><strong>{{report.processId}} | [{{report.host}}]</strong></span>
+                            <div class="type-bar grey"></div>
+                            <p>{{report.mainClass}}</p>
+                            <p>{{report.processStateChange}}</p>
+                            <p class="right-align">{{report.timeStamp}}</p>
+                        </div>
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
     </div>
+
+    <!--<div class="row">
+        <div class="col s4 offset-s8">
+            <ul class="collapsible hoverable" data-collapsible="accordion">
+                <li>
+                    <div class="green-text collapsible-header"><i class="material-icons">filter_drama</i>X-Wing 4132</div>
+                    <div class="collapsible-body"><ul><li>Host: [tovalrs02]</li><li>Last Heartbeat: 2 seconds ago</li></ul></div>
+                </li>
+                <li>
+                    <div class="green-text collapsible-header"><i class="material-icons">filter_drama</i>X-Wing 1992</div>
+                    <div class="collapsible-body"><ul><li>Host: [tovalrs03]</li><li>Last Heartbeat: 4 seconds ago</li></ul></div>
+                </li>
+
+                <li ng-repeat="status in statuses">
+                    <div class="green-text collapsible-header"><i class="material-icons">filter_drama</i>X-Wing {{status.xwingId}}</div>
+                    <div class="collapsible-body"><ul><li>Host: {{status.host}}</li><li>Timestamp: {{status.timeStamp}}</li></ul></div>
+                </li>
+
+            </ul>
+        </div>
+    </div>-->
+
 </div>

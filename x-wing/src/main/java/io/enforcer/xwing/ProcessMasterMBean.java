@@ -5,7 +5,7 @@ import java.util.Set;
 /**
  * Created by kavehg on 2/24/2015.
  */
-public interface ProcessMasterMBean {
+public interface ProcessMasterMBean{
     void logCurrentState();
     void stopScheduler();
     Set<Integer> getProblematicProcessIds();

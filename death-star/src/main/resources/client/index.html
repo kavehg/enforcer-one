@@ -1,42 +1,100 @@
 <!DOCTYPE html>
 <html ng-app="Enforcer">
-<head lang="en">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <title>Enforcer One</title>
+    <head lang="en">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Enforcer One</title>
 
-    <link rel="stylesheet" href="assets/css/normalize.css">
+        <link rel="stylesheet" href="assets/css/normalize.css">
 
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+        <!-- Materialize -->
+        <link type="text/css" rel="stylesheet" href="assets/css/materialize.css"  media="screen,projection"/>
 
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="assets/css/animations.css">
+        <link rel="stylesheet" href="assets/css/menu_sideslide.css">
 
-    <link rel="stylesheet" href="assets/css/enforcer.css">
-    <link rel="stylesheet" href="assets/css/animations.css">
 
-    <!-- Angular JS -->
-    <script src="vendor/angular.js"></script>
-    <script src="vendor/angular-route.js"></script>
-    <script src="src/enforcer/Enforcer.js"></script>
-    <script src="src/enforcer/app/App.js"></script>
-    <script src="src/enforcer/app/controllers/MainController.js"></script>
-    <script src="src/enforcer/dashboard/Dashboard.js"></script>
-    <script src="src/enforcer/dashboard/controllers/DashboardController.js"></script>
-    <script src="src/enforcer/app/services/WebSocketService.js"></script>
 
-</head>
-<body ng-controller="MainCtrl as main">
-    <div class="navbar navbar-fixed-top navbar-default">
-        <div class="navbar-header">
-            <a class="logo navbar-brand" href="#/">
-                <!--<img src="assets/img/enforcer-one-small-logo.png">-->
-                <h3 id="logo"><strong>Enforcer One</strong></h3>
-            </a>
+        <!-- Google Open Sans font -->
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,600,600italic,700,700italic,800,800italic,300italic,300' rel='stylesheet' type='text/css'>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+        <!-- JQuery/Materialize -->
+        <script src="vendor/jquery.js"></script>
+        <script src="vendor/jquery-ui.js"></script>
+        <script src="vendor/materialize.min.js"></script>
+
+        <!-- Angular JS -->
+        <script src="vendor/angular.js"></script>
+        <script src="vendor/angular-route.js"></script>
+        <script src="vendor/ngDraggable.js"></script>
+        <script src="src/enforcer/Enforcer.js"></script>
+        <script src="src/enforcer/app/App.js"></script>
+        <script src="src/enforcer/app/controllers/MainController.js"></script>
+        <script src="src/enforcer/dashboard/Dashboard.js"></script>
+        <script src="src/enforcer/dashboard/controllers/DashboardController.js"></script>
+        <script src="src/enforcer/app/services/WebSocketService.js"></script>
+
+    </head>
+
+    <body style="background: url('assets/img/concrete_seamless.png'); background-repeat: repeat;" ng-controller="DashboardCtrl">
+
+
+    <div>
+        <div class="menu-wrap">
+            <nav class="menu" style="box-shadow:none">
+                <div class="icon-list">
+                    <a><span style="margin-left:0px; font-size:1.05em">Deployed X-Wings</span></a>
+                    <!--<a class="tooltipped green-text" data-position="right" data-delay="35" data-tooltip="Host: [tovalrs01]"><i class="material-icons" style="float:left">verified_user</i><span>X-Wing 442</span></a>
+                    <a class="tooltipped green-text" data-position="right" data-delay="35" data-tooltip="Host: [tovalrs02]"><i class="material-icons" style="float:left">verified_user</i><span>X-Wing 089</span></a>
+                    <a class="tooltipped green-text" data-position="right" data-delay="35" data-tooltip="Host: [tovalrs03]"><i class="material-icons" style="float:left">verified_user</i><span>X-Wing 041</span></a>-->
+                    <a class="tooltipped green-text" data-position="right" data-delay="35" data-tooltip="Host: {{status.host}}" ng-repeat="status in statuses" id="text-{{status.xwingId}}">
+                        <i class="material-icons" style="float:left">verified_user</i><span>X-Wing {{status.xwingId}}</span>
+                    </a>
+                    <!--<a><i class="material-icons" style="float:left">settings_remote</i><span>Connection: {{connection.open}}</span></a>-->
+                </div>
+            </nav>
+            <button class="close-button" id="close-button">Close Menu</button>
+        </div>
+
+        <div class="row">
+            <div class="col s1"><button class="menu-button" id="open-button">Open Menu</button></div>
+            <div class="col s4 offset-s4 center-align"><h3 class="grey-text text-darken-1">Enforcer One</h3></div>
         </div>
     </div>
-    <div ng-view=""></div>
-    <div class="modal"></div>
-</body>
+
+
+        <!--<div class="row">
+            <p></p>
+        </div>
+
+        <div class="container">
+            <div class="row">
+
+                <button class="menu-button" id="open-button">Open Menu</button>
+                <nav class="white">
+                    <div class="hoverable nav-wrapper">
+                        <a href="#!" class="brand-logo center grey-text text-darken-1">Enforcer One</a>
+
+                        <!--<ul id="nav-mobile" class="right hide-on-med-and-down">
+                            <li><a href="#!" class="grey-text" style="font-weight:600;">Option 1</a></li>
+                            <li><a href="#!" class="grey-text" style="font-weight:600;">Option 2</a></li>
+                        </ul>-->
+                    <!--</div>
+                </nav>
+
+            </div>
+
+        </div>-->
+
+        <div class="content-wrap">
+            <div ng-view=""></div>
+        </div>
+
+
+        <!--<div class="modal"></div>-->
+        <script src="assets/js/classie.js"></script>
+        <script src="assets/js/main.js"></script>
+    </body>
+
 </html>

@@ -15,20 +15,20 @@ import java.time.Instant;
 @XmlRootElement
 public class Status {
 
-    public int processId;
+    public int xwingId;
     public String host;
     public String timeStamp;
 
     public Status() {} // JAX-RS requirement
 
-    public Status(int processId, String host, String timeStamp) {
-        this.processId = processId;
+    public Status(int xWingId, String host, String timeStamp) {
+        this.xwingId = xWingId;
         this.host = host;
         this.timeStamp = timeStamp;
     }
 
-    public int getProcessId() {
-        return processId;
+    public int getXWingId() {
+        return xwingId;
     }
 
     public String getHost() {
@@ -50,7 +50,7 @@ public class Status {
 
         Status status = (Status) o;
 
-        if (processId != status.processId) return false;
+        if (xwingId != status.xwingId) return false;
         if (!host.equals(status.host)) return false;
 
         return true;
@@ -58,7 +58,7 @@ public class Status {
 
     @Override
     public int hashCode() {
-        int result = processId;
+        int result = xwingId;
         result = 31 * result + host.hashCode();
         return result;
     }
@@ -66,7 +66,7 @@ public class Status {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Status{");
-        sb.append("processId=").append(processId);
+        sb.append("xwingId=").append(xwingId);
         sb.append(", host='").append(host).append('\'');
         sb.append(", timeStamp='").append(timeStamp).append('\'');
         sb.append('}');

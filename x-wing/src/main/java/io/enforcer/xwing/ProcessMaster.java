@@ -104,6 +104,7 @@ public class ProcessMaster implements ProcessMasterMBean {
         if(connectToDeathStar)
             deathStar = connectToDeathStar();
 
+
         ignoredProcesses = initIgnoredProcesses();
 
         if(getInitialProcessSnapshot)
@@ -123,14 +124,6 @@ public class ProcessMaster implements ProcessMasterMBean {
     }
 
     /**
-     * Allows clients of this class to determine when to start the
-     * process monitor. This is useful for unit testing.
-     */
-    public void startProcessMonitoring() {
-        startScheduler();
-    }
-
-    /**
      * Retrieves death star connection details from configuration and
      * returns an instance of the DeathStarClient
      *
@@ -141,6 +134,7 @@ public class ProcessMaster implements ProcessMasterMBean {
         String deathStarPort = config.getProperty("deathStarPort");
         Integer deathStarPortInt = null;
 
+        //todo: send error messages to client
         if(deathStarHost == null) {
             logger.log(Level.SEVERE, "Could not find deathStarHost in the configuration");
             return null;
@@ -154,6 +148,15 @@ public class ProcessMaster implements ProcessMasterMBean {
             return new DeathStarClient(deathStarHost, deathStarPortInt);
         }
     }
+
+    /**
+     * Allows clients of this class to determine when to start the
+     * process monitor. This is useful for unit testing.
+     */
+    public void startProcessMonitoring() {
+        startScheduler();
+    }
+
 
     /**
      * Allows a client to reset the starting state and provide
@@ -231,6 +234,7 @@ public class ProcessMaster implements ProcessMasterMBean {
             sb.append(process.toString());
             sb.append("\n");
         }
+
         return sb.toString();
     }
 
@@ -464,6 +468,8 @@ public class ProcessMaster implements ProcessMasterMBean {
                     "localhost",
                     "2015-07-31T00:00:00Z");
         }
+
+
 
     }
 }
