@@ -5,7 +5,12 @@ import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.pojos.Status;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,12 +18,12 @@ import java.util.logging.Logger;
 /**
  * Created by herret2 on 8/13/2015.
  */
-public class StatusMaster implements Runnable {
+public class StatusMaster {
 
     /**
      * Logger to be used in class
      */
-    private static final Logger logger = Logger.getLogger(ProcessMaster.class.getName());
+    private static final Logger logger = Logger.getLogger(StatusMaster.class.getName());
 
     /**
      * Configuration properties
@@ -29,70 +34,45 @@ public class StatusMaster implements Runnable {
     private int heartbeat;
     private int xwingid;
     private String xwinghost;
-    private volatile boolean alive;
 
+    /**
+     * The periodic status publishing task is run by this scheduler
+     */
+    private ScheduledExecutorService scheduler;
+
+    /**
+     *
+     * @param heartBeatTime
+     * @param xWingId
+     * @param host
+     * @param deathStarClient
+     */
     public StatusMaster (int heartBeatTime, int xWingId, String host, DeathStarClient deathStarClient) {
-
         heartbeat = heartBeatTime;
         deathstar = deathStarClient;
         xwingid = xWingId;
         xwinghost = host;
-        alive = false;
-
+        scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
-    /*
+    /**
      * Allow the X-Wing to publicly start the Status sending thread
      */
     public void startStatusSending() {
-
-        new Thread(){
-            public void run(){
-                while (alive) {
-
-                    try {
-                        sendStatus();
-                        Thread.sleep(heartbeat);
-                    } catch (Exception e)
-                    {
-                        logger.log(Level.SEVERE, "StatusMaster Thread error: " + e.getMessage());
-                    }
-                }
-            }
-        }.start();
-
+        scheduler.scheduleAtFixedRate(new StatusPublisherThread(), 5, 5, TimeUnit.SECONDS);
     }
 
-    public void run() {
-
-    }
-
-    /*
-     * Stop the sending of statuses
+    /**
+     * Thread responsible for sending heartbeat/status to death star
      */
-    public void stopStatusSending() {
-        alive = false;
+    private class StatusPublisherThread implements Runnable {
+        @Override
+        public void run() {
+            Instant now = Instant.now();
+            Status status = new Status(xwingid, xwinghost, now.toString());
+            logger.log(Level.INFO, "Sending status: {0}", status);
+            deathstar.sendStatus(status);
+        }
     }
 
-
-    /*
-     * Sends a status via the deathstar client
-     */
-    private void sendStatus () {
-
-        Status status = buildStatus();
-        deathstar.sendStatus(status);
-    }
-
-    /*
-     * Builds a status with proper timestamp
-     */
-    private Status buildStatus() {
-        long ms = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date resultdate = new Date(ms);
-        String date = sdf.format(resultdate);
-
-        return new Status(xwingid, xwinghost, date);
-    }
 }

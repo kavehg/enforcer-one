@@ -1,10 +1,8 @@
 package io.enforcer.deathstar.services;
 
-import io.enforcer.deathstar.DeathStar;
 import io.enforcer.deathstar.pojos.Action;
 import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.ws.WebSocketBroadcastThread;
-import io.enforcer.deathstar.ws.WebSocketServer;
 
 import java.util.Set;
 import java.util.concurrent.*;
