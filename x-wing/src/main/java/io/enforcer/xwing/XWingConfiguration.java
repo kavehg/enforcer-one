@@ -2,6 +2,9 @@ package io.enforcer.xwing;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +49,17 @@ public class XWingConfiguration {
         // Add system properties
         Properties systemProperties = System.getProperties();
         this.properties.putAll(systemProperties);
+
+        // Add process specific properties
+        try {
+            String hostName = InetAddress.getLocalHost().getHostName();
+            this.properties.put("hostname", hostName);
+
+            String name = ManagementFactory.getRuntimeMXBean().getName();
+            this.properties.put("processId", parseProcessId(name).toString());
+        } catch (UnknownHostException e) {
+            logger.log(Level.WARNING, "Could not determine hostname", e);
+        }
     }
 
     /**
@@ -73,6 +87,24 @@ public class XWingConfiguration {
         } catch (IOException e) {
             logger.log(Level.SEVERE, "could not load properties from input stream", e);
         }
+    }
+
+    /**
+     * Somewhat fragile way of determining the id of the current process
+     * across Linux, Windows, and Mac
+     *
+     * @param name output of ManagementFactory.getRuntimeMXBean().getName()
+     * @return process id
+     */
+    private Integer parseProcessId(String name) {
+        String substring = name.substring(0, name.indexOf('@'));
+        int processId = -1;
+        try {
+            processId = Integer.parseInt(substring);
+        } catch (NumberFormatException e) {
+            logger.log(Level.SEVERE, "Cannot determine process id from ManagementFactory output: {0}", name);
+        }
+        return processId;
     }
 
     /**

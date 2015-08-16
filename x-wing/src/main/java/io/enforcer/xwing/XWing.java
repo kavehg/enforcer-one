@@ -15,7 +15,7 @@ public class XWing {
     private static final Logger logger = Logger.getLogger(XWing.class.getName());
     private static final ConsoleHandler consoleHandler = new ConsoleHandler();
     private static final XWingConfiguration config = new XWingConfiguration(null);
-    private static final int HEART_BEAT_TIME = 1000;
+    private static final int HEART_BEAT_TIME = 5;
 
     private DeathStarClient deathstar;
 
@@ -43,7 +43,7 @@ public class XWing {
 
     public XWing() {
 
-        // setup deathstarclient
+        // setup deathstar client
         deathstar = connectToDeathStar();
 
         if (deathstar != null) {
@@ -52,7 +52,7 @@ public class XWing {
             processMaster.startProcessMonitoring();
 
             //start the status master
-            statusMaster = new StatusMaster(HEART_BEAT_TIME, 100, "localhost", deathstar);
+            statusMaster = new StatusMaster(HEART_BEAT_TIME, deathstar);
             statusMaster.startStatusSending();
         }
     }

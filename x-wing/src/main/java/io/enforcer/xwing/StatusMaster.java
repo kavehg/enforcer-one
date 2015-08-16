@@ -30,9 +30,24 @@ public class StatusMaster {
      */
     private XWingConfiguration config;
 
+    /**
+     * Connection to death star
+     */
     private DeathStarClient deathstar;
+
+    /**
+     * Period of time in seconds between heartbeats
+     */
     private int heartbeat;
+
+    /**
+     * The process id of the x-wing, retrieved from config
+     */
     private int xwingid;
+
+    /**
+     * The hostname of this x-wing, retrieved from config
+     */
     private String xwinghost;
 
     /**
@@ -41,17 +56,15 @@ public class StatusMaster {
     private ScheduledExecutorService scheduler;
 
     /**
-     *
-     * @param heartBeatTime
-     * @param xWingId
-     * @param host
-     * @param deathStarClient
+     * @param heartBeatTime     Period of time in seconds between heartbeats
+     * @param deathStarClient   Connection to death star
      */
-    public StatusMaster (int heartBeatTime, int xWingId, String host, DeathStarClient deathStarClient) {
+    public StatusMaster (int heartBeatTime, DeathStarClient deathStarClient) {
         heartbeat = heartBeatTime;
         deathstar = deathStarClient;
-        xwingid = xWingId;
-        xwinghost = host;
+        config = XWing.getConfig();
+        xwingid = Integer.parseInt(config.getProperty("processId"));
+        xwinghost = config.getProperty("hostname");
         scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
@@ -59,7 +72,7 @@ public class StatusMaster {
      * Allow the X-Wing to publicly start the Status sending thread
      */
     public void startStatusSending() {
-        scheduler.scheduleAtFixedRate(new StatusPublisherThread(), 5, 5, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(new StatusPublisherThread(), 5, heartbeat, TimeUnit.SECONDS);
     }
 
     /**
