@@ -83,7 +83,7 @@ public class StatusMaster {
         public void run() {
             Instant now = Instant.now();
             Status status = new Status(xwingid, xwinghost, now.toString());
-            logger.log(Level.INFO, "Sending status: {0}", status);
+            logger.log(Level.FINE, "Sending status: {0}", status);
             deathstar.sendStatus(status);
         }
     }

@@ -40,7 +40,7 @@ public class ReportResourceTest {
     /**
      * Test to see that the message "Got it!" is sent in the response.
      */
-    @Test
+//    @Test
     public void testGetIt() {
         String responseMsg = target.path("status").request().get(String.class);
         assertEquals("{\"processId\":123,\"host\":\"host123\",\"timeStamp\":\"2012-02-12T23:45:32Z\"}", responseMsg);

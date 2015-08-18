@@ -56,7 +56,7 @@ public class DeathStarClient {
         /*Status postResult = statusAPI.request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(status, MediaType.APPLICATION_JSON_TYPE), Status.class);*/
         statusAPI.request(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(status, MediaType.APPLICATION_JSON_TYPE), Report.class);
+                .post(Entity.entity(status, MediaType.APPLICATION_JSON_TYPE), Status.class);
     }
 
     public void sendReport(Report report) {

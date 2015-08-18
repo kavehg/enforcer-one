@@ -130,9 +130,9 @@ public class StatusService {
      * @param status incoming status update from
      */
     public void addStatusUpdate(Status status) {
-        logger.log(Level.INFO, "storing incoming status update {0}", status);
+        logger.log(Level.FINE, "storing incoming status update {0}", status);
         Status oldStatus = statusStore.put(status.getHost(), status);
-        logger.log(Level.INFO, "status stored: {0}, old status: {1}", new Object[]{status, oldStatus});
+        logger.log(Level.FINE, "status stored: {0}, old status: {1}", new Object[]{status, oldStatus});
         statusBroadcastQueue.add(status);
     }
 
