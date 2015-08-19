@@ -1,0 +1,56 @@
+<!-- App Settings Modal -->
+<div class="modal-content">
+    <h4 class="grey-text text-darken-1">Application Settings</h4>
+    <div class="row"></div>
+    <h5 class="grey-text text-darken-1" style="margin-left:4.165%;">Time Settings</h5>
+    <div class="row">
+        <div class="col s4 offset-s1">
+            <p class="range-field" ng-focus="blah()">
+                <label for="missing-time">Time for Missing Hosts (in seconds)</label>
+                <input type="range" id="missing-time" min="{{missingTime.floor}}" max="{{missingTime.ceil}}" ng-model="missingTime.temp"/>
+            </p>
+        </div>
+        <div class="col s4 offset-s1">
+            <p class="range-field">
+                <label for="statusScan-time">Time for Status Scan (in seconds)</label>
+                <input type="range" id="statusScan-time" min="{{statusScanTime.floor}}" max="{{statusScanTime.ceil}}" ng-model="statusScanTime.temp"/>
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s4 offset-s1">
+            <p class="range-field">
+                <label for="dead-time">Time for Dead Hosts (in minutes)</label>
+                <input type="range" id="dead-time" min="{{deathTime.floor}}" max="{{deathTime.ceil}}" ng-model="deathTime.temp"/>
+            </p>
+        </div>
+        <div class="col s4 offset-s1">
+            <p class="range-field">
+                <label for="escalation-time">Time for Escalation (in minutes)</label>
+                <input type="range" id="escalation-time" min="{{escalationTime.floor}}" max="{{escalationTime.ceil}}" ng-model="escalationTime.temp"/>
+            </p>
+        </div>
+    </div>
+
+    <h5 class="grey-text text-darken-1" style="margin-left:4.165%;">Other Settings</h5>
+    <div class="row">
+        <div class="col s4 offset-s1">
+
+            <label for="auto-escalation">Auto-Escalation</label>
+            <div class="switch" id="auto-escalation">
+                <label>
+                    Off
+                    <input ng-model="autoEscalation.temp" type="checkbox" i>
+                    <span class="lever"></span>
+                    On
+                </label>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal-footer">
+    <a ng-click="restoreSettings()" class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+    <a ng-click="saveSettings()" class="modal-action modal-close waves-effect waves-green btn-flat">Save</a>
+</div>

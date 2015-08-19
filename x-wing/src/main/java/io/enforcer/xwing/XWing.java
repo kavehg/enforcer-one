@@ -37,7 +37,6 @@ public class XWing {
 
         // start
         XWing xWing = new XWing();
-        //(new Thread(xWing)).start();
         xWing.run();
     }
 

@@ -11,13 +11,13 @@ angular.module('Enforcer.Common')
 
         var statuses = [];
 
-        // Creates a promise and
+        // Creates a promise and resolves it with available data, otherwise reject the promise.
         function getReport() {
 
             var deferred = $q.defer();
 
             if(reports.length > 0) {
-                deferred.resolve(reports.shift());
+                deferred.resolve(reports.shift()); // Treats reports[] like a FIFO queue
             }
             else {
                 deferred.reject("No reports!");
@@ -26,12 +26,13 @@ angular.module('Enforcer.Common')
             return deferred.promise;
         }
 
+        // Creates a promise and resolves it with available data, otherwise reject the promise.
         function getStatus() {
 
             var deferred = $q.defer();
 
             if(statuses.length > 0) {
-                deferred.resolve(statuses.shift());
+                deferred.resolve(statuses.shift()); // Treats statuses[] like a FIFO queue
             }
             else {
                 deferred.reject("No statuses!");
@@ -47,12 +48,23 @@ angular.module('Enforcer.Common')
             $rootScope.$broadcast('connectionOpen');
         };
 
-        // When websocket receives a message
+        ws.onerror = function() {
+            console.log("Error with socket");
+            $rootScope.$broadcast('connectionError');
+        };
+
+        ws.onclose = function() {
+            console.log("Socket has been closed");
+            $rootScope.$broadcast('connectionClosed');
+        };
+
+        // When WebSocket receives a message
         ws.onmessage = function(message) {
             console.log("Received message: " + JSON.stringify(message.data));
 
             var theMsg = JSON.parse(message.data);
 
+            // Depending on type of message received, broadcast on rootScope to alert controllers
             if(isStatus(theMsg)){
                 statuses.push(theMsg);
                 $rootScope.$broadcast('statusReceived');
@@ -61,7 +73,6 @@ angular.module('Enforcer.Common')
                 reports.push(theMsg);
                 $rootScope.$broadcast('reportReceived');
             }
-
 
         };
 
@@ -73,6 +84,7 @@ angular.module('Enforcer.Common')
             return false;
         }
 
+        // Calls to functions inside this service from external controllers
         return {
 
             getReport: getReport,

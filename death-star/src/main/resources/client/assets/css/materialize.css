@@ -6646,10 +6646,10 @@ form p:last-child {
   height: 0; }
 
 .switch label input[type=checkbox]:checked + .lever {
-  background-color: #84c7c1; }
+  background-color: #64b5f6; }
 
 .switch label input[type=checkbox]:checked + .lever:after {
-  background-color: #26a69a; }
+  background-color: #673ab7; }
 
 .switch label .lever {
   content: "";
@@ -6808,7 +6808,7 @@ input[type=range] + .thumb {
   height: 0;
   width: 0;
   border-radius: 50%;
-  background-color: #26a69a;
+  background-color: #64b5f6;
   top: 10px;
   margin-left: -6px;
   -webkit-transform-origin: 50% 50%;
@@ -6820,25 +6820,30 @@ input[type=range] + .thumb {
   -moz-transform: rotate(-45deg);
   -ms-transform: rotate(-45deg);
   -o-transform: rotate(-45deg);
-  transform: rotate(-45deg); }
+  transform: rotate(-45deg);
+  border-radius: 50% 50% 50% 0;}
   input[type=range] + .thumb .value {
     display: block;
     width: 30px;
     text-align: center;
-    color: #26a69a;
+    color: #673ab7;
     font-size: 0;
     -webkit-transform: rotate(45deg);
     -moz-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     -o-transform: rotate(45deg);
-    transform: rotate(45deg); }
+    transform: rotate(45deg);
+    color: #fff;
+    margin-left: -1px;
+    margin-top: 8px;
+    font-size: 10px;}
   input[type=range] + .thumb.active {
     border-radius: 50% 50% 50% 0; }
     input[type=range] + .thumb.active .value {
       color: #fff;
       margin-left: -1px;
-      margin-top: 8px;
-      font-size: 10px; }
+      margin-top: 5px;
+      font-size: 12px; }
 
 input[type=range]:focus {
   outline: none; }
@@ -6857,7 +6862,7 @@ input[type=range]::-webkit-slider-thumb {
   height: 14px;
   width: 14px;
   border-radius: 50%;
-  background-color: #26a69a;
+  background-color: #673ab7;
   transform-origin: 50% 50%;
   margin: -5px 0 0 0;
   -webkit-transition: 0.3s;
@@ -6884,7 +6889,7 @@ input[type=range]::-moz-range-thumb {
   height: 14px;
   width: 14px;
   border-radius: 50%;
-  background: #26a69a;
+  background: #673ab7;
   margin-top: -5px; }
 
 /*hide the outline behind the border*/
@@ -6916,7 +6921,7 @@ input[type=range]::-ms-thumb {
   height: 14px;
   width: 14px;
   border-radius: 50%;
-  background: #26a69a; }
+  background: #673ab7; }
 
 input[type=range]:focus::-ms-fill-lower {
   background: #888; }
@@ -8147,8 +8152,6 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
    Custom Enforcer One Styling
    ========================================================================== */
 
-.menu-text
-
 .drag-enter {
   border: solid 2px white;
   margin-top: -2px;
@@ -8162,6 +8165,22 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
   height: 5px;
   width: 100%;
   margin-bottom: 10px;
+}
+
+.New {
+  background-color: #2196f3;
+}
+
+.Acknowledged {
+  background-color: #4caf50;
+}
+
+.Escalated {
+  background-color: #F44336;
+}
+
+.History {
+  background-color: #9e9e9e;
 }
 
 .list {

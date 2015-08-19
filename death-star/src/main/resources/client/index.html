@@ -8,12 +8,9 @@
         <link rel="stylesheet" href="assets/css/normalize.css">
 
         <!-- Materialize -->
-        <link type="text/css" rel="stylesheet" href="assets/css/materialize.css"  media="screen,projection"/>
-
+        <link rel="stylesheet" href="assets/css/materialize.css"  media="screen,projection"/>
         <link rel="stylesheet" href="assets/css/animations.css">
         <link rel="stylesheet" href="assets/css/menu_sideslide.css">
-
-
 
         <!-- Google Open Sans font -->
         <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,600,600italic,700,700italic,800,800italic,300italic,300' rel='stylesheet' type='text/css'>
@@ -22,17 +19,27 @@
         <!-- JQuery/Materialize -->
         <script src="vendor/jquery.js"></script>
         <script src="vendor/jquery-ui.js"></script>
-        <script src="vendor/materialize.min.js"></script>
+        <script src="vendor/materialize.js"></script>
 
         <!-- Angular JS -->
         <script src="vendor/angular.js"></script>
         <script src="vendor/angular-route.js"></script>
+        <script src="vendor/angular-ui-router.js"></script>
         <script src="vendor/ngDraggable.js"></script>
+        <!-- Enforcer One -->
         <script src="src/enforcer/Enforcer.js"></script>
         <script src="src/enforcer/app/App.js"></script>
         <script src="src/enforcer/app/controllers/MainController.js"></script>
         <script src="src/enforcer/dashboard/Dashboard.js"></script>
-        <script src="src/enforcer/dashboard/controllers/DashboardController.js"></script>
+        <!-- Controllers -->
+        <script src="src/enforcer/dashboard/controllers/AuditCtrl.js"></script>
+        <script src="src/enforcer/dashboard/controllers/DashboardCtrl.js"></script>
+        <script src="src/enforcer/dashboard/controllers/StatusCtrl.js"></script>
+        <script src="src/enforcer/dashboard/controllers/SettingsCtrl.js"></script>
+        <!-- Services -->
+        <script src="src/enforcer/dashboard/services/AuditService.js"></script>
+        <script src="src/enforcer/dashboard/services/ReportService.js"></script>
+        <script src="src/enforcer/dashboard/services/SettingsService.js"></script>
         <script src="src/enforcer/app/services/WebSocketService.js"></script>
 
     </head>
@@ -40,18 +47,15 @@
     <body style="background: url('assets/img/concrete_seamless.png'); background-repeat: repeat;" ng-controller="DashboardCtrl">
 
 
-    <div>
+    <!-- Sidebar -->
+    <div ng-controller="StatusCtrl">
         <div class="menu-wrap">
             <nav class="menu" style="box-shadow:none">
                 <div class="icon-list">
-                    <a><span style="margin-left:0px; font-size:1.05em">Deployed X-Wings</span></a>
-                    <!--<a class="tooltipped green-text" data-position="right" data-delay="35" data-tooltip="Host: [tovalrs01]"><i class="material-icons" style="float:left">verified_user</i><span>X-Wing 442</span></a>
-                    <a class="tooltipped green-text" data-position="right" data-delay="35" data-tooltip="Host: [tovalrs02]"><i class="material-icons" style="float:left">verified_user</i><span>X-Wing 089</span></a>
-                    <a class="tooltipped green-text" data-position="right" data-delay="35" data-tooltip="Host: [tovalrs03]"><i class="material-icons" style="float:left">verified_user</i><span>X-Wing 041</span></a>-->
-                    <a class="tooltipped green-text" data-position="right" data-delay="35" data-tooltip="Host: {{status.host}}" ng-repeat="status in statuses" id="text-{{status.xwingId}}">
-                        <i class="material-icons" style="float:left">verified_user</i><span>X-Wing {{status.xwingId}}</span>
+                    <a><span style="margin-left:0px; font-size:1.05em">Monitored Hosts</span></a>
+                    <a class="tooltipped green-text" ng-mouseover="calculateTimeDiff(status)" data-position="right" data-delay="25" data-tooltip="Last Heartbeat: {{timeDiff}}s" ng-repeat="status in statuses" id="text-{{status.xwingId}}">
+                        <i class="material-icons" style="float:left">verified_user</i><span>{{status.host}}</span>
                     </a>
-                    <!--<a><i class="material-icons" style="float:left">settings_remote</i><span>Connection: {{connection.open}}</span></a>-->
                 </div>
             </nav>
             <button class="close-button" id="close-button">Close Menu</button>
@@ -63,33 +67,143 @@
         </div>
     </div>
 
+    <!-- Main Dashboard Content -->
+    <div class="content-wrap">
+        <div ui-view></div>
 
-        <!--<div class="row">
-            <p></p>
+        <!-- Settings button -->
+        <div class="fixed-action-btn" style="bottom: 45px; right: 24px;" ng-controller="SettingsCtrl">
+            <a class="btn-floating btn-large red darken-1">
+                <i class="large material-icons">settings</i>
+            </a>
+            <ul>
+                <li><a href="#modal3" class="btn-floating blue modal-trigger tooltipped" data-delay="25" data-tooltip="User Profile" data-position="left"><i class="material-icons">perm_identity</i></i></a></li>
+                <li><a href="#modal2" class="btn-floating pink modal-trigger tooltipped" data-delay="25" data-tooltip="Change Log" data-position="left"><i class="material-icons">view_list</i></a></li>
+                <li><a ng-click="openSettings()" class="btn-floating purple tooltipped" data-delay="25" data-tooltip="App Settings" data-position="left"><i class="material-icons">settings_applications</i></a></li>
+                <li><a id="connectionStatus" class="btn-floating red tooltipped" data-delay="25" data-tooltip="Connection: {{connection}}" data-position="left"><i class="material-icons">settings_ethernet</i></a></li>
+            </ul>
         </div>
+    </div>
 
-        <div class="container">
+    <!-- App Settings Modal -->
+    <div id="modal1" class="modal modal-fixed-footer" ng-controller="SettingsCtrl">
+
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-1">Application Settings</h4>
+            <div class="row"></div>
+            <h5 class="grey-text text-darken-1" style="margin-left:4.165%;">Time Settings</h5>
             <div class="row">
-
-                <button class="menu-button" id="open-button">Open Menu</button>
-                <nav class="white">
-                    <div class="hoverable nav-wrapper">
-                        <a href="#!" class="brand-logo center grey-text text-darken-1">Enforcer One</a>
-
-                        <!--<ul id="nav-mobile" class="right hide-on-med-and-down">
-                            <li><a href="#!" class="grey-text" style="font-weight:600;">Option 1</a></li>
-                            <li><a href="#!" class="grey-text" style="font-weight:600;">Option 2</a></li>
-                        </ul>-->
-                    <!--</div>
-                </nav>
-
+                <div class="col s4 offset-s1">
+                    <p class="range-field" ng-focus="blah()">
+                        <label for="missing-time">Time for Missing Hosts (in seconds)</label>
+                        <input type="range" id="missing-time" min="{{missingTime.floor}}" max="{{missingTime.ceil}}" ng-model="missingTime.temp"/>
+                    </p>
+                </div>
+                <div class="col s4 offset-s1">
+                    <p class="range-field">
+                        <label for="statusScan-time">Time for Status Scan (in seconds)</label>
+                        <input type="range" id="statusScan-time" min="{{statusScanTime.floor}}" max="{{statusScanTime.ceil}}" ng-model="statusScanTime.temp"/>
+                    </p>
+                </div>
             </div>
 
-        </div>-->
+            <div class="row">
+                <div class="col s4 offset-s1">
+                    <p class="range-field">
+                        <label for="dead-time">Time for Dead Hosts (in minutes)</label>
+                        <input type="range" id="dead-time" min="{{deathTime.floor}}" max="{{deathTime.ceil}}" ng-model="deathTime.temp"/>
+                    </p>
+                </div>
+                <div class="col s4 offset-s1">
+                    <p class="range-field">
+                        <label for="escalation-time">Time for Escalation (in minutes)</label>
+                        <input type="range" id="escalation-time" min="{{escalationTime.floor}}" max="{{escalationTime.ceil}}" ng-model="escalationTime.temp"/>
+                    </p>
+                </div>
+            </div>
 
-        <div class="content-wrap">
-            <div ng-view=""></div>
+            <h5 class="grey-text text-darken-1" style="margin-left:4.165%;">Other Settings</h5>
+            <div class="row">
+                <div class="col s4 offset-s1">
+                    <label for="auto-escalation">Auto-Escalation</label>
+                    <div class="switch" id="auto-escalation">
+                        <label>
+                            Off
+                            <input ng-model="autoEscalation.temp" type="checkbox" i>
+                            <span class="lever"></span>
+                            On
+                        </label>
+                    </div>
+                </div>
+                <div class="col s4 offset-s1">
+                    <label for="notification-toasts">Notification Toasts</label>
+                    <div class="switch" id="notification-toasts">
+                        <label>
+                            Off
+                            <input ng-model="notificationToasts.temp" type="checkbox" i>
+                            <span class="lever"></span>
+                            On
+                        </label>
+                    </div>
+                </div>
+            </div>
+
         </div>
+        <div class="modal-footer">
+            <a ng-click="restoreSettings()" class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+            <a ng-click="saveSettings()" class="modal-action modal-close waves-effect waves-green btn-flat">Save</a>
+        </div>
+    </div>
+
+    <!-- Audit Trail Modal -->
+    <div id="modal2" class="modal bottom-sheet" ng-controller="AuditCtrl">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-1">Change Log</h4>
+            <ul>
+                <li ng-repeat="audit in auditTrail">
+                    <div class="row">
+                        <div class="col s2 offset-s1" style="margin-top:2.1%"><h6 ng-bind="audit.movedTime | date:'EEE d MMM y - h:mm:ss a'">{{audit.movedTime | date:'EEE d MMM y - h:mm:ss a'}}</h6></div>
+                        <div class="col s1"><i class="large material-icons">account_circle</i><p style="float:bottom">{{audit.user}}</p></div>
+                        <div class="col s2">
+                            <div class="card white hoverable" style="transform: scale(0.75); margin-top:-5%">
+                                <div class="card-content black-text">
+                                    <span class="card-title black-text"><strong>{{audit.processId}} | [{{audit.host}}]</strong></span>
+                                    <div class="type-bar {{audit.oldStatus}}"></div>
+                                    <p>{{audit.mainClass}}</p>
+                                    <p>{{audit.processStateChange}}</p>
+                                    <p class="right-align">{{audit.timeStamp}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col s1" style="margin-top:2.5%"><a class="waves-effect waves-light btn purple">Moved-></a></div>
+                        <div class="col s2">
+                            <div class="card white hoverable" style="transform: scale(0.75); margin-top:-5%">
+                                <div class="card-content black-text">
+                                    <span class="card-title black-text"><strong>{{audit.processId}} | [{{audit.host}}]</strong></span>
+                                    <div class="type-bar {{audit.newStatus}}"></div>
+                                    <p>{{audit.mainClass}}</p>
+                                    <p>{{audit.processStateChange}}</p>
+                                    <p class="right-align">{{audit.timeStamp}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="modal3" class="modal modal-fixed-footer">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-1">User Profile</h4>
+            <p>A bunch of text</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat ">Cancel</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Ok</a>
+        </div>
+    </div>
 
 
         <!--<div class="modal"></div>-->

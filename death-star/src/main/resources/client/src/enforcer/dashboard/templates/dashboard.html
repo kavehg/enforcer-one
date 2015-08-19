@@ -2,8 +2,6 @@
 <div class="container">
     <div class="row">
 
-        <!--<a class="waves-effect waves-light btn" ng-click="punch()">punch</a>-->
-
         <!-- New Column -->
         <div ng-drop="true" ng-drop-success="onDropCompleteNew($data,$event)" class="col s3">
             <ul class="list" id="newList">
@@ -18,7 +16,7 @@
                             <div class="type-bar blue"></div>
                             <p>{{report.mainClass}}</p>
                             <p>{{report.processStateChange}}</p>
-                            <p class="right-align">{{report.timeStamp}}</p>
+                            <p class="right-align">{{report.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                         </div>
                     </div>
 
@@ -40,7 +38,7 @@
                             <div class="type-bar green"></div>
                             <p>{{report.mainClass}}</p>
                             <p>{{report.processStateChange}}</p>
-                            <p class="right-align">{{report.timeStamp}}</p>
+                            <p class="right-align">{{report.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                         </div>
                     </div>
 
@@ -62,7 +60,7 @@
                             <div class="type-bar red"></div>
                             <p>{{report.mainClass}}</p>
                             <p>{{report.processStateChange}}</p>
-                            <p class="right-align">{{report.timeStamp}}</p>
+                            <p class="right-align">{{report.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                         </div>
                     </div>
 
@@ -84,7 +82,7 @@
                             <div class="type-bar grey"></div>
                             <p>{{report.mainClass}}</p>
                             <p>{{report.processStateChange}}</p>
-                            <p class="right-align">{{report.timeStamp}}</p>
+                            <p class="right-align">{{report.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                         </div>
                     </div>
 
@@ -94,25 +92,5 @@
 
     </div>
 
-    <!--<div class="row">
-        <div class="col s4 offset-s8">
-            <ul class="collapsible hoverable" data-collapsible="accordion">
-                <li>
-                    <div class="green-text collapsible-header"><i class="material-icons">filter_drama</i>X-Wing 4132</div>
-                    <div class="collapsible-body"><ul><li>Host: [tovalrs02]</li><li>Last Heartbeat: 2 seconds ago</li></ul></div>
-                </li>
-                <li>
-                    <div class="green-text collapsible-header"><i class="material-icons">filter_drama</i>X-Wing 1992</div>
-                    <div class="collapsible-body"><ul><li>Host: [tovalrs03]</li><li>Last Heartbeat: 4 seconds ago</li></ul></div>
-                </li>
-
-                <li ng-repeat="status in statuses">
-                    <div class="green-text collapsible-header"><i class="material-icons">filter_drama</i>X-Wing {{status.xwingId}}</div>
-                    <div class="collapsible-body"><ul><li>Host: {{status.host}}</li><li>Timestamp: {{status.timeStamp}}</li></ul></div>
-                </li>
-
-            </ul>
-        </div>
-    </div>-->
 
 </div>

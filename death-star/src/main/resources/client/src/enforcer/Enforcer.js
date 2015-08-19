@@ -1,17 +1,28 @@
 var myModule = angular.module('Enforcer',[
-    'ngRoute',
+    'ui.router',
     'ngDraggable',
     'Enforcer.Common',
     'Enforcer.Dashboard'
 ]);
 
-myModule.config(function($routeProvider) {
-    $routeProvider
-        .when('/', {
-            templateUrl: 'src/enforcer/dashboard/tmpl/dashboard.html',
-            controller: '',
-            controllerAs: 'dashboard'
+myModule.config(function($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise('dashboard');
+
+    $stateProvider
+
+        // Home State and Nested Views
+        .state('dashboard', {
+            url: '/dashboard',
+            templateUrl: 'src/enforcer/dashboard/templates/dashboard.html'
         })
-        .otherwise({redirectTo: '/'});
+
+
+        // About page
+        .state('dashboard.settings', {
+            //url: '/settings',
+            //templateUrl: 'src/enforcer/dashboard/templates/settings.html'
+        });
+
+
 });
 

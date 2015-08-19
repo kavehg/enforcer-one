@@ -92,18 +92,18 @@ public class DeathStarClient {
         int i = 0;
 
         Status status1 = new Status(399, "localhost", Instant.now().toString());
-        Status status2 = new Status(401, "hostabed", Instant.now().toString());
+        Status status2 = new Status(401, "hostabcd", Instant.now().toString());
         ArrayList<Status> statuses = new ArrayList<Status>();
         statuses.add(status1);
         statuses.add(status2);
 
         // 10 iterations
-        while (i < 6){
+        while (i < 5){
 
             // every 2 iterations, create new status, aka new x-wing
             if ((i % 2) == 0)
             {
-                Status s = new Status((int)(Math.random() * 5000), "localhost", Instant.now().toString());
+                Status s = new Status((int)(Math.random() * 5000), "tovalrs0"+i, Instant.now().toString());
                 statuses.add(s);
             }
 
