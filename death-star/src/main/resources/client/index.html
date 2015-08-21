@@ -41,14 +41,18 @@
         <script src="src/enforcer/dashboard/services/ReportService.js"></script>
         <script src="src/enforcer/dashboard/services/SettingsService.js"></script>
         <script src="src/enforcer/app/services/WebSocketService.js"></script>
+        <!-- Directives -->
+        <script src="src/enforcer/dashboard/directives/Settings.js"></script>
+        <script src="src/enforcer/dashboard/templates/settings.html"></script>
 
     </head>
 
-    <body style="background: url('assets/img/concrete_seamless.png'); background-repeat: repeat;" ng-controller="DashboardCtrl">
+    <body style="background: url('assets/img/concrete_seamless.png'); background-repeat: repeat;">
 
 
     <!-- Sidebar -->
     <div ng-controller="StatusCtrl">
+        <!--<div ui-view="sidebar"></div>-->
         <div class="menu-wrap">
             <nav class="menu" style="box-shadow:none">
                 <div class="icon-list">
@@ -69,6 +73,7 @@
 
     <!-- Main Dashboard Content -->
     <div class="content-wrap">
+
         <div ui-view></div>
 
         <!-- Settings button -->
@@ -87,7 +92,6 @@
 
     <!-- App Settings Modal -->
     <div id="modal1" class="modal modal-fixed-footer" ng-controller="SettingsCtrl">
-
         <div class="modal-content">
             <h4 class="grey-text text-darken-1">Application Settings</h4>
             <div class="row"></div>
@@ -156,41 +160,8 @@
     </div>
 
     <!-- Audit Trail Modal -->
-    <div id="modal2" class="modal bottom-sheet" ng-controller="AuditCtrl">
-        <div class="modal-content">
-            <h4 class="grey-text text-darken-1">Change Log</h4>
-            <ul>
-                <li ng-repeat="audit in auditTrail">
-                    <div class="row">
-                        <div class="col s2 offset-s1" style="margin-top:2.1%"><h6 ng-bind="audit.movedTime | date:'EEE d MMM y - h:mm:ss a'">{{audit.movedTime | date:'EEE d MMM y - h:mm:ss a'}}</h6></div>
-                        <div class="col s1"><i class="large material-icons">account_circle</i><p style="float:bottom">{{audit.user}}</p></div>
-                        <div class="col s2">
-                            <div class="card white hoverable" style="transform: scale(0.75); margin-top:-5%">
-                                <div class="card-content black-text">
-                                    <span class="card-title black-text"><strong>{{audit.processId}} | [{{audit.host}}]</strong></span>
-                                    <div class="type-bar {{audit.oldStatus}}"></div>
-                                    <p>{{audit.mainClass}}</p>
-                                    <p>{{audit.processStateChange}}</p>
-                                    <p class="right-align">{{audit.timeStamp}}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col s1" style="margin-top:2.5%"><a class="waves-effect waves-light btn purple">Moved-></a></div>
-                        <div class="col s2">
-                            <div class="card white hoverable" style="transform: scale(0.75); margin-top:-5%">
-                                <div class="card-content black-text">
-                                    <span class="card-title black-text"><strong>{{audit.processId}} | [{{audit.host}}]</strong></span>
-                                    <div class="type-bar {{audit.newStatus}}"></div>
-                                    <p>{{audit.mainClass}}</p>
-                                    <p>{{audit.processStateChange}}</p>
-                                    <p class="right-align">{{audit.timeStamp}}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </div>
+    <div id="modal2" class="modal bottom-sheet">
+        <div ui-view="auditTrail"></div>
     </div>
 
     <!-- User Profile Modal -->

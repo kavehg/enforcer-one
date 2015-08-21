@@ -11,17 +11,30 @@ myModule.config(function($stateProvider, $urlRouterProvider) {
     $stateProvider
 
         // Home State and Nested Views
-        .state('dashboard', {
+        /*.state('dashboard', {
             url: '/dashboard',
             templateUrl: 'src/enforcer/dashboard/templates/dashboard.html'
+        })*/
+        .state('dashboard', {
+            url: '/dashboard',
+            views: {
+                '': {
+                    templateUrl: 'src/enforcer/dashboard/templates/dashboard.html'
+                },
+                'auditTrail@': {
+                    templateUrl: 'src/enforcer/dashboard/templates/auditTrail.html',
+                    controller: 'AuditCtrl',
+                    replace: true
+                },
+                'sidebar@': {
+                    templateUrl: 'src/enforcer/dashboard/templates/sidebar.html',
+                    controller: 'StatusCtrl',
+                    replace: true
+                }
+
+            }
+
         })
-
-
-        // About page
-        .state('dashboard.settings', {
-            //url: '/settings',
-            //templateUrl: 'src/enforcer/dashboard/templates/settings.html'
-        });
 
 
 });

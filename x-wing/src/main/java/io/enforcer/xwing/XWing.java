@@ -30,27 +30,27 @@ public class XWing {
             globalLogger.removeHandler(handler);
         }
 
-        // configure console logger & set levels
+        // Configure console logger & set levels
         consoleHandler.setLevel(Level.INFO);
         globalLogger.addHandler(consoleHandler);
         globalLogger.setLevel(Level.ALL);
 
-        // start
+        // Start
         XWing xWing = new XWing();
         xWing.run();
     }
 
     public XWing() {
 
-        // setup deathstar client
+        // Setup deathstar client
         deathstar = connectToDeathStar();
 
         if (deathstar != null) {
-            // start the process master and monitor
+            // Start the process master and monitor
             processMaster = new ProcessMaster();
             processMaster.startProcessMonitoring();
 
-            //start the status master
+            // Start the status master
             statusMaster = new StatusMaster(HEART_BEAT_TIME, deathstar);
             statusMaster.startStatusSending();
         }

@@ -145,6 +145,17 @@ angular.module('Enforcer.Dashboard')
 
             $('#modal1').openModal();
 
+            $('.lean-overlay').click(function() {
+                Materialize.toast('clicked', 2000);
+                // Restore the temp values to original values
+                $scope.missingTime.temp = $scope.missingTime.value;
+                $scope.statusScanTime.temp = $scope.statusScanTime.value;
+                $scope.deathTime.temp = $scope.deathTime.value;
+                $scope.escalationTime.temp = $scope.escalationTime.value;
+                $scope.autoEscalation.temp = $scope.autoEscalation.value;
+                $scope.notificationToasts.temp = $scope.notificationToasts.value;
+            });
+
         };
 
         // Saves the settings changes applied by user

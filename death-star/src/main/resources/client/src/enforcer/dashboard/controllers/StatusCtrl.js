@@ -74,7 +74,7 @@ angular.module('Enforcer.Dashboard')
                 function(returnedSettings) {
                     $scope.received = true;
                     $scope.settings = returnedSettings;
-                    log('StatusCtrl: Settings Updated');
+                    log('StatusCtrl: Settings Refreshed');
 
                 }, function() {
                     $scope.received = false

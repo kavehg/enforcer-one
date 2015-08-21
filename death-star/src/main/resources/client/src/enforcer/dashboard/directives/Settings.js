@@ -1,12 +1,8 @@
+
 angular.module('Enforcer.Dashboard')
-    .directive('settings', function() {
+    .directive('helloWorld', function() {
         return {
-            restrict: 'EA',
-            require: true,
-            scope: {
-                ngModel: '='
-            },
-            controller: '',
-            templateUrl: 'dashboard/templates/settings.html'
-        };
+            restrict: 'AE',
+            templateUrl: 'src/enforcer/dashboard/templates/settings.html'
+        }
     });
