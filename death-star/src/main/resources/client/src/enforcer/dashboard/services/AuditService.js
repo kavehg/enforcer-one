@@ -4,7 +4,7 @@
  *               - also broadcasts when an audit is received, in order to update the audit screen
  */
 angular.module('Enforcer.Dashboard')
-    .service('AuditService', ['$q', '$rootScope', function($q, $scope, $rootScope) {
+    .service('AuditService', ['$q', '$resource', '$log', '$rootScope', function($q, $resource, $log, $scope, $rootScope) {
 
         /* ========================================================================================
          * Audits
@@ -15,10 +15,32 @@ angular.module('Enforcer.Dashboard')
         var settingChanges = [];
 
         /* ========================================================================================
+         * API
+         * ===================================================================================== */
+
+        var auditAPI = $resource('http://localhost:8000/api/persistence/audit', null, {
+            get: { // retrieve a specific audit with an auditId
+                method: 'GET',
+                isArray: false,
+                url: 'http://localhost:8000/api/persistence/audit/:auditId'
+            },
+            getAll: { // retrieves all available Audits
+                method: 'GET',
+                isArray: true,
+                url: 'http://localhost:8000/api/persistence/audit'
+            },
+            post: { // for creating NEW Audits
+                method: 'POST',
+                isArray: false,
+                url: 'http://localhost:8000/api/persistence/audit/:auditId'
+            }
+        });
+
+        /* ========================================================================================
          * Functions
          * ===================================================================================== */
 
-        // Creates a promise and resolves it with available data, otherwise reject the promise.
+        // Retrieves all audits available in the database
         function getAuditTrail() {
 
             var deferred = $q.defer();
@@ -33,17 +55,20 @@ angular.module('Enforcer.Dashboard')
             return deferred.promise;
         }
 
-        // Receives an audit and adds it to list
+        // Posts audit object to database and stores it locally in audits[]
         function addAudit(audit) {
             var deferred = $q.defer();
 
-            if (true) {
-                audits.push(audit);
-                deferred.resolve('auditAdded');
-            }
-            else {
-                deferred.reject("Error adding audit.")
-            }
+            auditAPI.post({auditId: audit.processId}, audit).$promise.then(
+                function(data) {
+                    $log.info('Successfully posted audit: ' + data.processId);
+                    audits.push(data);
+                    deferred.resolve(data);
+                }, function(err) {
+                    $log.error('Failed to post audit: ' + err);
+                    deferred.reject(err);
+                }
+            );
 
             return deferred.promise;
         }

@@ -1,6 +1,7 @@
 var myModule = angular.module('Enforcer',[
     'ui.router',
     'ngDraggable',
+    'ngResource',
     'Enforcer.Common',
     'Enforcer.Dashboard'
 ]);
@@ -31,9 +32,7 @@ myModule.config(function($stateProvider, $urlRouterProvider) {
                     controller: 'StatusCtrl',
                     replace: true
                 }
-
             }
-
         })
 
 

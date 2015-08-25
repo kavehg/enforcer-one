@@ -1,8 +1,20 @@
 angular.module('Enforcer.Dashboard')
-    .controller('AuditCtrl', function($scope, $rootScope, $log, AuditService) {
+    .controller('AuditCtrl', function($scope, $rootScope, $log, AuditService, SettingsService) {
 
         // init function
         var init = function() {
+
+            $scope.settings = {
+                "connection" : "None",
+                "missingTime" : 20,
+                "statusScanTime" : 5,
+                "deathTime" : 2,
+                "escalationTime" : 5,
+                "autoEscalation" : true,
+                "notificationToasts" : true
+            };
+
+            refreshSettings();
 
             refreshAudits();
 
@@ -28,6 +40,23 @@ angular.module('Enforcer.Dashboard')
         /* ========================================================================================
          * Functions
          * ===================================================================================== */
+
+        // Calls the SettingsService and retrrieves the updated settings
+        function refreshSettings() {
+            // If promise received is resolved
+            SettingsService.getSettings().then(
+                function(returnedSettings) {
+
+                    $scope.received = true;
+                    $scope.settings = returnedSettings;
+                    log('AuditCtrl: Settings Refreshed');
+
+                }, function() {
+                    $scope.received = false;
+                    logError('AuditCtrl: Settings Refreshed FAILED');
+                }
+            );
+        }
 
         // Calls the AuditService and retrieves the updated auditTrail
         function refreshAudits() {

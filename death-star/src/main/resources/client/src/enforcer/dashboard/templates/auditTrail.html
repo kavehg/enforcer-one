@@ -4,7 +4,7 @@
         <li ng-repeat="audit in auditTrail">
             <div class="row">
                 <div class="col s2 offset-s1" style="margin-top:2.1%"><h6 ng-bind="audit.movedTime | date:'EEE d MMM y - h:mm:ss a'">{{audit.movedTime | date:'EEE d MMM y - h:mm:ss a'}}</h6></div>
-                <div class="col s1"><i class="large material-icons">account_circle</i><p style="float:bottom">{{audit.user}}</p></div>
+                <div class="col s1"><i class="large material-icons">account_circle</i><p style="float:bottom">{{audit.userId}}</p></div>
                 <div class="col s2">
                     <div class="card white hoverable" style="transform: scale(0.75); margin-top:-5%">
                         <div class="card-content black-text">

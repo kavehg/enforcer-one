@@ -1,5 +1,6 @@
 package io.enforcer.deathstar;
 
+import io.enforcer.deathstar.services.PersistenceService;
 import io.enforcer.deathstar.services.ReportService;
 import io.enforcer.deathstar.services.StatusService;
 import io.enforcer.deathstar.ws.WebSocketServer;
@@ -19,6 +20,20 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
+import static java.util.Arrays.asList;
+
+
+
+
 /**
  * DeathStar class
  */
@@ -30,9 +45,15 @@ public class DeathStar {
     // Base URI the Grizzly HTTP server will listen on
     public static final String API_BASE_URI = "http://localhost:8000/api/";
 
+    //MongoDB
+    //public static MongoClient mongoClient;
+    //public static MongoDatabase db;
+
     private static StatusService statusService;
 
     private static ReportService reportService;
+
+    private static PersistenceService persistenceService;
 
     private static WebSocketServer webSocketServer;
 
@@ -89,6 +110,14 @@ public class DeathStar {
         reportService = new ReportService();
         reportService.startBroadcastThread();
 
+        // persistence service
+        persistenceService = new PersistenceService();
+
+        // Connect to MongoDB
+        //mongoClient = new MongoClient("localhost", 27017);
+        //db = mongoClient.getDatabase("test");
+
+
         // wait todo: handle service stop & CTRL+C
         try {
             Thread.sleep(Long.MAX_VALUE);
@@ -114,6 +143,14 @@ public class DeathStar {
      */
     public static ReportService getReportService() {
         return reportService;
+    }
+
+    /**
+     * Obtain reference to persistence service
+     * @return report service instance
+     */
+    public static PersistenceService getPersistenceService() {
+        return persistenceService;
     }
 
     /**

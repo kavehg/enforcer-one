@@ -37,9 +37,9 @@ angular.module('Enforcer.Dashboard')
 
         init();
 
-        /* ========================================================================================
-         * Scope Variables
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Scope Variables
+         ** ===================================================================================== */
 
         $scope.new = [];
 
@@ -50,9 +50,9 @@ angular.module('Enforcer.Dashboard')
         $scope.history = [];
 
 
-        /* ========================================================================================
-         * Broadcast Listeners
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Broadcast Listeners
+         ** ===================================================================================== */
 
         // Listen for broadcast update when settings are changed
         $scope.$on('settingsChanged', function() {
@@ -65,9 +65,9 @@ angular.module('Enforcer.Dashboard')
         });
 
 
-        /* ========================================================================================
-         * Functions
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Functions
+         ** ===================================================================================== */
 
         // Calls the SettingsService and retrrieves the updated settings
         function refreshSettings() {
@@ -85,6 +85,7 @@ angular.module('Enforcer.Dashboard')
                 }
             );
         }
+
 
         // Sends a report to the ReportService
         function addReport (report) {
@@ -113,6 +114,8 @@ angular.module('Enforcer.Dashboard')
                         allocateReports(returnedReports);
                     };
 
+                    //addReport(returnedReports[0]);
+
                     log('DashboardCtrl: Reports Refreshed');
 
                 }, function() {
@@ -124,13 +127,13 @@ angular.module('Enforcer.Dashboard')
 
         function moveReport(report) {
             ReportService.moveReport(report).then(
-                function(returnedBroadcast) {
+                function(data) {
                     $rootScope.$broadcast('reportsChanged');
-                    log('DashboardCtrl: Moved Report');
+                    log('DashboardCtrl: Moved Report ' + data);
 
-                }, function() {
+                }, function(err) {
                     $scope.received = false;
-                    logError('DashboardCtrl: Move Report FAILED');
+                    logError('DashboardCtrl: Move Report FAILED ' + err);
                 }
             );
         }
@@ -227,16 +230,16 @@ angular.module('Enforcer.Dashboard')
                 "newStatus" : newStatus,
                 "timeStamp" : report.timeStamp,
                 "movedTime" : new Date(),
-                "user" : user
+                "userId" : user
             }
 
             return audit;
         }
 
 
-        /* ========================================================================================
-         * Drag and Drop Functions
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Drag and Drop Functions
+         ** ===================================================================================== */
 
         // When a card is dropped into New, remove it from any list it was in,
         // add it to $scope.new and increase the New column height

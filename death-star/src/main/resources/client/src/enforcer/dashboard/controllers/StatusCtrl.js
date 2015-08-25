@@ -24,9 +24,9 @@ angular.module('Enforcer.Dashboard')
 
         init();
 
-        /* ========================================================================================
-         * Scope Variables
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Scope Variables
+         ** ===================================================================================== */
 
         $scope.statuses = [];
 
@@ -34,9 +34,9 @@ angular.module('Enforcer.Dashboard')
 
         $scope.timeDiff = 0;
 
-        /* ========================================================================================
-         * Broadcast Listeners
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Broadcast Listeners
+         ** ===================================================================================== */
 
         // Listen for broadcast update from the websocketservice
         $scope.$on('statusReceived', function() {
@@ -48,9 +48,9 @@ angular.module('Enforcer.Dashboard')
             refreshSettings();
         });
 
-        /* ========================================================================================
-         * Functions
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Functions
+         ** ===================================================================================== */
 
         // Calls the WebSocketService and retrieves any new reports
         $scope.checkForStatus = function () {
@@ -221,12 +221,14 @@ angular.module('Enforcer.Dashboard')
         $scope.sendReport = function (report) {
 
             ReportService.addReport(report).then(
-                function(returnedBroadcast) {
+                function(data) {
                     $scope.received = true;
                     $rootScope.$broadcast('reportsChanged');
+                    log('StatusCtrl: Added Report');
 
-                }, function() {
+                }, function(err) {
                     $scope.received = false
+                    logError('StatusCtrl: Add Report FAILED');
                 }
             );
         };
