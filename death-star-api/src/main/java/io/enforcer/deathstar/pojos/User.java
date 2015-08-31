@@ -9,36 +9,45 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class User {
 
-    public Integer userId;
+    /** ========================================================================================
+     ** Variables
+     ** ===================================================================================== */
+
+    public String _id; // For use with MongoDB
     public String acf2Id;
     public String password;
-    public Integer accessLevel;
-    //public String logins;
-    //public String logoffs;
+    public String accessLevel; //Todo: Make Enum?
+    public String[] logins;
+    public String[] logoffs;
+
+    /** ========================================================================================
+     ** Constructors
+     ** ===================================================================================== */
 
     public User() {} // JAX-RS requirement
 
-    public User(Integer userId, String acf2Id, String password, Integer accessLevel) {
-        this.userId = userId;
+    public User(String acf2Id, String password, String accessLevel) {
+        this._id = null;
         this.acf2Id = acf2Id;
         this.password = password;
         this.accessLevel = accessLevel;
-        //this.logins = logins;
-        //this.logoffs = logoffs;
     }
 
-    /*@Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("User{");
-        sb.append("userId=").append(processId);
-        sb.append(", mainClass='").append(mainClass).append('\'');
-        sb.append(", processStateChange='").append(processStateChange).append('\'');
-        sb.append(", host='").append(host).append('\'');
-        sb.append(", timeStamp='").append(timeStamp).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }*/
+    // Takes additional _id argument for when Audit is created after database entry
+    public User(String id, String acf2Id, String password, String accessLevel) {
+        this._id = id;
+        this.acf2Id = acf2Id;
+        this.password = password;
+        this.accessLevel = accessLevel;
+    }
 
+    /** ========================================================================================
+     ** Accessors/Mutators
+     ** ===================================================================================== */
+
+    public String getId() { return _id; }
+
+    public void setID(String id) { _id = id; }
 }
 
 

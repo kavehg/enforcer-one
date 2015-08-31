@@ -1,7 +1,15 @@
+/**
+ * AuditController - controls the auditTrail.html template
+ *                 - actively updates and displays audits
+ *
+ */
 angular.module('Enforcer.Dashboard')
     .controller('AuditCtrl', function($scope, $rootScope, $log, AuditService, SettingsService) {
 
-        // init function
+        /** ========================================================================================
+         ** Init
+         ** ===================================================================================== */
+
         var init = function() {
 
             $scope.settings = {
@@ -22,24 +30,29 @@ angular.module('Enforcer.Dashboard')
 
         init();
 
-        /* ========================================================================================
-         * Scope Variables
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Scope Variables
+         ** ===================================================================================== */
 
         $scope.auditTrail = [];
 
-        /* ========================================================================================
-         * Broadcast Listeners
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Broadcast Listeners
+         ** ===================================================================================== */
+
+        // Listen for broadcast update when settings are changed
+        $scope.$on('settingsChanged', function() {
+            refreshSettings();
+        });
 
         // Listen for broadcast update from the websocketservice
         $scope.$on('auditTrailChanged', function() {
             refreshAudits();
         });
 
-        /* ========================================================================================
-         * Functions
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Functions
+         ** ===================================================================================== */
 
         // Calls the SettingsService and retrrieves the updated settings
         function refreshSettings() {

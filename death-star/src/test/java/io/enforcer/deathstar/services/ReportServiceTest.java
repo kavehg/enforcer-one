@@ -23,8 +23,8 @@ public class ReportServiceTest {
     @Before
     public void setUp() throws Exception {
         reportService = new ReportService();
-        report_1 = new Report(1, "main", "ADDED", "hostABC", "2015-07-22T21:00:00Z");
-        report_2 = new Report(2, "main", "ADDED", "hostDEF", "2015-08-22T21:00:00Z");
+        report_1 = new Report("1", "main", "ADDED", "hostABC", "2015-07-22T21:00:00Z", "New");
+        report_2 = new Report("2", "main", "ADDED", "hostDEF", "2015-08-22T21:00:00Z", "New");
     }
 
     @After

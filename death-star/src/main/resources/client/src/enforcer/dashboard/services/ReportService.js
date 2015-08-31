@@ -7,114 +7,69 @@ angular.module('Enforcer.Dashboard')
     .service('ReportService', ['$resource', '$q', '$log', '$rootScope', function($resource, $q, $log, $scope, $rootScope) {
 
         /** ========================================================================================
-         ** New Reports Queue
+         ** Reports
          ** ===================================================================================== */
 
-        var newReports = [];
-
         var reports = [
-            {
-                "processId" : 1875,
+            /*{
+                "processId" : "1875",
                 "host" : "tovalrs01",
                 "mainClass" : "Valuation Engine",
                 "processStateChange" : "STOPPED",
                 "status" : "New",
                 "timeStamp" : "2015/07/17 16:55:32"
-            },
-            {
-                "processId" : 2443,
-                "host" : "tovalrs02",
-                "mainClass" : "Pricing Engine",
-                "processStateChange" : "STOPPED",
-                "status" : "New",
-                "timeStamp" : "2015/07/17 16:55:32"
-            },
-            {
-                "processId" : 2901,
-                "host" : "tovalrs02",
-                "mainClass" : "Pricing Engine",
-                "processStateChange" : "STOPPED",
-                "status" : "New",
-                "timeStamp" : "2015/07/17 16:55:32"
-            },
-            {
-                "processId" : 4443,
-                "host" : "tovalrs05",
-                "mainClass" : "Reference Data Service",
-                "processStateChange" : "STOPPED",
-                "status" : "New",
-                "timeStamp" : "2015/07/17 16:55:32"
-            },
-        //acknowledged
-            {
-                "processId" : 1965,
-                "host" : "tovalrs03",
-                "mainClass" : "Trade Service",
-                "processStateChange" : "STARTED",
-                "status" : "Acknowledged",
-                "timeStamp" : "2015/07/17 16:55:32"
-            },
-            {
-                "processId" : 765,
-                "host" : "tovalrs02",
-                "mainClass" : "Pricing Engine",
-                "processStateChange" : "STOPPED",
-                "status" : "Acknowledged",
-                "timeStamp" : "2015/07/17 16:55:32"
-            },
-         //escalated
-            {
-                "processId" : 8765,
-                "host" : "tovalrs04",
-                "mainClass" : "Market Data Service",
-                "processStateChange" : "STOPPED",
-                "status" : "Escalated",
-                "timeStamp" : "2015/07/17 16:55:32"
-            },
-        //history
-            {
-                "processId" : 8745,
-                "host" : "tovalrs05",
-                "mainClass" : "Reference Data Service",
-                "processStateChange" : "STOPPED",
-                "status" : "History",
-                "timeStamp" : "2015/07/17 16:55:32"
-            }
+            }*/
         ];
 
         /** ========================================================================================
-         ** API
+         ** API Setup
          ** ===================================================================================== */
 
         var reportAPI = $resource('http://localhost:8000/api/persistence/reports', null, {
-            get: {
+            get: { // for retrieving a single report
                 method: 'GET',
                 isArray: false,
-                url: 'http://localhost:8000/api/persistence/report/:reportId'
+                url: 'http://localhost:8000/api/persistence/reports/:reportId'
             },
-            post: { // for creating NEW pricers (will validate it is actually new on server)
+            getAll: { // for retrieving all reportsS
+                method: 'GET',
+                isArray: true,
+                headers: {
+                    'Accept': 'application/json, text/javascript',
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                url: 'http://localhost:8000/api/persistence/reports'
+            },
+            post: { // for creating NEW reports
                 method: 'POST',
                 isArray: false,
-                url: 'http://localhost:8000/api/persistence/report/:reportId'
+                headers: {
+                    'Accept': 'application/json, text/javascript',
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                url: 'http://localhost:8000/api/persistence/reports/:reportId'
             },
-            put: { // for creating NEW pricers (will validate it is actually new on server)
+            put: { // for updating reports
                 method: 'PUT',
                 isArray: false,
-                url: 'http://localhost:8000/api/persistence/report/:reportId'
+                headers: {
+                    'Accept': 'application/json, text/javascript',
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                url: 'http://localhost:8000/api/persistence/reports/:reportId'
             }
         });
-
 
         /** ========================================================================================
          ** Functions
          ** ===================================================================================== */
 
         // Creates a promise and resolves it with available data, otherwise reject the promise.
-        function getReport() {
+        function getReport(reportId) {
 
             var deferred = $q.defer();
 
-            reportAPI.get({reportId: 1299}).$promise.then(
+            reportAPI.get({reportId: reportId}).$promise.then(
                 function(report) {
                     $log.info('Successfully retrieved report: ' + report.processId);
                     deferred.resolve(report);
@@ -132,52 +87,44 @@ angular.module('Enforcer.Dashboard')
 
             var deferred = $q.defer();
 
-            if(reports.length > 0) {
-                deferred.resolve(reports);
-            }
-            else {
-                deferred.reject("No reports!");
-            }
+            reportAPI.getAll().$promise.then(
+                function(reports) {
+                    $log.info('Successfully retrieved reports: ' + reports.length);
+                    deferred.resolve(reports);
+                }, function(err) {
+                    $log.error('Failed to retrieve report: ' + err);
+                    deferred.reject(err);
+                }
+            );
 
             return deferred.promise;
         }
 
         // Receives a report and saves it to database if new
         function addReport(report) {
+
             var deferred = $q.defer();
 
-            var newReport = {
-                    "processId": report.processId+110,
-                    "mainClass": report.mainClass,
-                    "processStateChange": report.processStateChange,
-                    "host": report.host + "abc",
-                    "timeStamp": report.timeStamp
-            };
-
-            if (reportCompare(newReport) == -1) {
-                reportAPI.post({reportId: newReport.processId}, newReport).$promise.then(
-                    function(data) {
-                        $log.info('ReportService: Successfully posted report: ' + data.processId);
-                        reports.push(data);
-                        deferred.resolve(data);
-                    }, function(err) {
-                        $log.error('Failed to post report: ' + err);
-                        deferred.reject(err);
-                    }
-                );
-            }
-            else {
-                deferred.reject("Error adding report.")
-            }
+            reportAPI.post({reportId: report.processId}, report).$promise.then(
+                function(data) {
+                    $log.info('ReportService: Successfully posted report: ' + data.processId);
+                    //reports.push(data);
+                    deferred.resolve(data);
+                }, function(err) {
+                    $log.error('Failed to post report: ' + err);
+                    deferred.reject(err);
+                }
+            );
 
             return deferred.promise;
         }
 
         // Receives a report, replaces old version in list with new report
         function moveReport(report) {
+
             var deferred = $q.defer();
 
-            if (reportCompare(report) > -1) {
+            /*if (reportCompare(report) > -1) {
                 if (swapReports(report)) {
                     deferred.resolve('reportsModified');
                 }
@@ -189,22 +136,22 @@ angular.module('Enforcer.Dashboard')
                 deferred.reject("Report doesn't exist to be moved")
             }
 
+            return deferred.promise;*/
+
+            //Todo: some comparisons of reports?
+
+            reportAPI.put({reportId: report._id}, report).$promise.then(
+                function(data) {
+                    $log.info('ReportService: Successfully moved report: ' + data.processId);
+                    //reports.push(data);
+                    deferred.resolve(data);
+                }, function(err) {
+                    $log.error('Failed to move report: ' + err);
+                    deferred.reject(err);
+                }
+            );
+
             return deferred.promise;
-        }
-
-        // Swaps a pre-existing report with an updated version
-        function swapReports(newReport) {
-
-            var index = reportCompare(newReport);
-
-            // Report exists, swap it
-            if(index > -1)
-                reports[index] = newReport;
-            else // Report doesn't exist, add it
-                reports.push(newReport);
-
-            return true;
-
         }
 
         // Compares reports based on processId and host
@@ -219,6 +166,10 @@ angular.module('Enforcer.Dashboard')
             }
             return -1;
         }
+
+        /** ========================================================================================
+         ** Return
+         ** ===================================================================================== */
 
         // Calls to functions inside this service from external controllers
         return {

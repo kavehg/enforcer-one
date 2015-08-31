@@ -1,7 +1,17 @@
+/**
+ * StatusController - primarily handles statuses
+ *                  - actively updates and displays statuses in the sidebar menu
+ *                  - constantly compares the time difference between incoming statuses and current time
+ *                  - automatically generates reports if statuses "die"
+ *
+ */
 angular.module('Enforcer.Dashboard')
     .controller('StatusCtrl', function($scope, $rootScope, $log, WebSocketService, ReportService, SettingsService) {
 
-        // init function
+        /** ========================================================================================
+         ** Init
+         ** ===================================================================================== */
+
         var init = function() {
 
             $scope.settings = {
@@ -69,7 +79,7 @@ angular.module('Enforcer.Dashboard')
 
         // Calls the SettingsService and retrieves the updated settings
         function refreshSettings() {
-            // If promise received is resolved
+
             SettingsService.getSettings().then(
                 function(returnedSettings) {
                     $scope.received = true;
@@ -84,6 +94,7 @@ angular.module('Enforcer.Dashboard')
 
         // Handles a received status
         function handleStatus(status) {
+
             // Check if status is in list
             var index = statusCompare(status);
 
@@ -121,10 +132,10 @@ angular.module('Enforcer.Dashboard')
                 }
                 return -1; // new x-wing/status
             }
-
             return -1; // new x-wing/status
         }
 
+        // Calculates the time difference between a given status and now
         $scope.calculateTimeDiff = function(status) {
 
             var currentTime = new Date() / 1000;
@@ -158,7 +169,6 @@ angular.module('Enforcer.Dashboard')
                         deadStatus($scope.statuses[i]);
                 }
             }
-
             return true;
         }
 
@@ -188,9 +198,10 @@ angular.module('Enforcer.Dashboard')
         function deadStatus(status) {
 
             var report = {
-                "processId" : status.xwingId,
+                "_id" : "",
+                "processId" : status.xwingId.toString(),
                 "host" : status.host,
-                "mainClass" : "X-Wing is down",
+                "mainClass" : "X-Wing missing more than 2 mins",
                 "processStateChange" : "MISSING",
                 "status" : "New",
                 "timeStamp" : status.timeStamp
@@ -233,13 +244,17 @@ angular.module('Enforcer.Dashboard')
             );
         };
 
+        // Logs message to console and prints toast if applicable
         function log (message) {
+
             $log.info(message);
             if ($scope.settings.notificationToasts)
                 Materialize.toast(message, 5000);
         };
 
+        // Logs error to console and prints toast if applicable
         function logError (message) {
+
             $log.error(message);
             if ($scope.settings.notificationToasts)
                 Materialize.toast(message, 5000);

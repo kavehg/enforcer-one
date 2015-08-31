@@ -1,9 +1,21 @@
 package io.enforcer.deathstar.services;
 
 import io.enforcer.deathstar.pojos.Action;
+import io.enforcer.deathstar.pojos.Audit;
 import io.enforcer.deathstar.pojos.Report;
+import io.enforcer.deathstar.pojos.User;
 import io.enforcer.deathstar.ws.WebSocketBroadcastThread;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.io.StringReader;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.logging.Level;
@@ -12,107 +24,181 @@ import java.util.logging.Logger;
 /**
  * Created by herret2 on 8/24/2015.
  */
-
 public class PersistenceService {
 
-    /**
-     * Class logger
-     */
+    /**  =======================================================================================
+     **  Variables
+     **  ==================================================================================== */
+
     private static final Logger logger = Logger.getLogger(PersistenceService.class.getName());
 
-    /**
-     * The persistence store is a collection of all reports that have been
-     * received.
-     *
-     * The value of the map contains all actions that have been taken
-     * for the report specified in the key of the map.
-     */
-    private final ConcurrentHashMap<Report, ConcurrentLinkedDeque<Action>> reportStore;
-
-    /**
-     * Reports that are meant to be broadcast to all http/websocket
-     * clients are placed on this queue and picked up by the publishing
-     * thread.
-     */
-    private final ArrayBlockingQueue<Report> reportBroadcastQueue;
-
-    /**
-     * The periodic monitoring task is run by this scheduler
-     */
-    private ExecutorService reportBroadcastExecutor;
-
-    /**
-     * Constructor
-     */
+    /**  =======================================================================================
+     **  Constructor
+     **  ==================================================================================== */
     public PersistenceService() {
-        reportStore = new ConcurrentHashMap<>();
-        reportBroadcastQueue = new ArrayBlockingQueue<>(1000);
-        reportBroadcastExecutor = Executors.newSingleThreadExecutor();
         logger.log(Level.FINE, "ReportService instantiated: {0}", this);
     }
 
-    /**
-     * Starts the broadcast thread
-     */
-    public void startBroadcastThread() {
-        reportBroadcastExecutor.execute(new WebSocketBroadcastThread(reportBroadcastQueue));
-        logger.log(Level.INFO, "WebSocket broadcast executor started");
-    }
+    /**  =======================================================================================
+     **  Methods
+     **  ==================================================================================== */
 
     /**
-     * Stops the broadcast thread
+     * Builds a Report object from a given string
      */
-    private void stopBroadcastThread() {
-        reportBroadcastExecutor.shutdown();
-        logger.log(Level.INFO, "WebSocket broadcast thread stopped");
-    }
+    public Report buildReport(String reportString) {
 
-    /**
-     * Add a report to the report service
-     *
-     * @param report to be added
-     * @return null if report is successfully added or associated value if report already exists
-     */
-    public ConcurrentLinkedDeque<Action> addReport(Report report) {
-        logger.log(Level.INFO, "storing report: {0}", report);
+        JsonReader jsonReader = Json.createReader(new StringReader(reportString));
+        JsonObject report = jsonReader.readObject();
+        jsonReader.close();
 
-        ConcurrentLinkedDeque<Action> existingValueForReport = reportStore.putIfAbsent(report, new ConcurrentLinkedDeque<>());
-        if(existingValueForReport != null) {
-            logger.log(Level.INFO, "This report was already present in the store and is being ignored: {0}", report);
-            return existingValueForReport;
+        Report newReport;
+
+        // Depending on whether reportString includes _id prooperty, use appropriate Report constructor
+        if (report.getString("_id") != "") {
+             newReport = new Report(report.getString("_id"), report.getString("processId"), report.getString("mainClass"),
+                    report.getString("processStateChange"), report.getString("host"), report.getString("timeStamp"), report.getString("status"));
         }
-        // add report to broadcast queue where it will be picked up by
-        // the WebSocketBroadcastThread
-        reportBroadcastQueue.add(report);
-        return null;
+        else {
+            newReport = new Report(report.getString("processId"), report.getString("mainClass"),
+                    report.getString("processStateChange"), report.getString("host"), report.getString("timeStamp"), report.getString("status"));
+        }
+
+        return newReport;
     }
 
     /**
-     * Store a batch of reports in the service
-     *
-     * @param reports collection of reports
+     * Builds an Audit object from a given string
      */
-    public void addReports(Set<Report> reports) {
-        logger.log(Level.INFO, "storing a batch of {0} reports", reports.size());
-        reports.forEach(this::addReport);
+    public Audit buildAudit(String auditString) {
+
+        JsonReader jsonReader = Json.createReader(new StringReader(auditString));
+        JsonObject audit = jsonReader.readObject();
+        jsonReader.close();
+
+        Audit newAudit;
+
+        // Depending on whether reportString includes _id prooperty, use appropriate Report constructor
+        if (audit.getString("_id") == "") {
+            newAudit = new Audit(audit.getString("processId"), audit.getString("host"), audit.getString("mainClass"), audit.getString("processStateChange"), audit.getString("timeStamp"),
+                    audit.getString("oldStatus"), audit.getString("newStatus"), audit.getString("movedTime"),audit.getString("userAcf2Id"));
+        }
+        else {
+            newAudit = new Audit(audit.getString("_id"), audit.getString("processId"), audit.getString("host"), audit.getString("mainClass"), audit.getString("processStateChange"), audit.getString("timeStamp"),
+                    audit.getString("oldStatus"), audit.getString("newStatus"), audit.getString("movedTime"),audit.getString("userAcf2Id"));
+        }
+
+        return newAudit;
     }
 
     /**
-     * Returns the number of reports that have been received
-     *
-     * @return number of received reports
+     * Builds a mongo-style Document from a given Report
      */
-    public Integer numberOfReceivedReports() {
-        return reportStore.size();
+    public Document reportToDocument(Report report) {
+        Document document = new Document();
+
+        // If _id is included in report, add it to document
+        if (!report._id.equals("")) {
+            document.append("_id", new ObjectId(report._id));
+        }
+
+        document.append("processId", report.processId);
+        document.append("host", report.host);
+        document.append("mainClass", report.mainClass);
+        document.append("processStateChange", report.processStateChange);
+        document.append("status", report.status);
+        document.append("timeStamp", report.timeStamp);
+
+        return document;
     }
 
     /**
-     * Returns all reports that have been received
-     *
-     * @return set of all received reports
+     * Builds a mongo-style Document from a given Audit
      */
-    public Set<Report> getAllReports() {
-        return reportStore.keySet();
+    public Document auditToDocument(Audit audit) {
+        Document document = new Document();
+
+        // If _id is included in audit, add it to document
+        if (!audit._id.equals("")) {
+            document.append("_id", new ObjectId(audit._id));
+        }
+
+        document.append("processId", audit.processId);
+        document.append("host", audit.host);
+        document.append("mainClass", audit.mainClass);
+        document.append("processStateChange", audit.processStateChange);
+        document.append("oldStatus", audit.oldStatus);
+        document.append("newStatus", audit.newStatus);
+        document.append("timeStamp", audit.timeStamp);
+        document.append("movedTime", audit.movedTime);
+        document.append("userAcf2Id", audit.userId);
+
+        return document;
     }
+
+    /**
+     * Builds a mongo-style Document from a given User
+     */
+    public Document userToDocument(User user) {
+        Document document = new Document();
+
+        //document.append("_id", new ObjectId(user._id));
+        document.append("acf2Id", user.acf2Id);
+        document.append("password", user.password);
+        document.append("access", user.accessLevel);
+
+        return document;
+    }
+
+    /**
+     * Builds a Report from a given mongo-style Document
+     */
+    public Report documentToReport(Document document) {
+        Report report = new Report();
+
+        report._id = ((ObjectId)document.get("_id")).toHexString();
+        report.processId = document.getString("processId");
+        report.mainClass = document.getString("mainClass");
+        report.host = document.getString("host");
+        report.processStateChange = document.getString("processStateChange");
+        report.status = document.getString("status");
+        report.timeStamp = document.getString("timeStamp");
+
+        return report;
+    }
+
+    /**
+     * Builds an Audit from a given mongo-style Document
+     */
+    public Audit documentToAudit(Document document) {
+        Audit audit = new Audit();
+
+        audit._id = ((ObjectId)document.get("_id")).toHexString();
+        audit.processId = document.getString("processId");
+        audit.host = document.getString("host");
+        audit.mainClass = document.getString("mainClass");
+        audit.processStateChange = document.getString("processStateChange");
+        audit.timeStamp = document.getString("timeStamp");
+        audit.oldStatus = document.getString("oldStatus");
+        audit.newStatus = document.getString("newStatus");
+        audit.movedTime = document.getString("movedTime");
+        audit.userId = document.getString("userAcf2Id");
+
+        return audit;
+    }
+
+    /**
+     * Builds Response from given status code and data
+     */
+    public Response responseBuilder(int code, String data, String allowedMethods) {
+
+        return Response.status(code)
+                .entity(data)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET,PUT,POST")
+                .header("Access-Control-Allow-Credentials", "true")
+                .allow("OPTIONS").build();
+    }
+
 
 }

@@ -11,23 +11,54 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Report {
 
-    public Integer processId;
+    /** ========================================================================================
+     ** Variables
+     ** ===================================================================================== */
+
+    public String _id; // For use with MongoDB
+    public String processId;
+    public String host;
     public String mainClass;
     public String processStateChange;
-    public String host;
     public String timeStamp;
+    public String status;
+
+    /** ========================================================================================
+     ** Constructors
+     ** ===================================================================================== */
 
     public Report() {} // JAX-RS requirement
 
-    public Report(Integer processId, String mainClass, String processStateChange, String host, String timeStamp) {
+    public Report(String processId, String mainClass, String processStateChange, String host, String timeStamp, String status) {
+        this._id = null;
         this.processId = processId;
+        this.host = host;
         this.mainClass = mainClass;
         this.processStateChange = processStateChange;
-        this.host = host;
         this.timeStamp = timeStamp;
+        this.status = status;
     }
 
-    public Integer getProcessId() {
+    // Takes additional _id argument for when Report is created after database entry
+    public Report(String id, String processId, String mainClass, String processStateChange, String host, String timeStamp, String status) {
+        this._id = id;
+        this.processId = processId;
+        this.host = host;
+        this.mainClass = mainClass;
+        this.processStateChange = processStateChange;
+        this.timeStamp = timeStamp;
+        this.status = status;
+    }
+
+    /** ========================================================================================
+     ** Accessors/Mutators
+     ** ===================================================================================== */
+
+    public String getId() { return _id; }
+
+    public void setId(String id) { _id = id; }
+
+    public String getProcessId() {
         return processId;
     }
 
@@ -46,6 +77,10 @@ public class Report {
     public String getTimeStamp() {
         return timeStamp;
     }
+
+    /** ========================================================================================
+     ** Methods
+     ** ===================================================================================== */
 
     @Override
     public boolean equals(Object o) {
@@ -81,6 +116,7 @@ public class Report {
         sb.append(", processStateChange='").append(processStateChange).append('\'');
         sb.append(", host='").append(host).append('\'');
         sb.append(", timeStamp='").append(timeStamp).append('\'');
+        sb.append(", status='").append(status).append('\'');
         sb.append('}');
         return sb.toString();
     }

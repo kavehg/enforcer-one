@@ -1,7 +1,15 @@
+/**
+ * SettingsController - primarily handles settings
+ *                    - settings can be updated and refreshed
+ *
+ */
 angular.module('Enforcer.Dashboard')
     .controller('SettingsCtrl', function($scope, $rootScope, $log, SettingsService) {
 
-        // init function
+        /** ========================================================================================
+         ** Init
+         ** ===================================================================================== */
+
         var init = function() {
 
             $scope.settings = {
@@ -20,9 +28,9 @@ angular.module('Enforcer.Dashboard')
 
         init();
 
-        /* ========================================================================================
-         * Scope Variables
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Scope Variables
+         ** ===================================================================================== */
 
         $scope.settings = {
             "connection" : "None",
@@ -74,10 +82,9 @@ angular.module('Enforcer.Dashboard')
             "temp": true
         };
 
-
-        /* ========================================================================================
-         * Broadcast Listeners
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Broadcast Listeners
+         ** ===================================================================================== */
 
         // Listen for broadcast update from the websocketservice
         $scope.$on('settingsChanged', function() {
@@ -120,10 +127,9 @@ angular.module('Enforcer.Dashboard')
                 $('#connectionStatus').addClass('red').removeClass('green');
         });
 
-
-        /* ========================================================================================
-         * Functions
-         * ===================================================================================== */
+        /** ========================================================================================
+         ** Functions
+         ** ===================================================================================== */
 
         // Calls the SettingsService and retrieves the updated settings
         function refreshSettings() {
@@ -200,7 +206,7 @@ angular.module('Enforcer.Dashboard')
                     return false;
                 }
             );
-        };
+        }
 
         // Restores the local settings if user cancels or closes modal
         $scope.restoreSettings = function () {

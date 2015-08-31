@@ -38,7 +38,7 @@ public class ReportResource {
     public Report getIt() {
         logger.log(Level.INFO, "getting report");
 
-        return new Report(123, "MainClass", "STARTED", "host1", "2015-02-05T13:09:32");
+        return new Report("123", "MainClass", "STARTED", "host1", "2015-02-05T13:09:32", "New");
     }
 
     @POST

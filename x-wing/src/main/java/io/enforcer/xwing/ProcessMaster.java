@@ -462,11 +462,12 @@ public class ProcessMaster implements ProcessMasterMBean {
          */
         private Report convertDiffToReport(MonitoredProcessDiff diff) {
             return new Report(
-                    diff.getProcessId(),
+                    diff.getProcessId().toString(),
                     diff.getMainClass(),
                     diff.getStateChange().name(),
                     "localhost",
-                    "2015-07-31T00:00:00Z");
+                    "2015-07-31T00:00:00Z",
+                    "New");
         }
 
 

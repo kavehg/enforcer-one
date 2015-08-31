@@ -67,7 +67,7 @@ public class DeathStarClient {
     public static void main(String[] args) {
         DeathStarClient client = new DeathStarClient("localhost", 8000);
 
-        Report report = new Report(152, "command", "REMOVED", "hostABCC", Instant.now().toString());
+        Report report = new Report("152", "command", "REMOVED", "hostABCC", Instant.now().toString(), "New");
         Status status1 = new Status(399, "localhost", Instant.now().toString());
         Status status2 = new Status(401, "hostabed", Instant.now().toString());
 

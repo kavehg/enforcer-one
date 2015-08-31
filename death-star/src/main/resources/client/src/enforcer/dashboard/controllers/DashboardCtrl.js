@@ -1,7 +1,17 @@
+/**
+ * DashboardController - primarily handles reports
+ *                     - actively updates and displays reports
+ *                     - allows reports to be moved and dynamically creates audits
+ *                     - automatically escalates reports from "New" to "Escalated" after a given time
+ *
+ */
 angular.module('Enforcer.Dashboard')
     .controller('DashboardCtrl', function($scope, $rootScope, $log, WebSocketService, ReportService, SettingsService, AuditService) {
 
-        // init function
+        /** ========================================================================================
+         ** Init
+         ** ===================================================================================== */
+
         var init = function() {
 
             $scope.settings = {
@@ -71,7 +81,7 @@ angular.module('Enforcer.Dashboard')
 
         // Calls the SettingsService and retrrieves the updated settings
         function refreshSettings() {
-            // If promise received is resolved
+
             SettingsService.getSettings().then(
                 function(returnedSettings) {
 
@@ -86,26 +96,9 @@ angular.module('Enforcer.Dashboard')
             );
         }
 
-
-        // Sends a report to the ReportService
-        function addReport (report) {
-
-            ReportService.addReport(report).then(
-                function(returnedBroadcast) {
-                    $rootScope.$broadcast('reportsChanged');
-                    log('DashboardCtrl: Added Report');
-
-                }, function() {
-                    $scope.received = false;
-                    logError('DashboardCtrl: Add Report FAILED');
-                }
-            );
-        };
-
         // Calls the ReportService and retrieves any new reports
         function refreshReports() {
 
-            // If promise received is resolved
             ReportService.getReports().then(
                 function(returnedReports) {
 
@@ -114,18 +107,18 @@ angular.module('Enforcer.Dashboard')
                         allocateReports(returnedReports);
                     };
 
-                    //addReport(returnedReports[0]);
-
                     log('DashboardCtrl: Reports Refreshed');
 
-                }, function() {
+                }, function(err) {
                     $scope.received = false;
                     logError('DashboardCtrl: Reports Refresh FAILED');
                 }
             );
         }
 
+        // Moves a report from one column to another
         function moveReport(report) {
+
             ReportService.moveReport(report).then(
                 function(data) {
                     $rootScope.$broadcast('reportsChanged');
@@ -138,6 +131,8 @@ angular.module('Enforcer.Dashboard')
             );
         }
 
+        // Will sort a list of reports and assign them to their appropriate sub-list
+        // based on their status
         function allocateReports(reports) {
 
             // Reset arrays
@@ -160,7 +155,6 @@ angular.module('Enforcer.Dashboard')
             }
 
             return true;
-
         }
 
         // Checks all of the New reports against time
@@ -200,6 +194,7 @@ angular.module('Enforcer.Dashboard')
                 report.status = "Escalated";
                 moveReport(report);
             });
+
         }
 
         // Sends new audit to AuditService
@@ -212,25 +207,26 @@ angular.module('Enforcer.Dashboard')
                     return true;
 
                 }, function() {
-                    logError("SettingsCtrl: Audit Add FAILED");
+                    logError("DashboardCtrl: Audit Add FAILED");
                     return false;
                 }
             );
-        };
+        }
 
-        // Creates an Audit item from a given report and newStatus
-        function createAudit(report, newStatus, user) {
+        // Creates an Audit item from a given report, newStatus and userAcf2Id
+        function createAudit(report, newStatus, userAcf2Id) {
 
             var audit = {
+                "_id" : "",
                 "processId" : report.processId,
                 "host" : report.host,
                 "mainClass" : report.mainClass,
                 "processStateChange" : report.processStateChange,
+                "timeStamp" : report.timeStamp,
                 "oldStatus" : report.status,
                 "newStatus" : newStatus,
-                "timeStamp" : report.timeStamp,
-                "movedTime" : new Date(),
-                "userId" : user
+                "movedTime" : new Date().toJSON(),
+                "userAcf2Id" : userAcf2Id
             }
 
             return audit;
@@ -245,6 +241,7 @@ angular.module('Enforcer.Dashboard')
         // add it to $scope.new and increase the New column height
         $scope.onDropCompleteNew=function(data,evt){
 
+            //Todo: add proper order for moving report and generating audit
             var newAudit = createAudit(data,"New","HERRET2");
 
             addAudit(newAudit);
@@ -252,6 +249,7 @@ angular.module('Enforcer.Dashboard')
             $scope.removeCard(data);
 
             data.status = "New";
+
             moveReport(data);
 
             increaseHeight("#newList");
@@ -261,6 +259,7 @@ angular.module('Enforcer.Dashboard')
         // add it to $scope.acknowledged and increase the Acknowledged column height
         $scope.onDropCompleteAcknowledged=function(data,evt){
 
+            //Todo: add proper order for moving report and generating audit
             var newAudit = createAudit(data,"Acknowledged","HERRET2");
 
             addAudit(newAudit);
@@ -268,6 +267,7 @@ angular.module('Enforcer.Dashboard')
             $scope.removeCard(data);
 
             data.status = "Acknowledged";
+
             moveReport(data);
 
             increaseHeight("#acknowledgedList");
@@ -277,6 +277,7 @@ angular.module('Enforcer.Dashboard')
         // add it to $scope.escalated and increase the Escalated column height
         $scope.onDropCompleteEscalated=function(data,evt){
 
+            //Todo: add proper order for moving report and generating audit
             var newAudit = createAudit(data,"Escalated","HERRET2");
 
             addAudit(newAudit);
@@ -284,6 +285,7 @@ angular.module('Enforcer.Dashboard')
             $scope.removeCard(data);
 
             data.status = "Escalated";
+
             moveReport(data);
 
             increaseHeight("#escalatedList");
@@ -293,6 +295,7 @@ angular.module('Enforcer.Dashboard')
         // reduce height of old row and increase the History column height
         $scope.onDropCompleteHistory=function(data,evt){
 
+            //Todo: add proper order for moving report and generating audit
             var newAudit = createAudit(data,"History","HERRET2");
 
             addAudit(newAudit);
@@ -300,6 +303,7 @@ angular.module('Enforcer.Dashboard')
             $scope.removeCard(data);
 
             data.status = "History";
+
             moveReport(data);
 
             increaseHeight("#historyList");
@@ -310,8 +314,7 @@ angular.module('Enforcer.Dashboard')
         }
 
         // Reduces the height of a column when a card leaves
-        $scope.removeCard = function(data)
-        {
+        $scope.removeCard = function(data) {
 
             if ($scope.new.indexOf(data) > -1)
                 reduceHeight("#newList");
@@ -326,18 +329,19 @@ angular.module('Enforcer.Dashboard')
 
         // Reduces the height by one card for a given column
         function reduceHeight(columnId) {
+
             var object = $(columnId);
 
             if (object.height() > 650)
                 object.height("-=165");
-        };
+        }
 
         // Increases the height by one card for a given column
         function increaseHeight(columnId) {
-            var object = $(columnId);
 
+            var object = $(columnId);
             object.height("+=165");
-        };
+        }
 
         // Logs message to console and prints toast if applicable
         function log (message) {
@@ -345,7 +349,7 @@ angular.module('Enforcer.Dashboard')
             $log.info(message);
             if ($scope.settings.notificationToasts)
                 Materialize.toast(message, 5000);
-        };
+        }
 
         // Logs error to console and prints toast if applicable
         function logError (message) {
@@ -353,6 +357,6 @@ angular.module('Enforcer.Dashboard')
             $log.error(message);
             if ($scope.settings.notificationToasts)
                 Materialize.toast(message, 5000);
-        };
+        }
 
     });

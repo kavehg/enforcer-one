@@ -113,11 +113,6 @@ public class DeathStar {
         // persistence service
         persistenceService = new PersistenceService();
 
-        // Connect to MongoDB
-        //mongoClient = new MongoClient("localhost", 27017);
-        //db = mongoClient.getDatabase("test");
-
-
         // wait todo: handle service stop & CTRL+C
         try {
             Thread.sleep(Long.MAX_VALUE);
