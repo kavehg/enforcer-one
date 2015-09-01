@@ -19,7 +19,7 @@ angular.module('Enforcer.Dashboard')
                 "deathTime" : 2,
                 "escalationTime" : 5,
                 "autoEscalation" : true,
-                "notificationToasts" : true
+                "notificationToasts" : false
             };
 
             refreshSettings();
@@ -39,7 +39,7 @@ angular.module('Enforcer.Dashboard')
             "deathTime" : 30,
             "escalationTime" : 1,
             "autoEscalation" : true,
-            "notificationToasts" : true
+            "notificationToasts" : false
         };
 
         $scope.connection = "None";
@@ -78,8 +78,8 @@ angular.module('Enforcer.Dashboard')
         };
 
         $scope.notificationToasts = {
-            "value": true,
-            "temp": true
+            "value": false,
+            "temp": false
         };
 
         /** ========================================================================================

@@ -43,7 +43,15 @@ angular.module('Enforcer.Dashboard')
 
             var deferred = $q.defer();
 
-            auditAPI.getAll().$promise.then(
+            if(audits.length > 0) {
+                deferred.resolve(audits);
+            }
+            else {
+                deferred.reject("No audits!");
+            }
+
+            // MongoDB
+            /*auditAPI.getAll().$promise.then(
                 function(audits) {
                     $log.info('Successfully retrieved ' + audits.length + ' audits');
                     deferred.resolve(audits);
@@ -51,7 +59,7 @@ angular.module('Enforcer.Dashboard')
                     $log.error('Failed to retrieve audits: ' + err);
                     deferred.reject(err);
                 }
-            );
+            );*/
 
             return deferred.promise;
         }
@@ -61,7 +69,16 @@ angular.module('Enforcer.Dashboard')
 
             var deferred = $q.defer();
 
-            auditAPI.post({auditId: audit.processId}, audit).$promise.then(
+            if (true) {
+                audits.push(audit);
+                deferred.resolve(audits);
+            }
+            else {
+                deferred.reject('Error adding audit');
+            }
+
+            // MongoDB
+            /*auditAPI.post({auditId: audit.processId}, audit).$promise.then(
                 function(data) {
                     $log.info('Successfully posted audit: ' + data.processId);
                     audits.push(data);
@@ -70,7 +87,7 @@ angular.module('Enforcer.Dashboard')
                     $log.error('Failed to post audit: ' + err);
                     deferred.reject(err);
                 }
-            );
+            );*/
 
             return deferred.promise;
         }

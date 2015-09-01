@@ -11,14 +11,71 @@ angular.module('Enforcer.Dashboard')
          ** ===================================================================================== */
 
         var reports = [
-            /*{
-                "processId" : "1875",
+            {
+                "processId" : "901",
                 "host" : "tovalrs01",
                 "mainClass" : "Valuation Engine",
                 "processStateChange" : "STOPPED",
                 "status" : "New",
                 "timeStamp" : "2015/07/17 16:55:32"
-            }*/
+            },
+            {
+                "processId" : "1875",
+                "host" : "tovalrs02",
+                "mainClass" : "Trade Service",
+                "processStateChange" : "STOPPED",
+                "status" : "New",
+                "timeStamp" : "2015/08/25 16:55:32"
+            },
+            {
+                "processId" : "1234",
+                "host" : "tovalrs03",
+                "mainClass" : "Derived Market Data Service",
+                "processStateChange" : "STOPPED",
+                "status" : "Acknowledged",
+                "timeStamp" : "2015/08/17 16:55:32"
+            },
+            {
+                "processId" : "7565",
+                "host" : "tovalrs01",
+                "mainClass" : "Valuation Engine",
+                "processStateChange" : "STOPPED",
+                "status" : "Acknowledged",
+                "timeStamp" : "2015/08/30 19:55:32"
+            },
+            {
+                "processId" : "2424",
+                "host" : "tovalrs02",
+                "mainClass" : "Valuation Engine",
+                "processStateChange" : "STOPPED",
+                "status" : "Escalated",
+                "timeStamp" : "2015/08/17 16:55:32"
+            },
+            {
+                "processId" : "357",
+                "host" : "tovalrs03",
+                "mainClass" : "Trade Service",
+                "processStateChange" : "STOPPED",
+                "status" : "Escalated",
+                "timeStamp" : "2015/08/31 17:55:32"
+            },
+            {
+                "processId" : "98411",
+                "host" : "tovalrs01",
+                "mainClass" : "Valuation Engine",
+                "processStateChange" : "STOPPED",
+                "status" : "History",
+                "timeStamp" : "2015/07/12 09:41:23"
+            },
+            {
+                "processId" : "1245",
+                "host" : "tovalrs02",
+                "mainClass" : "Valuation Engine",
+                "processStateChange" : "STOPPED",
+                "status" : "History",
+                "timeStamp" : "2015/07/29 12:52:48"
+            }
+
         ];
 
         /** ========================================================================================
@@ -87,7 +144,15 @@ angular.module('Enforcer.Dashboard')
 
             var deferred = $q.defer();
 
-            reportAPI.getAll().$promise.then(
+            if (reports.length > 0){
+                deferred.resolve(reports);
+            }
+            else {
+                deferred.resolve('There are no reports.');
+            }
+
+            // MongoDB
+            /*reportAPI.getAll().$promise.then(
                 function(reports) {
                     $log.info('Successfully retrieved reports: ' + reports.length);
                     deferred.resolve(reports);
@@ -95,7 +160,7 @@ angular.module('Enforcer.Dashboard')
                     $log.error('Failed to retrieve report: ' + err);
                     deferred.reject(err);
                 }
-            );
+            );*/
 
             return deferred.promise;
         }
@@ -105,7 +170,16 @@ angular.module('Enforcer.Dashboard')
 
             var deferred = $q.defer();
 
-            reportAPI.post({reportId: report.processId}, report).$promise.then(
+            if (reportCompare(report) == -1) {
+                reports.push(report);
+                deferred.resolve('reportHandled');
+            }
+            else {
+                deferred.reject('report already exists');
+            }
+
+            // MongoDB
+            /*reportAPI.post({reportId: report.processId}, report).$promise.then(
                 function(data) {
                     $log.info('ReportService: Successfully posted report: ' + data.processId);
                     //reports.push(data);
@@ -114,7 +188,7 @@ angular.module('Enforcer.Dashboard')
                     $log.error('Failed to post report: ' + err);
                     deferred.reject(err);
                 }
-            );
+            );*/
 
             return deferred.promise;
         }
@@ -124,7 +198,7 @@ angular.module('Enforcer.Dashboard')
 
             var deferred = $q.defer();
 
-            /*if (reportCompare(report) > -1) {
+            if (reportCompare(report) > -1) {
                 if (swapReports(report)) {
                     deferred.resolve('reportsModified');
                 }
@@ -136,11 +210,8 @@ angular.module('Enforcer.Dashboard')
                 deferred.reject("Report doesn't exist to be moved")
             }
 
-            return deferred.promise;*/
-
-            //Todo: some comparisons of reports?
-
-            reportAPI.put({reportId: report._id}, report).$promise.then(
+            // MongoDB
+            /*reportAPI.put({reportId: report._id}, report).$promise.then(
                 function(data) {
                     $log.info('ReportService: Successfully moved report: ' + data.processId);
                     //reports.push(data);
@@ -149,9 +220,24 @@ angular.module('Enforcer.Dashboard')
                     $log.error('Failed to move report: ' + err);
                     deferred.reject(err);
                 }
-            );
+            );*/
 
             return deferred.promise;
+        }
+
+        // Swaps a pre-existing report with an updated version
+        function swapReports(newReport) {
+
+            var index = reportCompare(newReport);
+
+            // Report exists, swap it
+            if(index > -1)
+                reports[index] = newReport;
+            else // Report doesn't exist, add it
+                reports.push(newReport);
+
+            return true;
+
         }
 
         // Compares reports based on processId and host

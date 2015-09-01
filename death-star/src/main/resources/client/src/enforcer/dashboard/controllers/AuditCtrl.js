@@ -19,7 +19,7 @@ angular.module('Enforcer.Dashboard')
                 "deathTime" : 2,
                 "escalationTime" : 5,
                 "autoEscalation" : true,
-                "notificationToasts" : true
+                "notificationToasts" : false
             };
 
             refreshSettings();
