@@ -1,13 +1,11 @@
 package io.enforcer.deathstar.services;
 
-import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.pojos.Status;
 import io.enforcer.deathstar.ws.WebSocketBroadcastThread;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.logging.Level;

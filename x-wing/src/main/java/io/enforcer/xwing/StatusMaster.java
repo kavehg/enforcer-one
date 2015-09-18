@@ -1,13 +1,9 @@
 package io.enforcer.xwing;
 
 import io.enforcer.deathstar.DeathStarClient;
-import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.pojos.Status;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
