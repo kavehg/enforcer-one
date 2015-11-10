@@ -50,17 +50,6 @@ angular.module('Enforcer.Dashboard')
                 deferred.reject("No audits!");
             }
 
-            // MongoDB
-            /*auditAPI.getAll().$promise.then(
-                function(audits) {
-                    $log.info('Successfully retrieved ' + audits.length + ' audits');
-                    deferred.resolve(audits);
-                }, function(err) {
-                    $log.error('Failed to retrieve audits: ' + err);
-                    deferred.reject(err);
-                }
-            );*/
-
             return deferred.promise;
         }
 
@@ -76,18 +65,6 @@ angular.module('Enforcer.Dashboard')
             else {
                 deferred.reject('Error adding audit');
             }
-
-            // MongoDB
-            /*auditAPI.post({auditId: audit.processId}, audit).$promise.then(
-                function(data) {
-                    $log.info('Successfully posted audit: ' + data.processId);
-                    audits.push(data);
-                    deferred.resolve(data);
-                }, function(err) {
-                    $log.error('Failed to post audit: ' + err);
-                    deferred.reject(err);
-                }
-            );*/
 
             return deferred.promise;
         }
