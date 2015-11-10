@@ -34,8 +34,6 @@ public class DeathStar {
 
     private static ReportService reportService;
 
-//    private static PersistenceService persistenceService;
-
     private static WebSocketServer webSocketServer;
 
     /**
@@ -91,9 +89,6 @@ public class DeathStar {
         reportService = new ReportService();
         reportService.startBroadcastThread();
 
-        // persistence service
-//        persistenceService = new PersistenceService();
-
         // wait todo: handle service stop & CTRL+C
         try {
             Thread.sleep(Long.MAX_VALUE);
@@ -120,14 +115,6 @@ public class DeathStar {
     public static ReportService getReportService() {
         return reportService;
     }
-
-//    /**
-//     * Obtain reference to persistence service
-//     * @return report service instance
-//     */
-//    public static PersistenceService getPersistenceService() {
-//        return persistenceService;
-//    }
 
     /**
      * Obtain reference to web socket server
