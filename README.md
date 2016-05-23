@@ -4,9 +4,9 @@ Enforcer one is a process monitoring tool.  Start an "X-Wing" process on each ho
 
 The Application is broken into 3 Major Components:
 
-  - X-Wing
-  - DeathStarClient
-  - DeathStar
+  - X-Wing (Process monitor)
+  - DeathStar (Web app)
+  - DeathStarClient (Client API used by X-Wings to communicate with the Death Star)
 
 ## Dependencies
 
@@ -19,7 +19,7 @@ Enforcer One has the following dependencies
 
 License
 ----
-Copyright [2015] [Kaveh Ghahremani]
+Copyright 2015 Kaveh Ghahremani
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
