@@ -12,7 +12,7 @@ The Application is broken into 3 Major Components:
 
 Once the Death Star web application has been started you can watch the monitoring console for any changes reported by the X-Wings. Support teams can drag new events to the acknowledged column. If events are not acknowledged, they are automatically moved to the "Escalated" column and escalation is triggered.
 
-![Alt text](/images/screen.png?raw=true "Monitoring Console")
+![Monitoring Console](https://github.com/kavehg/enforcer-one/blob/master/images/screen.png?raw=true)
 
 ## Running
 
