@@ -1,6 +1,6 @@
-# Enforcer-One
+# Enforcer One
 
-Enforcer one is a process monitoring tool.  Start an "X-Wing" process on each host where you would like to monitor processes.  The X-Wings will report their all process changes to the "Death Star".
+Enforcer One is a simple process monitoring tool.  Start an "X-Wing" process on each host where you would like to monitor processes.  The X-Wings will report their all process changes to the "Death Star".
 
 The Application is broken into 3 Major Components:
 
