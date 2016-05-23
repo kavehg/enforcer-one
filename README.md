@@ -8,14 +8,26 @@ The Application is broken into 3 Major Components:
   - DeathStar (Web app)
   - DeathStarClient (Client API used by X-Wings to communicate with the Death Star)
 
+## Monitoring Console
+
+Once the Death Star web application has been started you can watch the monitoring console for any changes reported by the X-Wings. Support teams can drag new events to the acknowledged column. If events are not acknowledged, they are automatically moved to the "Escalated" column and escalation is triggered.
+
+![Alt text](/images/screen.png?raw=true "Monitoring Console")
+
+## Running
+
+Use `mvn package` to compile and `java -jar death-star-1.0-SNAPSHOT.jar` to run. Same steps for the X-Wings.
+
 ## Dependencies
 
 Enforcer One has the following dependencies
 
+  - [Netty](http://netty.io)
   - [AngularJS](http://angularjs.org)
   - [Materialize CSS](http://materializecss.com)
   - [ngDraggable](https://github.com/fatlinesofcode/ngDraggable)
   - [jQuery](http://jquery.com)
+  - [Jersey](https://jersey.java.net)
 
 License
 ----
