@@ -59,6 +59,7 @@ angular.module('Enforcer.Dashboard')
 
         $scope.history = [];
 
+        $scope.received = false;
 
         /** ========================================================================================
          ** Broadcast Listeners
@@ -74,12 +75,35 @@ angular.module('Enforcer.Dashboard')
             refreshReports();
         });
 
+        $scope.$on('reportReceived', function() {
+            $scope.checkForReport();
+        });
 
         /** ========================================================================================
          ** Functions
          ** ===================================================================================== */
+        // Checks the WebSocketService for any new reports
+        $scope.checkForReport = function() {
+            WebSocketService.getReport().then(
+                function(returnedReport) {
+                    $scope.received = true
+                    ReportService.addReport(returnedReport).then(
+                        function(result) {
+                            log(result);
+                        },
+                        function(err){
+                            log(err);
+                        });
+                    $scope.$broadcast('reportsChanged');
+                    //log("DashboardCtrl: Report Received");
+                },
+                function() {
+                    $scope.received = false;
+                }
+            )
+        }
 
-        // Calls the SettingsService and retrrieves the updated settings
+        // Calls the SettingsService and retrieves the updated settings
         function refreshSettings() {
 
             SettingsService.getSettings().then(
@@ -98,10 +122,8 @@ angular.module('Enforcer.Dashboard')
 
         // Calls the ReportService and retrieves any new reports
         function refreshReports() {
-
             ReportService.getReports().then(
                 function(returnedReports) {
-
                     // If report doesn't already exist, add to $scope.new
                     if (returnedReports.length > 0) {
                         allocateReports(returnedReports);
@@ -143,7 +165,6 @@ angular.module('Enforcer.Dashboard')
 
             // Loop through reports and assign to arrays
             for(var i=0; i < reports.length; i++) {
-
                 if (reports[i].status == 'New')
                     $scope.new.push(reports[i]);
                 else if (reports[i].status == 'Acknowledged')
@@ -153,7 +174,6 @@ angular.module('Enforcer.Dashboard')
                 else if (reports[i].status == 'History')
                     $scope.history.push(reports[i]);
             }
-
             return true;
         }
 
@@ -176,6 +196,7 @@ angular.module('Enforcer.Dashboard')
                 differential = currentTime - reportTime;
 
                 if (differential > ($scope.settings.escalationTime * 60)) { // Convert escalation time in minutes to seconds
+                    removeAnimation($scope.new[i]);
                     escalateReport($scope.new[i]);
                 }
             }
@@ -232,10 +253,21 @@ angular.module('Enforcer.Dashboard')
             return audit;
         }
 
+        //Remove flash animation from new reports.
+        function removeAnimation(report){
+            $("#report-"+report.processId+report.processStateChange).removeClass('animated flash');
+        }
+
 
         /** ========================================================================================
          ** Drag and Drop Functions
          ** ===================================================================================== */
+
+        //When drag begins make sure no animations are attached to the card.
+        //This makes sure on re-entry the appropriate animations can be applied
+        $scope.onDragStart=function(data,evt) {
+            removeAnimation(data);
+        }
 
         // When a card is dropped into New, remove it from any list it was in,
         // add it to $scope.new and increase the New column height
@@ -321,7 +353,7 @@ angular.module('Enforcer.Dashboard')
             else if ($scope.escalated.indexOf(data) > -1)
                 reduceHeight("#escalatedList");
             else if ($scope.acknowledged.indexOf(data) > -1)
-                reduceHeight("acknowledgedList");
+                reduceHeight("#acknowledgedList");
             else if ($scope.history.indexOf(data) > -1)
                 reduceHeight("#historyList");
 

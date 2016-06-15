@@ -11,7 +11,7 @@ angular.module('Enforcer.Dashboard')
          ** ===================================================================================== */
 
         var reports = [
-            {
+            /*{
                 "processId" : "901",
                 "host" : "tovalrs01",
                 "mainClass" : "Valuation Engine",
@@ -36,7 +36,7 @@ angular.module('Enforcer.Dashboard')
                 "timeStamp" : "2015/08/17 16:55:32"
             },
             {
-                "processId" : "7565",
+                "processId" : "1000",
                 "host" : "tovalrs01",
                 "mainClass" : "Valuation Engine",
                 "processStateChange" : "STOPPED",
@@ -74,7 +74,7 @@ angular.module('Enforcer.Dashboard')
                 "processStateChange" : "STOPPED",
                 "status" : "History",
                 "timeStamp" : "2015/07/29 12:52:48"
-            }
+            }*/
 
         ];
 
@@ -141,7 +141,6 @@ angular.module('Enforcer.Dashboard')
 
         // Creates a promise and resolves it with available data, otherwise reject the promise.
         function getReports() {
-
             var deferred = $q.defer();
 
             if (reports.length > 0){
@@ -240,12 +239,12 @@ angular.module('Enforcer.Dashboard')
 
         }
 
-        // Compares reports based on processId and host
+        // Compares reports based on processId and host and processState
         function reportCompare(report) {
 
             if (reports.length > 0) {
                 for (var i = 0; i < reports.length; i++) {
-                    if (reports[i].processId == report.processId && reports[i].host == report.host)
+                    if (reports[i].processId == report.processId && reports[i].host == report.host && reports[i].processStateChange == report.processStateChange)
                         return i;
                 }
                 return -1;

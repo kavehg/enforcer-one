@@ -3,12 +3,12 @@
     <div class="row">
 
         <!-- New Column -->
-        <div ng-drop="true" ng-drop-success="onDropCompleteNew($data,$event)" class="col s3">
+        <div ng-drop="true" ng-drop-success="onDropCompleteNew($data,$event)" ng-drag-start="onDragStart($data,$event)" class="col s3">
             <ul class="list" id="newList">
                 <h5 class="grey-text text-darken-1">New</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report" ng-center-anchor="true" ng-repeat="report in new | filter: {status:status.name}">
+                <li class="report animated flash" ng-center-anchor="true" ng-repeat="report in new | filter: {status:status.name}" id="report-{{report.processId}}{{report.processStateChange}}">
 
                     <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content black-text">
