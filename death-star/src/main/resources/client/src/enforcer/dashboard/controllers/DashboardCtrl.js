@@ -6,7 +6,7 @@
  *
  */
 angular.module('Enforcer.Dashboard')
-    .controller('DashboardCtrl', function($scope, $rootScope, $log, WebSocketService, ReportService, SettingsService, AuditService) {
+    .controller('DashboardCtrl', function($scope, $rootScope, $log, WebSocketService, ReportService, SettingsService, AuditService, AnimationFactory) {
 
         /** ========================================================================================
          ** Init
@@ -95,7 +95,8 @@ angular.module('Enforcer.Dashboard')
                             log(err);
                         });
                     $scope.$broadcast('reportsChanged');
-                    //log("DashboardCtrl: Report Received");
+
+                    reportAddedToast(returnedReport);
                 },
                 function() {
                     $scope.received = false;
@@ -196,7 +197,6 @@ angular.module('Enforcer.Dashboard')
                 differential = currentTime - reportTime;
 
                 if (differential > ($scope.settings.escalationTime * 60)) { // Convert escalation time in minutes to seconds
-                    removeAnimation($scope.new[i]);
                     escalateReport($scope.new[i]);
                 }
             }
@@ -225,6 +225,10 @@ angular.module('Enforcer.Dashboard')
                 function(auditAdded) {
                     log("DashboardCtrl: Audit Added");
                     $rootScope.$broadcast('auditTrailChanged');
+
+                    //ToDo: have animation signal that report has been dropped in successfully (debug)
+                    AnimationFactory.playAnimation("#"+audit.newStatus+"-"+audit.processId+audit.processStateChange, "bounceIn");
+
                     return true;
 
                 }, function() {
@@ -235,7 +239,7 @@ angular.module('Enforcer.Dashboard')
         }
 
         // Creates an Audit item from a given report, newStatus and userAcf2Id
-        function createAudit(report, newStatus, userAcf2Id) {
+        function createAudit(report, oldStatus, userAcf2Id) {
 
             var audit = {
                 "_id" : "",
@@ -244,8 +248,8 @@ angular.module('Enforcer.Dashboard')
                 "mainClass" : report.mainClass,
                 "processStateChange" : report.processStateChange,
                 "timeStamp" : report.timeStamp,
-                "oldStatus" : report.status,
-                "newStatus" : newStatus,
+                "oldStatus" : oldStatus,
+                "newStatus" : report.status,
                 "movedTime" : new Date().toJSON(),
                 "userAcf2Id" : userAcf2Id
             }
@@ -253,9 +257,11 @@ angular.module('Enforcer.Dashboard')
             return audit;
         }
 
-        //Remove flash animation from new reports.
-        function removeAnimation(report){
-            $("#report-"+report.processId+report.processStateChange).removeClass('animated flash');
+        //Creates toast specifically for when a new report comes in from server.
+        function reportAddedToast(report) {
+            AnimationFactory.playAnimation("#"+report.status+"Col", "flash");
+            var toast = "<p><span class='New'>NEW</span> REPORT: "+report.processId+" "+report.processStateChange+"</p>";
+            Materialize.toast(toast, 4000);
         }
 
 
@@ -263,20 +269,13 @@ angular.module('Enforcer.Dashboard')
          ** Drag and Drop Functions
          ** ===================================================================================== */
 
-        //When drag begins make sure no animations are attached to the card.
-        //This makes sure on re-entry the appropriate animations can be applied
-        $scope.onDragStart=function(data,evt) {
-            removeAnimation(data);
-        }
-
         // When a card is dropped into New, remove it from any list it was in,
         // add it to $scope.new and increase the New column height
         $scope.onDropCompleteNew=function(data,evt){
 
             //Todo: add proper order for moving report and generating audit
-            var newAudit = createAudit(data,"New","HERRET2");
 
-            addAudit(newAudit);
+            var oldStatus = data.status;
 
             $scope.removeCard(data);
 
@@ -284,7 +283,14 @@ angular.module('Enforcer.Dashboard')
 
             moveReport(data);
 
+            var newAudit = createAudit(data, oldStatus,"HERRET2");
+
+            addAudit(newAudit);
+
             increaseHeight("#newList");
+
+            //ToDo: animate column title when report is received rather than dropped in
+            AnimationFactory.playAnimation("#NewCol", "flash");
         }
 
         // When a card is dropped into Acknowledged, remove it from any list it was in,
@@ -292,9 +298,7 @@ angular.module('Enforcer.Dashboard')
         $scope.onDropCompleteAcknowledged=function(data,evt){
 
             //Todo: add proper order for moving report and generating audit
-            var newAudit = createAudit(data,"Acknowledged","HERRET2");
-
-            addAudit(newAudit);
+            var oldStatus = data.status;
 
             $scope.removeCard(data);
 
@@ -302,7 +306,14 @@ angular.module('Enforcer.Dashboard')
 
             moveReport(data);
 
+            var newAudit = createAudit(data, oldStatus,"HERRET2");
+
+            addAudit(newAudit);
+
             increaseHeight("#acknowledgedList");
+
+            //ToDo: animate column title when report is received rather than dropped in
+            AnimationFactory.playAnimation("#AcknowledgedCol", "flash");
         }
 
         // When a card is dropped into Escalated, remove it from any list it was in,
@@ -310,9 +321,7 @@ angular.module('Enforcer.Dashboard')
         $scope.onDropCompleteEscalated=function(data,evt){
 
             //Todo: add proper order for moving report and generating audit
-            var newAudit = createAudit(data,"Escalated","HERRET2");
-
-            addAudit(newAudit);
+            var oldStatus = data.status;
 
             $scope.removeCard(data);
 
@@ -320,7 +329,14 @@ angular.module('Enforcer.Dashboard')
 
             moveReport(data);
 
+            var newAudit = createAudit(data, oldStatus,"HERRET2");
+
+            addAudit(newAudit);
+
             increaseHeight("#escalatedList");
+
+            //ToDo: animate column title when report is received rather than dropped in
+            AnimationFactory.playAnimation("#EscalatedCol", "flash");
         }
 
         // When a card is dropped into History, create audit item,
@@ -328,9 +344,7 @@ angular.module('Enforcer.Dashboard')
         $scope.onDropCompleteHistory=function(data,evt){
 
             //Todo: add proper order for moving report and generating audit
-            var newAudit = createAudit(data,"History","HERRET2");
-
-            addAudit(newAudit);
+            var oldStatus = data.status;
 
             $scope.removeCard(data);
 
@@ -338,7 +352,14 @@ angular.module('Enforcer.Dashboard')
 
             moveReport(data);
 
+            var newAudit = createAudit(data, oldStatus,"HERRET2");
+
+            addAudit(newAudit);
+
             increaseHeight("#historyList");
+
+            //ToDo: animate column title when report is received rather than dropped in
+            AnimationFactory.playAnimation("#HistoryCol", "flash");
         }
 
         $scope.onDragComplete=function(data,evt){

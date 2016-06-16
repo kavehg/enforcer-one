@@ -4,7 +4,7 @@
  *
  */
 angular.module('Enforcer.Dashboard')
-    .controller('AuditCtrl', function($scope, $rootScope, $log, AuditService, SettingsService) {
+    .controller('AuditCtrl', function($scope, $rootScope, $log, AuditService, SettingsService, AnimationFactory) {
 
         /** ========================================================================================
          ** Init
@@ -78,6 +78,7 @@ angular.module('Enforcer.Dashboard')
                 function(returnedAuditTrail) {
                     $scope.received = true;
                     $scope.auditTrail = returnedAuditTrail;
+                    reportAuditToast($scope.auditTrail[$scope.auditTrail.length - 1]);
                     log('AuditCtrl: Audits Refreshed');
                 }, function() {
                     $scope.received = false
@@ -106,5 +107,12 @@ angular.module('Enforcer.Dashboard')
             if ($scope.settings.notificationToasts)
                 Materialize.toast(message, 5000);
         }
+
+        function reportAuditToast(audit) {
+            AnimationFactory.playAnimation("#gear-button", "bounce");
+            var toast = "<p>Report "+audit.processId+" Moved from <span class='"+audit.oldStatus+"'>"+audit.oldStatus+"</span> to <span class='"+audit.newStatus+"'>"+audit.newStatus+"</span></p>"
+            Materialize.toast(toast, 4000);
+        }
+
 
     });

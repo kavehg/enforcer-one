@@ -3,12 +3,13 @@
     <div class="row">
 
         <!-- New Column -->
-        <div ng-drop="true" ng-drop-success="onDropCompleteNew($data,$event)" ng-drag-start="onDragStart($data,$event)" class="col s3">
+        <div ng-drop="true" ng-drop-success="onDropCompleteNew($data,$event)" class="col s3">
             <ul class="list" id="newList">
-                <h5 class="grey-text text-darken-1">New</h5>
+                <div id="toast-container"></div>
+                <h5 class="grey-text text-darken-1" id="NewCol">New</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report animated flash" ng-center-anchor="true" ng-repeat="report in new | filter: {status:status.name}" id="report-{{report.processId}}{{report.processStateChange}}">
+                <li class="report" ng-center-anchor="true" ng-repeat="report in new | filter: {status:status.name}" id="New-{{report.processId}}{{report.processStateChange}}">
 
                     <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content black-text">
@@ -27,10 +28,10 @@
         <!-- Acknowledged Column -->
         <div ng-drop="true" ng-drop-success="onDropCompleteAcknowledged($data,$event)" class="col s3">
             <ul class="list" id="acknowledgedList">
-                <h5 class="grey-text text-darken-1">Acknowledged</h5>
+                <h5 class="grey-text text-darken-1" id="AcknowledgedCol">Acknowledged</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report" ng-center-anchor="true" ng-repeat="report in acknowledged | filter: {status:status.name}">
+                <li class="report" ng-center-anchor="true" ng-repeat="report in acknowledged | filter: {status:status.name}" id="Acknowledged-{{report.processId}}{{report.processStateChange}}">
 
                     <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content black-text">
@@ -49,10 +50,10 @@
         <!-- Escalated Column -->
         <div ng-drop="true" ng-drop-success="onDropCompleteEscalated($data,$event)" class="col s3">
             <ul class="list" id="escalatedList">
-                <h5 class="grey-text text-darken-1">Escalated</h5>
+                <h5 class="grey-text text-darken-1" id="EscalatedCol">Escalated</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report" ng-center-anchor="true" ng-repeat="report in escalated | filter: {status:status.name}">
+                <li class="report" ng-center-anchor="true" ng-repeat="report in escalated | filter: {status:status.name}" id="Escalated-{{report.processId}}{{report.processStateChange}}">
 
                     <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content black-text">
@@ -71,10 +72,10 @@
         <!-- History Column -->
         <div ng-drop="true" ng-drop-success="onDropCompleteHistory($data,$event)" class="col s3">
             <ul class="list" id="historyList">
-                <h5 class="grey-text text-darken-1">History</h5>
+                <h5 class="grey-text text-darken-1" id="HistoryCol">History</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report" ng-center-anchor="true" ng-repeat="report in history | filter: {status:status.name}">
+                <li class="report" ng-center-anchor="true" ng-repeat="report in history | filter: {status:status.name}" id="History-{{report.processId}}{{report.processStateChange}}">
 
                     <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content black-text">

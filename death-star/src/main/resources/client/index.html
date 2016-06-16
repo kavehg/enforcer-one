@@ -47,6 +47,8 @@
         <!-- Directives -->
         <!--<script src="src/enforcer/dashboard/directives/Settings.js"></script>
         <script src="src/enforcer/dashboard/templates/settings.html"></script>-->
+        <!--Factories-->
+        <script src="src/enforcer/dashboard/factories/AnimationFactory.js"></script>
 
     </head>
 
@@ -80,7 +82,7 @@
         <div ui-view></div>
 
         <!-- Settings button -->
-        <div class="fixed-action-btn" style="bottom: 45px; right: 24px;" ng-controller="SettingsCtrl">
+        <div class="fixed-action-btn" style="bottom: 45px; right: 24px;" ng-controller="SettingsCtrl" id="gear-button">
             <a class="btn-floating btn-large red darken-1">
                 <i class="large material-icons">settings</i>
             </a>
