@@ -19,7 +19,7 @@ angular.module('Enforcer.Dashboard')
                 "missingTime" : 20,
                 "statusScanTime" : 5,
                 "deathTime" : 2,
-                "escalationTime" : 5,
+                "escalationTime" : 1,
                 "autoEscalation" : true,
                 "notificationToasts" : false
             };
@@ -60,6 +60,8 @@ angular.module('Enforcer.Dashboard')
         $scope.history = [];
 
         $scope.received = false;
+
+        $scope.showHistory = false;
 
         /** ========================================================================================
          ** Broadcast Listeners
@@ -227,7 +229,7 @@ angular.module('Enforcer.Dashboard')
                     $rootScope.$broadcast('auditTrailChanged');
 
                     //ToDo: have animation signal that report has been dropped in successfully (debug)
-                    AnimationFactory.playAnimation("#"+audit.newStatus+"-"+audit.processId+audit.processStateChange, "bounceIn");
+                    //AnimationFactory.playAnimation("#"+audit.newStatus+"-"+audit.processId+audit.processStateChange, "bounceIn");
 
                     return true;
 
@@ -291,6 +293,7 @@ angular.module('Enforcer.Dashboard')
 
             //ToDo: animate column title when report is received rather than dropped in
             AnimationFactory.playAnimation("#NewCol", "flash");
+            $scope.showHistory = false;
         }
 
         // When a card is dropped into Acknowledged, remove it from any list it was in,
@@ -314,6 +317,7 @@ angular.module('Enforcer.Dashboard')
 
             //ToDo: animate column title when report is received rather than dropped in
             AnimationFactory.playAnimation("#AcknowledgedCol", "flash");
+            $scope.showHistory = false;
         }
 
         // When a card is dropped into Escalated, remove it from any list it was in,
@@ -337,6 +341,7 @@ angular.module('Enforcer.Dashboard')
 
             //ToDo: animate column title when report is received rather than dropped in
             AnimationFactory.playAnimation("#EscalatedCol", "flash");
+            $scope.showHistory = false;
         }
 
         // When a card is dropped into History, create audit item,
@@ -360,10 +365,22 @@ angular.module('Enforcer.Dashboard')
 
             //ToDo: animate column title when report is received rather than dropped in
             AnimationFactory.playAnimation("#HistoryCol", "flash");
+            $scope.showHistory = false;
         }
 
         $scope.onDragComplete=function(data,evt){
             /*console.log("drag success, data:", data);*/
+        }
+
+        //ToDo: Show $historyBox when a card is picked up
+        $scope.onDrag= function(data,evt){
+            $scope.showHistory = true;
+            AnimationFactory.playAnimation("#historyBox", "fadeIn");
+            log($scope.showHistory);
+        }
+
+        $scope.getReportHistory=function(data,evt){
+
         }
 
         // Reduces the height of a column when a card leaves

@@ -9,24 +9,35 @@ body {
 
 .New {
     background-color: #1976d2; /* blue */
-    color: #1976d2;
 }
 
 .Acknowledged {
     background-color: #388e3c; /* green */
-    color: #388e3c;
 }
 
 .Escalated {
     background-color: #d32f2f; /* red */
-    color: #d32f2f;
 }
 
 .History {
     background-color: #808080;
-    color: #808080;
 }
 
 .report-details {
     margin: 4px 0 0;
+}
+
+.report-drop {
+    font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 200%;
+    borer-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.3);
+    position: fixed;
+    padding-left: 2%;
+    padding-right: 2%;
+    width: 25%;
+    height:20%;
+    top: 70%;
+    margin-left: 37.5%;
+    margin-right: 37.5%;
 }

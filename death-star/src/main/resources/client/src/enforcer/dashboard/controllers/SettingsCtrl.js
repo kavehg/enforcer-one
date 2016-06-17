@@ -4,7 +4,7 @@
  *
  */
 angular.module('Enforcer.Dashboard')
-    .controller('SettingsCtrl', function($scope, $rootScope, $log, SettingsService) {
+    .controller('SettingsCtrl', function($scope, $rootScope, $log, SettingsService, AuditService) {
 
         /** ========================================================================================
          ** Init
@@ -82,6 +82,8 @@ angular.module('Enforcer.Dashboard')
             "temp": false
         };
 
+        $scope.changeLogCount = 0;
+
         /** ========================================================================================
          ** Broadcast Listeners
          ** ===================================================================================== */
@@ -125,6 +127,13 @@ angular.module('Enforcer.Dashboard')
 
             if ($('#connectionStatus').hasClass('green'))
                 $('#connectionStatus').addClass('red').removeClass('green');
+        });
+
+        //Displays how many audits are in Change Log on setting button
+        $scope.$on('auditTrailChanged', function(){
+            AuditService.getAuditTrail().then(function(returnedAudits){
+               $scope.changeLogCount = returnedAudits.length;
+            });
         });
 
         /** ========================================================================================
