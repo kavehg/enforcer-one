@@ -11,6 +11,8 @@ angular.module('Enforcer.Dashboard')
         /** ========================================================================================
          ** Init
          ** ===================================================================================== */
+        //currently necessary to distinguish between a category drop and a detail drop
+        var detailDrop = false;
 
         var init = function() {
 
@@ -31,6 +33,12 @@ angular.module('Enforcer.Dashboard')
             $scope.escalated = [];
 
             $scope.history = [];
+
+            //Audits which match unique report query
+            $scope.returnedAudits = [];
+
+            //Report currently being viewed in Report Detail modal
+            $scope.detailReport;
 
             refreshSettings();
 
@@ -61,7 +69,7 @@ angular.module('Enforcer.Dashboard')
 
         $scope.received = false;
 
-        $scope.showHistory = false;
+        $scope.showDetailBox = false;
 
         /** ========================================================================================
          ** Broadcast Listeners
@@ -103,7 +111,7 @@ angular.module('Enforcer.Dashboard')
                 function() {
                     $scope.received = false;
                 }
-            )
+            );
         }
 
         // Calls the SettingsService and retrieves the updated settings
@@ -274,8 +282,10 @@ angular.module('Enforcer.Dashboard')
         // When a card is dropped into New, remove it from any list it was in,
         // add it to $scope.new and increase the New column height
         $scope.onDropCompleteNew=function(data,evt){
-
+            $scope.showDetailBox = false;
             //Todo: add proper order for moving report and generating audit
+            if (detailDrop)
+            return
 
             var oldStatus = data.status;
 
@@ -293,14 +303,16 @@ angular.module('Enforcer.Dashboard')
 
             //ToDo: animate column title when report is received rather than dropped in
             AnimationFactory.playAnimation("#NewCol", "flash");
-            $scope.showHistory = false;
         }
 
         // When a card is dropped into Acknowledged, remove it from any list it was in,
         // add it to $scope.acknowledged and increase the Acknowledged column height
         $scope.onDropCompleteAcknowledged=function(data,evt){
-
+            $scope.showDetailBox = false;
             //Todo: add proper order for moving report and generating audit
+            if (detailDrop)
+            return
+
             var oldStatus = data.status;
 
             $scope.removeCard(data);
@@ -317,14 +329,16 @@ angular.module('Enforcer.Dashboard')
 
             //ToDo: animate column title when report is received rather than dropped in
             AnimationFactory.playAnimation("#AcknowledgedCol", "flash");
-            $scope.showHistory = false;
         }
 
         // When a card is dropped into Escalated, remove it from any list it was in,
         // add it to $scope.escalated and increase the Escalated column height
         $scope.onDropCompleteEscalated=function(data,evt){
-
+            $scope.showDetailBox = false;
             //Todo: add proper order for moving report and generating audit
+            if (detailDrop)
+            return
+
             var oldStatus = data.status;
 
             $scope.removeCard(data);
@@ -341,14 +355,17 @@ angular.module('Enforcer.Dashboard')
 
             //ToDo: animate column title when report is received rather than dropped in
             AnimationFactory.playAnimation("#EscalatedCol", "flash");
-            $scope.showHistory = false;
         }
 
         // When a card is dropped into History, create audit item,
         // reduce height of old row and increase the History column height
         $scope.onDropCompleteHistory=function(data,evt){
-
+            $scope.showDetailBox = false;
             //Todo: add proper order for moving report and generating audit
+            if (detailDrop)
+            return;
+
+
             var oldStatus = data.status;
 
             $scope.removeCard(data);
@@ -365,22 +382,36 @@ angular.module('Enforcer.Dashboard')
 
             //ToDo: animate column title when report is received rather than dropped in
             AnimationFactory.playAnimation("#HistoryCol", "flash");
-            $scope.showHistory = false;
+
         }
 
         $scope.onDragComplete=function(data,evt){
             /*console.log("drag success, data:", data);*/
         }
 
-        //ToDo: Show $historyBox when a card is picked up
+        //Show detail drag container when report is picked up
         $scope.onDrag= function(data,evt){
-            $scope.showHistory = true;
-            AnimationFactory.playAnimation("#historyBox", "fadeIn");
-            log($scope.showHistory);
+            $scope.showDetailBox = true;
+            detailDrop = false;
+            AnimationFactory.playAnimation("#detailDrop", "fadeIn");
         }
 
-        $scope.getReportHistory=function(data,evt){
-
+        //Query for matching audits and set as report to be detailed when there is a drop in the detail box
+        $scope.getReportDetails=function(data,evt){
+            detailDrop = true;
+            $scope.detailReport = data;
+            $("#modal4").openModal();
+            AuditService.getAuditTrail().then(
+                function(returnedAuditTrail) {
+                    for (var i = 0; i < returnedAuditTrail.length; i++) {
+                        if (returnedAuditTrail[i].processId == data.processId && returnedAuditTrail[i].processStateChange == data.processStateChange) {
+                            $scope.returnedAudits.push(returnedAuditTrail[i]);
+                        }
+                    }
+                }, function(err) {
+                    log("Could not retrieve audits.");
+                }
+            );
         }
 
         // Reduces the height of a column when a card leaves

@@ -2,6 +2,10 @@
 <div class="container" ng-controller="DashboardCtrl">
     <div class="row">
 
+        <!-- Detail Drop Container -->
+        <div class="report-drop valign-wrapper"  ng-drop="true" ng-drop-success="getReportDetails($data,$event)" ng-show="showDetailBox" id="detailDrop">
+            <p class="white-text center-align">Drop Report for Details</p>
+        </div>
         <!-- New Column -->
         <div ng-drop="true" ng-drop-success="onDropCompleteNew($data,$event)" class="col s3" ng-drag-start="onDrag($data,$event)">
             <ul class="list" id="newList">
@@ -89,6 +93,79 @@
 
                 </li>
             </ul>
+        </div>
+    </div>
+
+    <!-- Single Report Detail Modal -->
+    <div id="modal4" class="modal modal-fixed-footer">
+        <div class="modal-content">
+            <!-- Information from card laid for easier reading -->
+            <h4 class="grey-text text-darken-1">Report Details</h4>
+            <div class="row valign-wrapper">
+                <div class="card white col s3">
+                    <div class="card-content black-text">
+                        <span class="card-title black-text"><strong>{{detailReport.processId}} | [{{detailReport.host}}]</strong></span>
+                        <div class="type-bar {{detailReport.status}}"></div>
+                        <p>{{detailReport.mainClass}}</p>
+                        <p>{{detailReport.processStateChange}}</p>
+                        <p class="right-align">{{detailReport.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
+                    </div>
+                </div>
+                <div class="col s9">
+                    <ul class="collection">
+                        <li class="collection-item"><span style="font-weight: bold;">Process Id - </span><span class="grey-text text-darken-1">{{detailReport.processId}}</span></li>
+                        <li class="collection-item"><span style="font-weight: bold;">Host - </span><span class="grey-text text-darken-1">{{detailReport.host}}</span></li>
+                        <li class="collection-item"><span style="font-weight: bold;">Main Class - </span><span class="grey-text text-darken-1">{{detailReport.mainClass}}</span></li>
+                        <li class="collection-item"><span style="font-weight: bold;">Process State - </span><span class="grey-text text-darken-1">{{detailReport.processStateChange}}</span></li>
+                        <li class="collection-item"><span style="font-weight: bold;">Time/Date - </span><span class="grey-text text-darken-1">{{detailReport.timeStamp}}</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Details Input. Allows user to attach additional information, objectives, progress, etc to the report-->
+            <h4 class="grey-text text-darken-1">Additional Information</h4>
+            <div class="row">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <i class="material-icons prefix">mode_edit</i>
+                        <textarea id="details_form" class="materialize-textarea" ng-model="detailReport.details">{{detailReport.details}}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unique Change Log History for dropped Report-->
+            <h4 class="grey-text text-darken-1"> Change Log </h4>
+            <div ng-repeat="audit in returnedAudits" class="row valign-wrapper">
+                <div class="center-align col s2">
+                    <i class="large material-icons">account_circle</i>
+                    <p class="text-gray bold" style="bottom: 0; font-weight: bold;">{{audit.userAcf2Id}}</p>
+                </div>
+                <div class="card white col s3" >
+                    <div class="card-content black-text">
+                        <span class="card-title black-text"><strong>{{audit.processId}} | [{{audit.host}}]</strong></span>
+                        <div class="type-bar {{audit.oldStatus}}"></div>
+                        <p>{{audit.mainClass}}</p>
+                        <p>{{audit.processStateChange}}</p>
+                        <p class="right-align">{{audit.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
+                    </div>
+                </div>
+                <div class="col s3 center-align">
+                    <i class="large material-icons">trending_flat</i>
+                    <p style="font-weight: bold;">{{audit.timeStamp}}</p>
+                </div>
+                <div class="card white col s3" >
+                    <div class="card-content black-text">
+                        <span class="card-title black-text"><strong>{{audit.processId}} | [{{audit.host}}]</strong></span>
+                        <div class="type-bar {{audit.newStatus}}"></div>
+                        <p>{{audit.mainClass}}</p>
+                        <p>{{audit.processStateChange}}</p>
+                        <p class="right-align">{{audit.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-light btn-flat purple white-text" ng-click="returnedAudits = []">Ok</a>
         </div>
     </div>
 

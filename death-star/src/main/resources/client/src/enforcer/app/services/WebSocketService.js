@@ -70,6 +70,8 @@ angular.module('Enforcer.Common')
                 $rootScope.$broadcast('statusReceived');
             }
             else {
+                //**adds detail property to all reports coming in. Should it be separate from death-star? Or should Report pojo be modified?**
+                theMsg.details = "*Provide any additional details here*";
                 reports.push(theMsg);
                 $rootScope.$broadcast('reportReceived');
             }
