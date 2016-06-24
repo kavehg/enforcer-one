@@ -5641,7 +5641,7 @@ small {
   @media only screen and (min-width : 993px) {
     #toast-container {
       min-width: 8%;
-      top: 5%;
+      top: 2%;
       right: 5%; } }
 
 .toast {

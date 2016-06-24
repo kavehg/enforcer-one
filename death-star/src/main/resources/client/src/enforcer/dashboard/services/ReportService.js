@@ -239,12 +239,12 @@ angular.module('Enforcer.Dashboard')
 
         }
 
-        // Compares reports based on processId and host and processState
+        // Compares reports based on processId and host and processState and mainClass
         function reportCompare(report) {
 
             if (reports.length > 0) {
                 for (var i = 0; i < reports.length; i++) {
-                    if (reports[i].processId == report.processId && reports[i].host == report.host && reports[i].processStateChange == report.processStateChange)
+                    if (reports[i].processId == report.processId && reports[i].host == report.host && reports[i].processStateChange == report.processStateChange && reports[i].mainClass == report.mainClass)
                         return i;
                 }
                 return -1;

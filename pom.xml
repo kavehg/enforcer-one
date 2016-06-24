@@ -12,6 +12,7 @@
         <module>x-wing</module>
         <module>death-star</module>
         <module>death-star-api</module>
+        <module>vader</module>
     </modules>
 
     <dependencies>

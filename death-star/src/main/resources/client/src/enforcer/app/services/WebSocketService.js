@@ -86,11 +86,16 @@ angular.module('Enforcer.Common')
             return false;
         }
 
+        function sendMetricRequest(request) {
+            ws.send(request);
+        }
+
         // Calls to functions inside this service from external controllers
         return {
 
             getReport: getReport,
-            getStatus: getStatus
+            getStatus: getStatus,
+            sendMetricRequest: sendMetricRequest
 
         };
 

@@ -79,6 +79,7 @@ angular.module('Enforcer.Dashboard')
                     $scope.received = true;
                     $scope.auditTrail = returnedAuditTrail;
                     reportAuditToast($scope.auditTrail[$scope.auditTrail.length - 1]);
+                    AnimationFactory.playAnimation("#"+$scope.auditTrail[$scope.auditTrail.length - 1].newStatus+"Col", "flash");
                     log('AuditCtrl: Audits Refreshed');
                 }, function() {
                     $scope.received = false

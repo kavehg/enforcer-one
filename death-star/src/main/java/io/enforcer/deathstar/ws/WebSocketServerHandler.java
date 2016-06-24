@@ -15,6 +15,7 @@
  */
 package io.enforcer.deathstar.ws;
 
+import io.enforcer.vader.Vader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -147,8 +148,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     .getName()));
         }
 
+        // Identifies any incoming Vader requests
+        if (((TextWebSocketFrame) frame).text().startsWith("{\"url\"")) {
+            new Vader(((TextWebSocketFrame) frame).text());
+        }
+
         // Send the uppercase string back.
-        String request = ((TextWebSocketFrame) frame).text();
+        String request =((TextWebSocketFrame) frame).text();
         System.err.printf("%s received %s%n", ctx.channel(), request);
         ctx.channel().write(new TextWebSocketFrame(request.toUpperCase()));
     }

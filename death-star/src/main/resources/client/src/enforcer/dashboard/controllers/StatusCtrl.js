@@ -244,6 +244,11 @@ angular.module('Enforcer.Dashboard')
             );
         };
 
+        //opens a modal for configuring a metric monitor
+        $scope.openMetric = function() {
+            $("#modal5").openModal();
+        }
+
         // Logs message to console and prints toast if applicable
         function log (message) {
 

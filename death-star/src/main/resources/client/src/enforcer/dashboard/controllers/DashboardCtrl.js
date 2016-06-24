@@ -99,14 +99,13 @@ angular.module('Enforcer.Dashboard')
                     $scope.received = true
                     ReportService.addReport(returnedReport).then(
                         function(result) {
+                            reportAddedToast(returnedReport);
                             log(result);
                         },
                         function(err){
                             log(err);
                         });
                     $scope.$broadcast('reportsChanged');
-
-                    reportAddedToast(returnedReport);
                 },
                 function() {
                     $scope.received = false;
@@ -236,9 +235,6 @@ angular.module('Enforcer.Dashboard')
                     log("DashboardCtrl: Audit Added");
                     $rootScope.$broadcast('auditTrailChanged');
 
-                    //ToDo: have animation signal that report has been dropped in successfully (debug)
-                    //AnimationFactory.playAnimation("#"+audit.newStatus+"-"+audit.processId+audit.processStateChange, "bounceIn");
-
                     return true;
 
                 }, function() {
@@ -260,7 +256,7 @@ angular.module('Enforcer.Dashboard')
                 "timeStamp" : report.timeStamp,
                 "oldStatus" : oldStatus,
                 "newStatus" : report.status,
-                "movedTime" : new Date().toJSON(),
+                "movedTime" : new Date().getTime(),
                 "userAcf2Id" : userAcf2Id
             }
 
@@ -284,7 +280,7 @@ angular.module('Enforcer.Dashboard')
         $scope.onDropCompleteNew=function(data,evt){
             $scope.showDetailBox = false;
             //Todo: add proper order for moving report and generating audit
-            if (detailDrop)
+            if (detailDrop || data.status == "New")
             return
 
             var oldStatus = data.status;
@@ -300,9 +296,6 @@ angular.module('Enforcer.Dashboard')
             addAudit(newAudit);
 
             increaseHeight("#newList");
-
-            //ToDo: animate column title when report is received rather than dropped in
-            AnimationFactory.playAnimation("#NewCol", "flash");
         }
 
         // When a card is dropped into Acknowledged, remove it from any list it was in,
@@ -310,7 +303,7 @@ angular.module('Enforcer.Dashboard')
         $scope.onDropCompleteAcknowledged=function(data,evt){
             $scope.showDetailBox = false;
             //Todo: add proper order for moving report and generating audit
-            if (detailDrop)
+            if (detailDrop || data.status == "Acknowledged")
             return
 
             var oldStatus = data.status;
@@ -326,9 +319,6 @@ angular.module('Enforcer.Dashboard')
             addAudit(newAudit);
 
             increaseHeight("#acknowledgedList");
-
-            //ToDo: animate column title when report is received rather than dropped in
-            AnimationFactory.playAnimation("#AcknowledgedCol", "flash");
         }
 
         // When a card is dropped into Escalated, remove it from any list it was in,
@@ -336,7 +326,7 @@ angular.module('Enforcer.Dashboard')
         $scope.onDropCompleteEscalated=function(data,evt){
             $scope.showDetailBox = false;
             //Todo: add proper order for moving report and generating audit
-            if (detailDrop)
+            if (detailDrop || data.status == "Escalated")
             return
 
             var oldStatus = data.status;
@@ -352,9 +342,6 @@ angular.module('Enforcer.Dashboard')
             addAudit(newAudit);
 
             increaseHeight("#escalatedList");
-
-            //ToDo: animate column title when report is received rather than dropped in
-            AnimationFactory.playAnimation("#EscalatedCol", "flash");
         }
 
         // When a card is dropped into History, create audit item,
@@ -362,7 +349,7 @@ angular.module('Enforcer.Dashboard')
         $scope.onDropCompleteHistory=function(data,evt){
             $scope.showDetailBox = false;
             //Todo: add proper order for moving report and generating audit
-            if (detailDrop)
+            if (detailDrop || data.status == "History")
             return;
 
 
@@ -379,9 +366,6 @@ angular.module('Enforcer.Dashboard')
             addAudit(newAudit);
 
             increaseHeight("#historyList");
-
-            //ToDo: animate column title when report is received rather than dropped in
-            AnimationFactory.playAnimation("#HistoryCol", "flash");
 
         }
 

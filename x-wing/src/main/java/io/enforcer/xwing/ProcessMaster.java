@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 /**
  * Created by kavehg on 2/23/2015.
@@ -468,7 +469,7 @@ public class ProcessMaster implements ProcessMasterMBean {
                     diff.getMainClass(),
                     diff.getStateChange().name(),
                     "localhost",
-                    "2015-07-31T00:00:00Z",
+                    LocalDateTime.now().toString(),
                     "New");
         }
 
