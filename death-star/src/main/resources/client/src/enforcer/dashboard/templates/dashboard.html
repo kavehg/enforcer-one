@@ -13,15 +13,15 @@
                 <h5 class="New white-text text-darken-1" style="border-radius: 2px; padding: 5px;" id="NewCol">New</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report animated bounceIn" ng-center-anchor="true" ng-repeat="report in new | filter: {status:status.name}" id="New-{{report.processId}}{{report.processStateChange}}">
+                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in new | filter: {status:status.name}" id="New-{{card.header}}{{report.detail}}">
 
-                    <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
-                        <div class="card-content black-text">
-                            <span class="card-title black-text"><strong>{{report.processId}} | [{{report.host}}]</strong></span>
+                    <div class="card {{card.type}} hoverable" ng-drag="true" ng-drag-data="card" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
+                        <div class="card-content">
+                            <span class="card-title"><strong>{{card.header}} | [{{card.headerDetail}}]</strong></span>
                             <div class="type-bar blue"></div>
-                            <p>{{report.mainClass}}</p>
-                            <p>{{report.processStateChange}}</p>
-                            <p class="right-align">{{report.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
+                            <p>{{card.classPath}}</p>
+                            <p>{{card.detail}}</p>
+                            <p class="right-align">{{card.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                         </div>
                     </div>
 
@@ -35,15 +35,15 @@
                 <h5 class="Acknowledged white-text text-darken-1" style="border-radius: 2px; padding: 5px;" id="AcknowledgedCol">Acknowledged</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report animated bounceIn" ng-center-anchor="true" ng-repeat="report in acknowledged | filter: {status:status.name}" id="Acknowledged-{{report.processId}}{{report.processStateChange}}">
+                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in acknowledged | filter: {status:status.name}" id="Acknowledged-{{card.header}}{{card.detail}}">
 
-                    <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
-                        <div class="card-content black-text">
-                            <span class="card-title black-text"><strong>{{report.processId}} | [{{report.host}}]</strong></span>
+                    <div class="card {{card.type}} hoverable" ng-drag="true" ng-drag-data="card" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
+                        <div class="card-content">
+                            <span class="card-title"><strong>{{card.header}} | [{{card.headerDetail}}]</strong></span>
                             <div class="type-bar green"></div>
-                            <p>{{report.mainClass}}</p>
-                            <p>{{report.processStateChange}}</p>
-                            <p class="right-align">{{report.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
+                            <p>{{card.classPath}}</p>
+                            <p>{{card.detail}}</p>
+                            <p class="right-align">{{card.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                         </div>
                     </div>
 
@@ -57,15 +57,15 @@
                 <h5 class="Escalated white-text text-darken-1" style="border-radius: 2px; padding: 5px;" id="EscalatedCol">Escalated</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report animated bounceIn" ng-center-anchor="true" ng-repeat="report in escalated | filter: {status:status.name}" id="Escalated-{{report.processId}}{{report.processStateChange}}">
+                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in escalated | filter: {status:status.name}" id="Escalated-{{card.header}}{{card.detail}}">
 
-                    <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
-                        <div class="card-content black-text">
-                            <span class="card-title black-text"><strong>{{report.processId}} | [{{report.host}}]</strong></span>
+                    <div class="card {{card.type}} hoverable" ng-drag="true" ng-drag-data="card" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
+                        <div class="card-content">
+                            <span class="card-title"><strong>{{card.header}} | [{{card.headerDetail}}]</strong></span>
                             <div class="type-bar red"></div>
-                            <p>{{report.mainClass}}</p>
-                            <p>{{report.processStateChange}}</p>
-                            <p class="right-align">{{report.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
+                            <p>{{card.classPath}}</p>
+                            <p>{{card.detail}}</p>
+                            <p class="right-align">{{card.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                         </div>
                     </div>
 
@@ -79,15 +79,15 @@
                 <h5 class="History white-text text-darken-1" style="border-radius: 2px; padding: 5px;" id="HistoryCol">History</h5>
                 <div class="grey darken-1 horizline"></div>
 
-                <li class="report animated bounceIn" ng-center-anchor="true" ng-repeat="report in history | filter: {status:status.name}" id="History-{{report.processId}}{{report.processStateChange}}">
+                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in history | filter: {status:status.name}" id="History-{{card.header}}{{card.headerDetail}}">
 
-                    <div class="card white hoverable" ng-drag="true" ng-drag-data="report" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
-                        <div class="card-content black-text">
-                            <span class="card-title black-text"><strong>{{report.processId}} | [{{report.host}}]</strong></span>
+                    <div class="card {{card.type}} hoverable" ng-drag="true" ng-drag-data="card" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
+                        <div class="card-content">
+                            <span class="card-title"><strong>{{card.header}} | [{{card.headerDetail}}]</strong></span>
                             <div class="type-bar grey"></div>
-                            <p>{{report.mainClass}}</p>
-                            <p>{{report.processStateChange}}</p>
-                            <p class="right-align">{{report.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
+                            <p>{{card.classPath}}</p>
+                            <p>{{card.detail}}</p>
+                            <p class="right-align">{{card.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                         </div>
                     </div>
 
@@ -99,24 +99,24 @@
     <!-- Single Report Detail Modal -->
     <div id="modal4" class="modal modal-fixed-footer">
         <div class="modal-content">
-            <!-- Information from card laid for easier reading -->
+            <!-- Information from card laid out for easier reading -->
             <h4 class="grey-text text-darken-1">Report Details</h4>
             <div class="row valign-wrapper">
-                <div class="card white col s3">
-                    <div class="card-content black-text">
-                        <span class="card-title black-text"><strong>{{detailReport.processId}} | [{{detailReport.host}}]</strong></span>
+                <div class="card {{detailReport.type}} col s3">
+                    <div class="card-content">
+                        <span class="card-title"><strong>{{detailReport.header}} | [{{detailReport.headerDetail}}]</strong></span>
                         <div class="type-bar {{detailReport.status}}"></div>
-                        <p>{{detailReport.mainClass}}</p>
-                        <p>{{detailReport.processStateChange}}</p>
+                        <p>{{detailReport.classPath}}</p>
+                        <p>{{detailReport.detail}}</p>
                         <p class="right-align">{{detailReport.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                     </div>
                 </div>
                 <div class="col s9">
                     <ul class="collection">
-                        <li class="collection-item"><span style="font-weight: bold;">Process Id - </span><span class="grey-text text-darken-1">{{detailReport.processId}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Host - </span><span class="grey-text text-darken-1">{{detailReport.host}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Main Class - </span><span class="grey-text text-darken-1">{{detailReport.mainClass}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Process State - </span><span class="grey-text text-darken-1">{{detailReport.processStateChange}}</span></li>
+                        <li class="collection-item"><span style="font-weight: bold;">Process Id - </span><span class="grey-text text-darken-1">{{detailReport.header}}</span></li>
+                        <li class="collection-item"><span style="font-weight: bold;">Host - </span><span class="grey-text text-darken-1">{{detailReport.headerDetail}}</span></li>
+                        <li class="collection-item"><span style="font-weight: bold;">Main Class - </span><span class="grey-text text-darken-1">{{detailReport.classPath}}</span></li>
+                        <li class="collection-item"><span style="font-weight: bold;">Process State - </span><span class="grey-text text-darken-1">{{detailReport.detail}}</span></li>
                         <li class="collection-item"><span style="font-weight: bold;">Time/Date - </span><span class="grey-text text-darken-1">{{detailReport.timeStamp}}</span></li>
                     </ul>
                 </div>
@@ -140,12 +140,12 @@
                     <i class="large material-icons">account_circle</i>
                     <p class="text-gray bold" style="bottom: 0; font-weight: bold;">{{audit.userAcf2Id}}</p>
                 </div>
-                <div class="card white col s3" >
-                    <div class="card-content black-text">
-                        <span class="card-title black-text"><strong>{{audit.processId}} | [{{audit.host}}]</strong></span>
+                <div class="card {{audit.type}} col s3" >
+                    <div class="card-content">
+                        <span class="card-title"><strong>{{audit.header}} | [{{audit.headerDetail}}]</strong></span>
                         <div class="type-bar {{audit.oldStatus}}"></div>
-                        <p>{{audit.mainClass}}</p>
-                        <p>{{audit.processStateChange}}</p>
+                        <p>{{audit.classPath}}</p>
+                        <p>{{audit.detail}}</p>
                         <p class="right-align">{{audit.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                     </div>
                 </div>
@@ -153,12 +153,12 @@
                     <i class="large material-icons">trending_flat</i>
                     <p style="font-weight: bold;">{{audit.timeStamp}}</p>
                 </div>
-                <div class="card white col s3" >
-                    <div class="card-content black-text">
-                        <span class="card-title black-text"><strong>{{audit.processId}} | [{{audit.host}}]</strong></span>
+                <div class="card {{audit.type}} col s3" >
+                    <div class="card-content">
+                        <span class="card-title"><strong>{{audit.header}} | [{{audit.headerDetail}}]</strong></span>
                         <div class="type-bar {{audit.newStatus}}"></div>
-                        <p>{{audit.mainClass}}</p>
-                        <p>{{audit.processStateChange}}</p>
+                        <p>{{audit.classPath}}</p>
+                        <p>{{audit.detail}}</p>
                         <p class="right-align">{{audit.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
                     </div>
                 </div>

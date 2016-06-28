@@ -4,7 +4,7 @@
  *
  */
 angular.module('Enforcer.Dashboard')
-    .controller('SettingsCtrl', function($scope, $rootScope, $log, SettingsService, AuditService) {
+    .controller('SettingsCtrl', function($scope, $rootScope, $log, SettingsService, AuditService, MetricService) {
 
         /** ========================================================================================
          ** Init

@@ -45,3 +45,13 @@ body {
     margin-right: 37.5%;
     text-align: center;
 }
+/* Card Decorators */
+.Metric {
+    background-color: #323232 !important;
+    color: #FFFFFF !important;
+}
+
+.Report {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+}

@@ -11,6 +11,8 @@ angular.module('Enforcer.Common')
 
         var statuses = [];
 
+        var metrics = [];
+
         // Creates a promise and resolves it with available data, otherwise reject the promise.
         function getReport() {
 
@@ -36,6 +38,21 @@ angular.module('Enforcer.Common')
             }
             else {
                 deferred.reject("No statuses!");
+            }
+
+            return deferred.promise;
+        }
+
+
+        function getMetric() {
+
+            var deferred = $q.defer();
+
+            if (metrics.length > 0) {
+                deferred.resolve(metrics.shift());
+            }
+            else {
+                deferred.reject('No metrics!');
             }
 
             return deferred.promise;
@@ -69,18 +86,36 @@ angular.module('Enforcer.Common')
                 statuses.push(theMsg);
                 $rootScope.$broadcast('statusReceived');
             }
-            else {
-                //**adds detail property to all reports coming in. Should it be separate from death-star? Or should Report pojo be modified?**
-                theMsg.details = "*Provide any additional details here*";
+            else if (isMetric(theMsg)){
+                metrics.push(theMsg);
+                $rootScope.$broadcast('metricsReceived');
+            }
+            else if (isReport(theMsg)) {
                 reports.push(theMsg);
                 $rootScope.$broadcast('reportReceived');
             }
 
         };
 
-        // Check if message is a status. If not, then it is a report.
+        // Check if message is a status.
         function isStatus(message) {
             if (message.xwingId != null)
+                return true;
+
+            return false;
+        }
+
+        // Check if the message is a metric
+        function isMetric(message) {
+            if (message.target != null)
+                return true;
+
+            return false;
+        }
+
+        //Checks if message is report
+        function isReport(message) {
+            if (message.processId != null)
                 return true;
 
             return false;
@@ -95,6 +130,7 @@ angular.module('Enforcer.Common')
 
             getReport: getReport,
             getStatus: getStatus,
+            getMetric: getMetric,
             sendMetricRequest: sendMetricRequest
 
         };

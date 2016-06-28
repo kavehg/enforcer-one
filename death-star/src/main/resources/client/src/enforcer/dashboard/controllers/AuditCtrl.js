@@ -111,7 +111,7 @@ angular.module('Enforcer.Dashboard')
 
         function reportAuditToast(audit) {
             AnimationFactory.playAnimation("#gear-button", "bounce");
-            var toast = "<p>Report "+audit.processId+" Moved from <span class='"+audit.oldStatus+"'>"+audit.oldStatus+"</span> to <span class='"+audit.newStatus+"'>"+audit.newStatus+"</span></p>"
+            var toast = "<p>"+ audit.type +" "+audit.header+" Moved from <span class='"+audit.oldStatus+"'>"+audit.oldStatus+"</span> to <span class='"+audit.newStatus+"'>"+audit.newStatus+"</span></p>"
             Materialize.toast(toast, 4000);
         }
 

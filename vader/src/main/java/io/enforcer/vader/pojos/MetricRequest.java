@@ -15,14 +15,16 @@ public class MetricRequest {
      ** ===================================================================================== */
 
     public String url;
+    public String metricDetail;
     public float threshold;
 
     /** ========================================================================================
      ** Constructors
      ** ===================================================================================== */
 
-    public MetricRequest(String url, float threshold) {
+    public MetricRequest(String url, String metricDetail, float threshold) {
         this.url = url;
+        this.metricDetail = metricDetail;
         this.threshold = threshold;
     }
 }

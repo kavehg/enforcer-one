@@ -6,7 +6,7 @@
  *
  */
 angular.module('Enforcer.Dashboard')
-    .controller('StatusCtrl', function($scope, $rootScope, $log, WebSocketService, ReportService, SettingsService) {
+    .controller('StatusCtrl', function($scope, $rootScope, $log, WebSocketService, ReportService, SettingsService, MetricService) {
 
         /** ========================================================================================
          ** Init
@@ -44,6 +44,8 @@ angular.module('Enforcer.Dashboard')
 
         $scope.timeDiff = 0;
 
+        $scope.monitoredMetricRequests = [];
+
         /** ========================================================================================
          ** Broadcast Listeners
          ** ===================================================================================== */
@@ -56,6 +58,20 @@ angular.module('Enforcer.Dashboard')
         // Listen for broadcast update from the websocketservice
         $scope.$on('settingsChanged', function() {
             refreshSettings();
+        });
+
+
+        $scope.$on('metricRequestReceived', function() {
+            $scope.monitoredMetricRequests = [];
+
+            MetricService.getMetricRequests().then(
+                function (metrics) {
+                    $scope.monitoredMetricRequests = metrics;
+                },
+                function (err) {
+                    log("Could not display metrics to sidebar");
+                }
+            );
         });
 
         /** ========================================================================================

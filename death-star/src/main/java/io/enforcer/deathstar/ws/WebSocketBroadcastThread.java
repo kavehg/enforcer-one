@@ -3,6 +3,7 @@ package io.enforcer.deathstar.ws;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.enforcer.deathstar.DeathStar;
+import io.enforcer.deathstar.pojos.Metric;
 import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.pojos.Status;
 
@@ -27,6 +28,11 @@ public class WebSocketBroadcastThread implements Runnable {
     private final ArrayBlockingQueue<Status> statusBroadcastQueue;
 
     /**
+     * The broadcast thread publishes events placed on this queue
+     */
+    private final ArrayBlockingQueue<Metric> metricBroadcastQueue;
+
+    /**
      * class logger
      */
     private final Logger logger = Logger.getLogger(WebSocketBroadcastThread.class.getName());
@@ -42,6 +48,7 @@ public class WebSocketBroadcastThread implements Runnable {
     public WebSocketBroadcastThread(ArrayBlockingQueue<Report> broadcastQueue) {
         this.reportBroadcastQueue = broadcastQueue;
         this.statusBroadcastQueue = null;
+        this.metricBroadcastQueue = null;
         this.jsonMapper = new ObjectMapper();
         logger.log(Level.FINE, "WebSocket broadcast thread instantiated: {0}", this);
     }
@@ -49,6 +56,15 @@ public class WebSocketBroadcastThread implements Runnable {
     public WebSocketBroadcastThread(ArrayBlockingQueue<Status> broadcastQueue, int n) {
         this.statusBroadcastQueue = broadcastQueue;
         this.reportBroadcastQueue = null;
+        this.metricBroadcastQueue = null;
+        this.jsonMapper = new ObjectMapper();
+        logger.log(Level.FINE, "WebSocket broadcast thread instantiated: {0}", this);
+    }
+
+    public WebSocketBroadcastThread(ArrayBlockingQueue<Metric> broadcastQueue, float e) {
+        this.metricBroadcastQueue = broadcastQueue;
+        this.reportBroadcastQueue = null;
+        this.statusBroadcastQueue = null;
         this.jsonMapper = new ObjectMapper();
         logger.log(Level.FINE, "WebSocket broadcast thread instantiated: {0}", this);
     }
@@ -70,13 +86,20 @@ public class WebSocketBroadcastThread implements Runnable {
                     logger.log(Level.FINE, "Broadcast status thread published an event to all webSocket clients: {0}", jsonString);
                     statusBroadcastQueue.clear();
                 }
-                else
+                else if (reportBroadcastQueue != null)
                 {
                     Report reportToBroadcast = reportBroadcastQueue.take();
                     String jsonString = jsonMapper.writeValueAsString(reportToBroadcast);
                     DeathStar.getWebSocketServer().broadcastToAllWebSocketClients(jsonString);
                     logger.log(Level.FINE, "Broadcast report thread published an event to all webSocket clients: {0}", jsonString);
                     reportBroadcastQueue.clear();
+                }
+                else {
+                    Metric metricToBroadcast = metricBroadcastQueue.take();
+                    String jsonString = jsonMapper.writeValueAsString(metricToBroadcast);
+                    DeathStar.getWebSocketServer().broadcastToAllWebSocketClients(jsonString);
+                    logger.log(Level.FINE, "Broadcast metric thread published an event to all webSocket clients: {0}", jsonString);
+
                 }
 
             } catch (InterruptedException e) {

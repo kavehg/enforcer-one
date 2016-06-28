@@ -1,5 +1,6 @@
 package io.enforcer.deathstar;
 
+import io.enforcer.deathstar.pojos.Metric;
 import io.enforcer.deathstar.pojos.Report;
 import io.enforcer.deathstar.pojos.Status;
 import org.glassfish.jersey.moxy.json.MoxyJsonConfig;
@@ -29,6 +30,7 @@ public class DeathStarClient {
     private final Client client;
     private final WebTarget statusAPI;
     private final WebTarget reportAPI;
+    private final WebTarget metricAPI;
 
     public DeathStarClient(String host, Integer port) {
         this.deathStarHost = host;
@@ -50,6 +52,7 @@ public class DeathStarClient {
 
         statusAPI = client.target("http://" + deathStarHost + ":" + deathStarPort + "/api/status");
         reportAPI = client.target("http://" + deathStarHost + ":" + deathStarPort + "/api/reports");
+        metricAPI = client.target("http://" + deathStarHost + ":" + deathStarPort + "/api/metrics");
     }
 
     public void sendStatus(Status status) {
@@ -62,6 +65,11 @@ public class DeathStarClient {
     public void sendReport(Report report) {
         reportAPI.request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(report, MediaType.APPLICATION_JSON_TYPE), Report.class);
+    }
+
+    public void sendMetric(Metric metric) {
+        metricAPI.request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(metric, MediaType.APPLICATION_JSON_TYPE), Metric.class);
     }
 
     public static void main(String[] args) {

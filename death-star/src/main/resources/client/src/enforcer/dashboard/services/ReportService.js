@@ -7,6 +7,18 @@ angular.module('Enforcer.Dashboard')
     .service('ReportService', ['$resource', '$q', '$log', '$rootScope', function($resource, $q, $log, $scope, $rootScope) {
 
         /** ========================================================================================
+         ** Report Object
+         ** ===================================================================================== */
+        var Report = function(data) {
+            this.processId = data.header;
+            this.host = data.headerDetail;
+            this.mainClass = data.classPath;
+            this.processStateChange = data.detail;
+            this.status = data.status;
+            this.timeStamp = data.timeStamp;
+        }
+
+        /** ========================================================================================
          ** Reports
          ** ===================================================================================== */
 
@@ -252,6 +264,49 @@ angular.module('Enforcer.Dashboard')
             return -1;
         }
 
+        function updateReports(report) {
+            var deferred = $q.defer();
+
+            //if the object is not a Report object, convert then try again
+            if (report.processId != null) {
+                if (reports.length > 0) {
+                    for (var i = 0; i < reports.length; i++) {
+                        if (reports[i].processId == report.processId && reports[i].host == report.host && reports[i].processStateChange == report.processStateChange && reports[i].mainClass == report.mainClass) {
+                            reports[i] = report;
+                            //ToDo: The promise is not returned when the card is moved in the dashboard for some reason
+                            deferred.reject('Report Service: Report Updated');
+                            return deferred.promise;
+                        }
+                    }
+                    //if the report cannot be updated it does not exist and must be added
+                    reports.push(report);
+                    deferred.resolve('Report Service: New Report Added');
+                    return deferred.promise;
+                    //return -1;
+                }
+                //if the report list is empty add the new metric
+                else {
+                    reports.push(report);
+                    deferred.resolve('Report Service: New Report Added');
+                    return deferred.promise;
+                    //return -1;
+                }
+            }
+            //assuming the object is a card object, try to convert to metric object and update
+            else {
+                var newReport = new Report(report);
+                if (newReport.processId != null && report.type != "Metric") {
+                    updateReports(newReport);
+                }
+                else {
+                 deferred.reject('Report Service: Invalid Report object, could not update reports');
+                 return deferred.promise;
+                }
+            }
+
+            return deferred.promise;
+        }
+
         /** ========================================================================================
          ** Return
          ** ===================================================================================== */
@@ -262,7 +317,8 @@ angular.module('Enforcer.Dashboard')
             getReport: getReport,
             getReports: getReports,
             addReport: addReport,
-            moveReport: moveReport
+            moveReport: moveReport,
+            updateReports: updateReports
         };
 
     }]);

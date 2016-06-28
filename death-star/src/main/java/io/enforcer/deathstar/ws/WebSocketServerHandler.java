@@ -150,7 +150,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
         // Identifies any incoming Vader requests
         if (((TextWebSocketFrame) frame).text().startsWith("{\"url\"")) {
-            new Vader(((TextWebSocketFrame) frame).text());
+            String[] json = {((TextWebSocketFrame) frame).text()};
+            Vader.main(json);
+            //new Vader(((TextWebSocketFrame) frame).text());
         }
 
         // Send the uppercase string back.

@@ -6,7 +6,40 @@
  *
  */
 angular.module('Enforcer.Dashboard')
-    .controller('DashboardCtrl', function($scope, $rootScope, $log, WebSocketService, ReportService, SettingsService, AuditService, AnimationFactory) {
+    .controller('DashboardCtrl', function($scope, $rootScope, $log, WebSocketService, ReportService, MetricService, SettingsService, AuditService, AnimationFactory) {
+        /** ========================================================================================
+         ** Card Object
+         ** ===================================================================================== */
+
+        //used for all items displayed on the dashboard and audits
+        var Card = function(data) {
+            if (isReport(data)) {
+                this.header = data.processId;
+                this.headerDetail = data.host;
+                this.classPath = data.mainClass;
+                this.detail = data.processStateChange;
+                this.timeStamp = data.timeStamp;
+                this.status = data.status;
+                this.type = "Report";
+            }
+            else {
+                this.header = data.metricDetail;
+                this.headerDetail = data.average;
+                this.classPath = data.target;
+                this.detail = data.threshold;
+                this.timeStamp = data.timeStamp;
+                this.status = data.status;
+                this.type = "Metric";
+            }
+        };
+
+        function isReport(data) {
+            if (data.processId != null)
+                return true;
+
+            return false;
+        }
+
 
         /** ========================================================================================
          ** Init
@@ -42,7 +75,8 @@ angular.module('Enforcer.Dashboard')
 
             refreshSettings();
 
-            refreshReports();
+            //refreshCards();
+            //refreshReports();
 
             // Check reports every $scope.settings.escalationTime
             setInterval(function () {
@@ -80,14 +114,15 @@ angular.module('Enforcer.Dashboard')
             refreshSettings();
         });
 
-        // Listen for broadcast update from the websocketservice when reports arrive
-        $scope.$on('reportsChanged', function() {
-            refreshReports();
-        });
-
+        //Listens to WebSocketService for new reports
         $scope.$on('reportReceived', function() {
             $scope.checkForReport();
         });
+
+        //Listens to WebSocketService for new metrics
+        $scope.$on('metricsReceived', function() {
+            $scope.checkForMetric();
+        })
 
         /** ========================================================================================
          ** Functions
@@ -96,21 +131,80 @@ angular.module('Enforcer.Dashboard')
         $scope.checkForReport = function() {
             WebSocketService.getReport().then(
                 function(returnedReport) {
-                    $scope.received = true
-                    ReportService.addReport(returnedReport).then(
+                    $scope.received = true;
+                    ReportService.updateReports(returnedReport).then(
                         function(result) {
+                            $scope.new.push(new Card(returnedReport));
                             reportAddedToast(returnedReport);
                             log(result);
                         },
                         function(err){
                             log(err);
                         });
-                    $scope.$broadcast('reportsChanged');
+                    //$scope.$broadcast('cardsChanged');
                 },
                 function() {
                     $scope.received = false;
                 }
             );
+        }
+
+        // Checks the WebSocketService for any new metrics
+        $scope.checkForMetric = function() {
+            WebSocketService.getMetric().then(
+                function(returnedMetric) {
+                    $scope.received = true;
+                    MetricService.updateMetrics(returnedMetric).then(
+                        function(result) {
+                            $scope.new.push(new Card(returnedMetric));
+                            $rootScope.$broadcast('metricAdded');
+                            metricAddedToast(returnedMetric);
+                            log(result);
+                        },
+                        function (update) {
+                            updateMetricCard(returnedMetric);
+                            log(update);
+                        }
+                    );
+                },
+                function() {
+                    $scope.received = false;
+                }
+            );
+        }
+
+        //ToDo: Metrics which are still above threshold be moved to new
+        function updateMetricCard(update) {
+
+            var card = new Card(update);
+            for (var i = 0; i < $scope.new.length; i++) {
+                if ($scope.new[i].classPath == update.classPath) {
+                    log("New Updating...")
+                    moveCard($scope.new[i], update.status);
+                    return;
+                }
+            }
+            for (var i = 0; i < $scope.acknowledged.length; i++) {
+                if ($scope.acknowledged[i].classPath == update.classPath) {
+                    log("Ack Updating...")
+                    moveCard($scope.acknowledged[i], update.status);
+                    return;
+                }
+            }
+            for (var i = 0; i < $scope.escalated.length; i++) {
+                if ($scope.escalated[i].classPath == update.classPath) {
+                    log("Esc Updating...")
+                    moveCard($scope.escalated[i], update.status);
+                    return;
+                }
+            }
+            for (var i = 0; i < $scope.history.length; i++) {
+                if ($scope.history[i].classPath == update.classPath) {
+                    log("Hist Updating...")
+                    moveCard($scope.history[i], update.status);
+                    return;
+                }
+            }
         }
 
         // Calls the SettingsService and retrieves the updated settings
@@ -130,64 +224,77 @@ angular.module('Enforcer.Dashboard')
             );
         }
 
-        // Calls the ReportService and retrieves any new reports
-        function refreshReports() {
-            ReportService.getReports().then(
-                function(returnedReports) {
-                    // If report doesn't already exist, add to $scope.new
-                    if (returnedReports.length > 0) {
-                        allocateReports(returnedReports);
-                    };
+        // Removes a card from one column and adds it to
+        // the column of the newStatus
+        function moveCard(card, newStatus) {
 
-                    log('DashboardCtrl: Reports Refreshed');
-
-                }, function(err) {
-                    $scope.received = false;
-                    logError('DashboardCtrl: Reports Refresh FAILED');
-                }
-            );
-        }
-
-        // Moves a report from one column to another
-        function moveReport(report) {
-
-            ReportService.moveReport(report).then(
-                function(data) {
-                    $rootScope.$broadcast('reportsChanged');
-                    log('DashboardCtrl: Moved Report ' + data);
-
-                }, function(err) {
-                    $scope.received = false;
-                    logError('DashboardCtrl: Move Report FAILED ' + err);
-                }
-            );
-        }
-
-        // Will sort a list of reports and assign them to their appropriate sub-list
-        // based on their status
-        function allocateReports(reports) {
-
-            // Reset arrays
-            $scope.new.length = 0;
-            $scope.acknowledged.length = 0;
-            $scope.escalated.length = 0;
-            $scope.history.length = 0;
-
-            // Loop through reports and assign to arrays
-            for(var i=0; i < reports.length; i++) {
-                if (reports[i].status == 'New')
-                    $scope.new.push(reports[i]);
-                else if (reports[i].status == 'Acknowledged')
-                    $scope.acknowledged.push(reports[i]);
-                else if (reports[i].status == 'Escalated')
-                    $scope.escalated.push(reports[i]);
-                else if (reports[i].status == 'History')
-                    $scope.history.push(reports[i]);
+            if (card.status == "New"){
+                $scope.new.splice($scope.new.indexOf(card), 1);
+                allocateCard(card, newStatus);
             }
-            return true;
+            else if (card.status == "Acknowledged") {
+                $scope.acknowledged.splice($scope.acknowledged.indexOf(card), 1);
+                allocateCard(card, newStatus);
+            }
+            else if (card.status == "Escalated") {
+                $scope.escalated.splice($scope.escalated.indexOf(card), 1);
+                allocateCard(card, newStatus);
+            }
+            else if (card.status == "History") {
+                $scope.history.splice($scope.history.indexOf(card), 1);
+                allocateCard(card, newStatus);
+            }
         }
 
-        // Checks all of the New reports against time
+        // Makes sure that each service has the right information for the cards on the dashboard
+        function syncServices(card) {
+            if (card.type == "Metric"){
+                MetricService.updateMetrics(card).then(
+                    function(result){
+                        log(result);
+                    },
+                    function(update){
+                        log(update);
+                    }
+                );
+            }
+            else {
+                ReportService.updateReports(card).then(
+                    function(result){
+                        log(result);
+                    },
+                    function(update){
+                        log(update);
+                    }
+                );
+            }
+
+            MetricService.getMetrics().then (function(metrics) {
+                log(metrics);
+            });
+        }
+
+        // Adds cards to their appropriate sub-list
+        // based on their status
+        function allocateCard(card, newStatus) {
+            card.status = newStatus;
+            if (newStatus == "New"){
+                $scope.new.push(card);
+            }
+            else if (newStatus == "Acknowledged") {
+                $scope.acknowledged.push(card);
+            }
+            else if (newStatus == "Escalated") {
+                $scope.escalated.push(card);
+            }
+            else if (newStatus == "History") {
+                $scope.history.push(card);
+            }
+
+            syncServices(card);
+        }
+
+        // Checks all of the New cards against time
         function reportScan() {
 
             var currentTime;
@@ -213,7 +320,7 @@ angular.module('Enforcer.Dashboard')
             return true;
         }
 
-        // Auto moves a report from New to Escalated after $scope.settings.escalationTime has passed
+        // Auto moves a card from New to Escalated after $scope.settings.escalationTime has passed
         function escalateReport(report) {
 
             var newAudit = createAudit(report, "Escalated", "Auto Escalation");
@@ -221,8 +328,7 @@ angular.module('Enforcer.Dashboard')
 
             $scope.$apply(function() {
                 $scope.removeCard(report);
-                report.status = "Escalated";
-                moveReport(report);
+                moveCard(report, "Escalated");
             });
 
         }
@@ -244,18 +350,19 @@ angular.module('Enforcer.Dashboard')
             );
         }
 
-        // Creates an Audit item from a given report, newStatus and userAcf2Id
-        function createAudit(report, oldStatus, userAcf2Id) {
+        // Creates an Audit item from a given card, oldStatus and userAcf2Id
+        function createAudit(card, newStatus, userAcf2Id) {
 
             var audit = {
                 "_id" : "",
-                "processId" : report.processId,
-                "host" : report.host,
-                "mainClass" : report.mainClass,
-                "processStateChange" : report.processStateChange,
-                "timeStamp" : report.timeStamp,
-                "oldStatus" : oldStatus,
-                "newStatus" : report.status,
+                "header" : card.header,
+                "headerDetail" : card.headerDetail,
+                "classPath" : card.classPath,
+                "detail" : card.detail,
+                "timeStamp" : card.timeStamp,
+                "oldStatus" : card.status,
+                "newStatus" : newStatus,
+                "type" : card.type,
                 "movedTime" : new Date().getTime(),
                 "userAcf2Id" : userAcf2Id
             }
@@ -263,10 +370,17 @@ angular.module('Enforcer.Dashboard')
             return audit;
         }
 
-        //Creates toast specifically for when a new report comes in from server.
+        //Creates toast specifically for when a new report comes in from DeathStar
         function reportAddedToast(report) {
             AnimationFactory.playAnimation("#"+report.status+"Col", "flash");
             var toast = "<p><span class='New'>NEW</span> REPORT: "+report.processId+" "+report.processStateChange+"</p>";
+            Materialize.toast(toast, 4000);
+        }
+
+        //Creates a toast specifically for when a new metric comes in from DeathStar
+        function metricAddedToast(metric) {
+            AnimationFactory.playAnimation("#"+metric.status+"Col", "flash");
+            var toast = "<p><span class='New'>NEW</span> METRIC: "+metric.metricDetail+" "+metric.average+"</p>";
             Materialize.toast(toast, 4000);
         }
 
@@ -283,15 +397,13 @@ angular.module('Enforcer.Dashboard')
             if (detailDrop || data.status == "New")
             return
 
-            var oldStatus = data.status;
+            var newStatus = "New";
+
+            var newAudit = createAudit(data, newStatus,"HERRET2");
+
+            moveCard(data, newStatus);
 
             $scope.removeCard(data);
-
-            data.status = "New";
-
-            moveReport(data);
-
-            var newAudit = createAudit(data, oldStatus,"HERRET2");
 
             addAudit(newAudit);
 
@@ -306,15 +418,13 @@ angular.module('Enforcer.Dashboard')
             if (detailDrop || data.status == "Acknowledged")
             return
 
-            var oldStatus = data.status;
+            var newStatus = "Acknowledged";
+
+            var newAudit = createAudit(data, newStatus,"HERRET2");
+
+            moveCard(data, newStatus);
 
             $scope.removeCard(data);
-
-            data.status = "Acknowledged";
-
-            moveReport(data);
-
-            var newAudit = createAudit(data, oldStatus,"HERRET2");
 
             addAudit(newAudit);
 
@@ -329,15 +439,13 @@ angular.module('Enforcer.Dashboard')
             if (detailDrop || data.status == "Escalated")
             return
 
-            var oldStatus = data.status;
+            var newStatus = "Escalated";
+
+            var newAudit = createAudit(data, newStatus,"HERRET2");
+
+            moveCard(data, newStatus);
 
             $scope.removeCard(data);
-
-            data.status = "Escalated";
-
-            moveReport(data);
-
-            var newAudit = createAudit(data, oldStatus,"HERRET2");
 
             addAudit(newAudit);
 
@@ -352,16 +460,13 @@ angular.module('Enforcer.Dashboard')
             if (detailDrop || data.status == "History")
             return;
 
+            var newStatus = "History";
 
-            var oldStatus = data.status;
+            var newAudit = createAudit(data, newStatus,"HERRET2");
+
+            moveCard(data, newStatus);
 
             $scope.removeCard(data);
-
-            data.status = "History";
-
-            moveReport(data);
-
-            var newAudit = createAudit(data, oldStatus,"HERRET2");
 
             addAudit(newAudit);
 
@@ -388,7 +493,7 @@ angular.module('Enforcer.Dashboard')
             AuditService.getAuditTrail().then(
                 function(returnedAuditTrail) {
                     for (var i = 0; i < returnedAuditTrail.length; i++) {
-                        if (returnedAuditTrail[i].processId == data.processId && returnedAuditTrail[i].processStateChange == data.processStateChange) {
+                        if (returnedAuditTrail[i].header == data.header && returnedAuditTrail[i].classPath == data.classPath && returnedAuditTrail[i].detail == data.detail) {
                             $scope.returnedAudits.push(returnedAuditTrail[i]);
                         }
                     }

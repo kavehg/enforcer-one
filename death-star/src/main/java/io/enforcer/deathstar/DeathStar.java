@@ -1,6 +1,7 @@
 package io.enforcer.deathstar;
 
 //import io.enforcer.deathstar.services.PersistenceService;
+import io.enforcer.deathstar.services.MetricService;
 import io.enforcer.deathstar.services.ReportService;
 import io.enforcer.deathstar.services.StatusService;
 import io.enforcer.deathstar.ws.WebSocketServer;
@@ -33,6 +34,8 @@ public class DeathStar {
     private static StatusService statusService;
 
     private static ReportService reportService;
+
+    private static MetricService metricService;
 
     private static WebSocketServer webSocketServer;
 
@@ -89,6 +92,10 @@ public class DeathStar {
         reportService = new ReportService();
         reportService.startBroadcastThread();
 
+        // metric service
+        metricService = new MetricService();
+        metricService.startBroadcastThread();
+
         // wait todo: handle service stop & CTRL+C
         try {
             Thread.sleep(Long.MAX_VALUE);
@@ -115,6 +122,12 @@ public class DeathStar {
     public static ReportService getReportService() {
         return reportService;
     }
+
+    /**
+     * Obtain reference to metric service
+     * @return report service instance
+     */
+    public static MetricService getMetricService() { return metricService; }
 
     /**
      * Obtain reference to web socket server

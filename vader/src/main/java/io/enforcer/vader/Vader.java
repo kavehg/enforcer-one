@@ -1,6 +1,9 @@
 package io.enforcer.vader;
 
 import io.enforcer.deathstar.DeathStarClient;
+
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,24 +12,42 @@ import java.util.logging.Logger;
  */
 
 /**
- * Vader - Very early version of a metric monitoring component,
- * metrics from graphite
+ * Vader - Early version of a graphite metrics monitoring component
  */
 public class Vader {
 
     private static final Logger logger = Logger.getLogger(Vader.class.getName());
     private static final VaderConfiguration config = new VaderConfiguration(null);
+    private static final ConsoleHandler consoleHandler = new ConsoleHandler();
 
     private DeathStarClient deathstar;
     private GraphiteMaster graphiteMaster;
 
-    //ToDo: Make Vader a separate process from DeathStar
-    //ToDo: Write tests
+    public static void main (String[] args) {
+        Logger globalLogger = Logger.getLogger("");
+        Handler[] handlers = globalLogger.getHandlers();
+        for(Handler handler : handlers) {
+            globalLogger.removeHandler(handler);
+        }
+
+        // Configure console logger & set levels
+        consoleHandler.setLevel(Level.INFO);
+        globalLogger.addHandler(consoleHandler);
+        globalLogger.setLevel(Level.ALL);
+
+        new Vader(args[0]);
+    }
+
     public Vader (String jsonString) {
 
         deathstar = connectToDeathStar();
-        graphiteMaster = new GraphiteMaster(jsonString);
-        graphiteMaster.startMetricMonitoring();
+
+        if (deathstar != null) {
+            graphiteMaster = new GraphiteMaster(jsonString);
+            graphiteMaster.startMetricMonitoring();
+        } else {
+            logger.log(Level.SEVERE, "Could not connect ot DeathStar");
+        }
     }
 
     /**
