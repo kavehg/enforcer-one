@@ -15,6 +15,8 @@
  */
 package io.enforcer.deathstar.ws;
 
+import com.google.gson.Gson;
+import io.enforcer.deathstar.pojos.MetricRequest;
 import io.enforcer.vader.Vader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -29,6 +31,16 @@ import io.netty.handler.codec.http.HttpHeaderUtil;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,6 +71,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      */
     private WebSocketServerHandshaker handshaker;
 
+
+    private Map<String, Vader> vaderMap = new ConcurrentHashMap<>(1000);
     /**
      * Handler for webSockets
      */
@@ -125,6 +139,86 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     /**
+     * Handle incoming Vader requests with different operations for ADD, EDIT, and REMOVE
+     * @param ctx
+     * @param frame
+     * @return
+     */
+    private boolean handleVaderRequest(ChannelHandlerContext ctx, WebSocketFrame frame) {
+        if (((TextWebSocketFrame) frame).text().startsWith("{\"url\"")) {
+            String json = ((TextWebSocketFrame) frame).text();
+            Gson gson = new Gson();
+            MetricRequest req = gson.fromJson(json, MetricRequest.class);
+            if (checkMetricValidity(req.url)) {
+                if (req.type.equals("ADD")) {
+                    Vader newVader = new Vader(req);
+                    vaderMap.put(req.metricDetail, newVader);
+                }
+                else if (req.type.equals("EDIT")) {
+                    Vader vader = vaderMap.remove(req.metricDetail);
+                    vader.getGraphiteMaster().stopMetricMonitoring();
+                    vader = null;
+                    Vader newVader = new Vader(req);
+                    vaderMap.put(req.metricDetail, newVader);
+                }
+                else if (req.type.equals("REMOVE")) {
+                    Vader removeVader = vaderMap.remove(req.metricDetail);
+                    removeVader.getGraphiteMaster().stopMetricMonitoring();
+                    removeVader = null;
+                    logger.log(Level.INFO, req.metricDetail + " Removed.");
+                }
+                logger.log(Level.INFO, String.valueOf(vaderMap.size()));
+            }
+            else {
+                if (req.type.equals("ADD")) {
+                    ctx.channel().write(new TextWebSocketFrame("ERROR: Could not process Metric(s) request"));
+                    req.type = "REMOVE";
+                    ctx.channel().write(new TextWebSocketFrame(gson.toJson(req)));
+                }
+                else if (req.type.equals("EDIT")){
+                    ctx.channel().write(new TextWebSocketFrame("ERROR: Vader could not be edited."));
+                }
+                else if (req.type.equals("REMOVE")) {
+                    Vader removeVader = vaderMap.remove(req.metricDetail);
+                    removeVader.getGraphiteMaster().stopMetricMonitoring();
+                    removeVader = null;
+                    logger.log(Level.INFO, req.metricDetail + " Removed.");
+                }
+            }
+            return true;
+        }
+        return false;
+
+    }
+
+
+    /**
+     * Checks validity of metric path. If an empty json object is returned
+     * the client will be informed that the Vader could not be created.
+     * @param url
+     * @return
+     */
+    private boolean checkMetricValidity(String url) {
+        try {
+            URL http = new URL(url);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(http.openStream()));
+            if (reader.readLine().equals("[]")){
+                logger.log(Level.INFO, "Metric Request Invalid");
+                return false;
+            }
+            return true;
+        }
+        catch (MalformedURLException e) {
+            logger.log(Level.SEVERE, "Metric Request Invalid");
+            return false;
+        }
+        catch (IOException e) {
+            logger.log(Level.SEVERE, "Could not retrieve Metric.");
+            return false;
+        }
+    }
+
+    /**
      * Invoked once we determine that the http request is using the webSocket
      * protocol
      *
@@ -148,17 +242,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     .getName()));
         }
 
-        // Identifies any incoming Vader requests
-        if (((TextWebSocketFrame) frame).text().startsWith("{\"url\"")) {
-            String[] json = {((TextWebSocketFrame) frame).text()};
-            Vader.main(json);
-            //new Vader(((TextWebSocketFrame) frame).text());
+        if (!handleVaderRequest(ctx, frame)) {
+            // Send the uppercase string back.
+            String request = ((TextWebSocketFrame) frame).text();
+            System.err.printf("%s received %s%n", ctx.channel(), request);
+            ctx.channel().write(new TextWebSocketFrame(request.toUpperCase()));
         }
-
-        // Send the uppercase string back.
-        String request =((TextWebSocketFrame) frame).text();
-        System.err.printf("%s received %s%n", ctx.channel(), request);
-        ctx.channel().write(new TextWebSocketFrame(request.toUpperCase()));
     }
 
     /**

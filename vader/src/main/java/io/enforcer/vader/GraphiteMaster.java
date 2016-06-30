@@ -3,8 +3,7 @@ package io.enforcer.vader;
 import com.google.gson.*;
 import io.enforcer.deathstar.DeathStarClient;
 import io.enforcer.deathstar.pojos.Metric;
-import io.enforcer.deathstar.pojos.Report;
-import io.enforcer.vader.pojos.MetricRequest;
+import io.enforcer.deathstar.pojos.MetricRequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -60,9 +59,9 @@ public class GraphiteMaster {
      */
     private ScheduledExecutorService service;
 
-    public GraphiteMaster (String metric) {
+    public GraphiteMaster (MetricRequest req) {
         deathstar = connectToDeathStar();
-        this.request = gson.fromJson(metric, MetricRequest.class);
+        this.request = req;
     }
 
     /**
@@ -76,6 +75,7 @@ public class GraphiteMaster {
             reader = new BufferedReader(new InputStreamReader(url.openStream()));
             String json = reader.readLine();
             currentMetrics = parseMetricData(json);
+            reader.close();
         } catch (IOException e) {
             e.printStackTrace();
             logger.log(Level.INFO, "Vader: Unable to retrieve data from Graphite");
@@ -146,7 +146,15 @@ public class GraphiteMaster {
      */
     public void startMetricMonitoring(){
         service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(new GraphiteMonitor(), 10, 10, TimeUnit.SECONDS);
+        service.scheduleAtFixedRate(new GraphiteMonitor(), 0, 1, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Shut down Executor for future calls
+     */
+    public void stopMetricMonitoring() {
+        logger.log(Level.INFO, "Vader Shutdown");
+        service.shutdownNow();
     }
 
     private DeathStarClient connectToDeathStar() {

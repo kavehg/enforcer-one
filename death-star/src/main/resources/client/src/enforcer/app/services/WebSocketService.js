@@ -3,7 +3,7 @@
  * are acceessed by controllers.
  */
 angular.module('Enforcer.Common')
-    .service('WebSocketService', ['$q', '$rootScope', function($q, $rootScope) {
+    .service('WebSocketService', ['$q', '$rootScope', 'MetricService', function($q, $rootScope, MetricService) {
 
         var ws = new WebSocket("ws://localhost:9090");
 
@@ -77,25 +77,51 @@ angular.module('Enforcer.Common')
 
         // When WebSocket receives a message
         ws.onmessage = function(message) {
-            console.log("Received message: " + JSON.stringify(message.data));
 
-            var theMsg = JSON.parse(message.data);
+            if (isJson(message.data)) {
+                console.log("Received message: " + JSON.stringify(message.data));
 
-            // Depending on type of message received, broadcast on rootScope to alert controllers
-            if(isStatus(theMsg)){
-                statuses.push(theMsg);
-                $rootScope.$broadcast('statusReceived');
+                var theMsg = JSON.parse(message.data);
+
+                // Depending on type of message received, broadcast on rootScope to alert controllers
+                if(isStatus(theMsg)){
+                    statuses.push(theMsg);
+                    $rootScope.$broadcast('statusReceived');
+                }
+                else if (isMetric(theMsg)){
+                    metrics.push(theMsg);
+                    $rootScope.$broadcast('metricsReceived');
+                }
+                else if (isMetricRequest(theMsg)) {
+                    if (theMsg.type === "REMOVE") {
+                        MetricService.updateMetricRequests(theMsg).then(
+                            function (removed) {
+                                console.log(removed);
+                            }
+                        );
+                    }
+                }
+                else if (isReport(theMsg)) {
+                    reports.push(theMsg);
+                    $rootScope.$broadcast('reportReceived');
+                }
             }
-            else if (isMetric(theMsg)){
-                metrics.push(theMsg);
-                $rootScope.$broadcast('metricsReceived');
-            }
-            else if (isReport(theMsg)) {
-                reports.push(theMsg);
-                $rootScope.$broadcast('reportReceived');
-            }
+            else
+                Materialize.toast(message.data, 5000);
+
 
         };
+
+        // Check if message is Json
+        function isJson(message) {
+            try {
+                JSON.parse(message);
+            }
+            catch (e) {
+                return false;
+            }
+            return true;
+        }
 
         // Check if message is a status.
         function isStatus(message) {
@@ -116,6 +142,13 @@ angular.module('Enforcer.Common')
         //Checks if message is report
         function isReport(message) {
             if (message.processId != null)
+                return true;
+
+            return false;
+        }
+
+        function isMetricRequest(message) {
+            if (message.url != null)
                 return true;
 
             return false;

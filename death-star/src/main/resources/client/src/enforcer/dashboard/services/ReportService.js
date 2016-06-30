@@ -16,6 +16,7 @@ angular.module('Enforcer.Dashboard')
             this.processStateChange = data.detail;
             this.status = data.status;
             this.timeStamp = data.timeStamp;
+            this.type = "Report";
         }
 
         /** ========================================================================================
@@ -147,6 +148,24 @@ angular.module('Enforcer.Dashboard')
                     deferred.reject(err);
                 }
             );
+
+            return deferred.promise;
+        }
+
+        //Find single Report
+        function findReport(data) {
+            var deferred = $q.defer();
+            var report = new Report(data);
+            if (reports.length > 0) {
+                for (var i = 0; i < reports.length; i++){
+                    if (reports[i].processId == report.processId && reports[i].processStateChange == report.processStateChange) {
+                        deferred.resolve(reports[i]);
+                        return deferred.promise;
+                    }
+                }
+                deferred.reject("ReportService: Could not find report");
+            }
+            else {deferred.reject("ReportService: No Reports1");}
 
             return deferred.promise;
         }
@@ -318,7 +337,8 @@ angular.module('Enforcer.Dashboard')
             getReports: getReports,
             addReport: addReport,
             moveReport: moveReport,
-            updateReports: updateReports
+            updateReports: updateReports,
+            findReport: findReport
         };
 
     }]);

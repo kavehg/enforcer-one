@@ -7,7 +7,7 @@ angular.module('Enforcer.Dashboard')
         /** ========================================================================================
          ** Metric Object
          ** ===================================================================================== */
-
+        //Constructor for Metric object
         var Metric = function (data) {
             this.target = data.classPath;
             this.datapoints = [];
@@ -16,11 +16,23 @@ angular.module('Enforcer.Dashboard')
             this.timeStamp = data.timeStamp;
             this.metricDetail = data.header;
             this.status = data.status;
+            this.type = "Metric";
+        }
+
+        //Constructor for MetricRequest object
+        var MetricRequest = function (data) {
+            this.url = data.url;
+            this.metricDetail = data.metricDetail;
+            this.threshold = data.threshold;
+            this.type = data.type;
         }
 
         /** ========================================================================================
          ** Variables
          ** ===================================================================================== */
+        //Most recent EDIT/REMOVE request
+        var recentRequest;
+
         //Holds each metric request made from the metric request modal
         var metricRequests = [];
 
@@ -39,7 +51,7 @@ angular.module('Enforcer.Dashboard')
             if (metric.target != null) {
                 if (metrics.length > 0) {
                     for (var i = 0; i < metrics.length; i++) {
-                        if (metrics[i].target == metric.target) {
+                        if (metrics[i].target == metric.target && metrics[i].header == metric.header) {
                             //For when a metric is moved, retains datapoints
                             if (metric.datapoints.length == 0) {
                                 metric.datapoints = metrics[i].datapoints;
@@ -54,19 +66,16 @@ angular.module('Enforcer.Dashboard')
                     metrics.push(metric);
                     deferred.resolve('Metric Service: New Metric Added');
                     return deferred.promise;
-                    //return -1;
                 }
                 //if the metric list is empty add the new metric
                 else {
                     metrics.push(metric);
                     deferred.resolve('Metric Service: New Metric Added');
                     return deferred.promise;
-                    //return -1;
                 }
             }
             //assuming the object is a card object, try to convert to metric object and update
             else {
-
                 var newMetric = new Metric(metric);
                 if (newMetric.target != null && metric.type != "Report") {
                     updateMetrics(newMetric);
@@ -76,34 +85,73 @@ angular.module('Enforcer.Dashboard')
                  return deferred.promise;
                 }
             }
-
+            deferred.resolve("bleh");
            return deferred.promise;
         }
 
+        //Adds or updates Metric Requests depending on whether or not it already exists
         function updateMetricRequests(metricRequest) {
             var deferred = $q.defer();
             if (metricRequests.length > 0) {
                 for (var i = 0; i < metricRequests.length; i++) {
-                    if (metricRequests[i].url == metricRequest.url) {
-                        deferred.reject("Metric is already being monitored.");
+                    if (metricRequests[i].url == metricRequest.url && metricRequest.type !== "EDIT" && metricRequest.type !== "REMOVE") {
+                        deferred.reject("Vader is already monitoring this Metric.");
                         return deferred.promise;
                     }
                     else if (metricRequests[i].metricDetail == metricRequest.metricDetail) {
-                        deferred.reject("This Metric Detail is already in use. Please try a different name.");
-                        return deferred.promise;
+                        if (metricRequest.type === "EDIT") {
+                            metricRequests[i] = metricRequest;
+                            recentRequest = metricRequests[i];
+                            removeMetrics(metricRequest);
+                            deferred.resolve("MetricService: Vader Updated")
+                            return deferred.promise;
+                        }
+                        else if (metricRequest.type === "REMOVE") {
+                            metricRequests.splice(i, 1);
+                            deferred.resolve("MetricService: Vader Removed");
+                            recentRequest = metricRequest;
+                            removeMetrics(metricRequest);
+                            return deferred.promise;
+                        }
+                        else
+                        {
+                            deferred.reject("This Vader is already in use. Please try a different name.");
+                            return deferred.promise;
+                        }
                     }
                 }
-
-                metricRequests.push(metricRequest);
-                deferred.resolve("Metric Request Added");
-                return deferred.promise;
+                if (metricRequest.type === "ADD") {
+                    metricRequests.push(metricRequest);
+                    deferred.resolve("MetricService: Metric Request Added");
+                    return deferred.promise;
+                }
+                else if (metricRequest.type === "EDIT") {
+                    deferred.reject("Vader could not be edited. Make sure the Metric Detail matches the name of the Vader to be edited.");
+                    return deferred.promise;
+                }
+                else if (metricRequest.type === "REMOVE") {
+                    deferred.reject("Vader does not exist to be removed.")
+                    return deferred.promise;
+                }
             }
             else {
                 metricRequests.push(metricRequest);
-                deferred.resolve("Metric Request Added");
+                deferred.resolve("MetricService: Metric Request Added");
                 return deferred.promise;
             }
+        }
 
+        //When an EDIT or REMOVE request is made, query through metrics and remove anything that was being monitored
+        function removeMetrics(req) {
+            var remove = [];
+            for (var i = 0; i < metrics.length; i++) {
+                if (metrics[i].metricDetail === req.metricDetail) {
+                    remove.push(i);
+                }
+            }
+            for (var i = remove.length-1; i >= 0; i--) {
+                metrics.splice(remove[i], 1);
+            }
         }
 
         //Returns metrics array
@@ -134,11 +182,50 @@ angular.module('Enforcer.Dashboard')
             return deferred.promise;
         }
 
+        //Returns recentRequest which hold the most recent EDIT or REMOVE request
+        function getRecentRequest() {
+            var deferred = $q.defer();
+
+            if (recentRequest != null) {
+                deferred.resolve(recentRequest);
+            }
+            else {
+                deferred.reject("No recent requests for edit or remove");
+            }
+
+            return deferred.promise;
+        }
+
+        //Find a single Metric
+        function findMetric(data) {
+            var deferred = $q.defer();
+
+            var metric = data;
+            if (metric.target == null) {
+                metric = new Metric(metric);
+            }
+
+            if (metrics.length > 0) {
+                for (var i = 0; i < metrics.length; i++) {
+                    if (metrics[i].target == metric.target && metrics[i].metricDetail == metric.metricDetail) {
+                        deferred.resolve(metrics[i]);
+                        return deferred.promise;
+                    }
+                }
+                deferred.reject("MetricService: Could not find Metric");
+            }
+            else { deferred.reject("MetricService: No Metrics!"); }
+
+            return deferred.promise;
+        }
+
         return {
             getMetrics: getMetrics,
             getMetricRequests: getMetricRequests,
             updateMetrics: updateMetrics,
-            updateMetricRequests: updateMetricRequests
+            updateMetricRequests: updateMetricRequests,
+            getRecentRequest: getRecentRequest,
+            findMetric: findMetric
         };
 
     }]);

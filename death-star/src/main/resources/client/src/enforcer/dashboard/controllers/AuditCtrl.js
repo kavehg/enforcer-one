@@ -78,8 +78,14 @@ angular.module('Enforcer.Dashboard')
                 function(returnedAuditTrail) {
                     $scope.received = true;
                     $scope.auditTrail = returnedAuditTrail;
-                    reportAuditToast($scope.auditTrail[$scope.auditTrail.length - 1]);
-                    AnimationFactory.playAnimation("#"+$scope.auditTrail[$scope.auditTrail.length - 1].newStatus+"Col", "flash");
+                    var audit = $scope.auditTrail[$scope.auditTrail.length - 1];
+                    if (audit.update) {
+                        reportAuditUpdateToast(audit);
+                    }
+                    else {
+                        reportAuditToast(audit);
+                        AnimationFactory.playAnimation("#"+audit.newStatus+"Col", "flash");
+                    }
                     log('AuditCtrl: Audits Refreshed');
                 }, function() {
                     $scope.received = false
@@ -112,7 +118,13 @@ angular.module('Enforcer.Dashboard')
         function reportAuditToast(audit) {
             AnimationFactory.playAnimation("#gear-button", "bounce");
             var toast = "<p>"+ audit.type +" "+audit.header+" Moved from <span class='"+audit.oldStatus+"'>"+audit.oldStatus+"</span> to <span class='"+audit.newStatus+"'>"+audit.newStatus+"</span></p>"
-            Materialize.toast(toast, 4000);
+            Materialize.toast(toast, 5000);
+        }
+
+        function reportAuditUpdateToast(audit) {
+            AnimationFactory.playAnimation("#gear-button", "bounce");
+            var toast = "<p>" + audit.type + " <span class='"+audit.status+"'>"+audit.header+"</span> Updated: "+audit.headerDetail+"</p>"
+            Materialize.toast(toast, 5000);
         }
 
 

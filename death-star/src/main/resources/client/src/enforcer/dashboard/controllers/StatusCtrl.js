@@ -67,6 +67,7 @@ angular.module('Enforcer.Dashboard')
             MetricService.getMetricRequests().then(
                 function (metrics) {
                     $scope.monitoredMetricRequests = metrics;
+
                 },
                 function (err) {
                     log("Could not display metrics to sidebar");
@@ -260,11 +261,6 @@ angular.module('Enforcer.Dashboard')
             );
         };
 
-        //opens a modal for configuring a metric monitor
-        $scope.openMetric = function() {
-            $("#modal5").openModal();
-        }
-
         // Logs message to console and prints toast if applicable
         function log (message) {
 
@@ -281,5 +277,59 @@ angular.module('Enforcer.Dashboard')
                 Materialize.toast(message, 5000);
         };
 
+        /** ========================================================================================
+         ** Manage Input from Vader Modal
+         ** ===================================================================================== */
 
+        /** ========================================================================================
+         ** Scope variables
+         ** ===================================================================================== */
+
+        $scope.metricRequest;
+
+        $scope.editVader;
+
+        /** ========================================================================================
+         ** Functions
+         ** ===================================================================================== */
+        //prepares metricRequest as json string
+        $scope.prepareMetricRequest = function(requestType) {
+            var metric = angular.copy($scope.metricRequest);
+            metric.url = "http://cpvalrsvz203.cibg.tdbank.ca:18080/render?target=summarize(" + metric.url + ",%221min%22,%22last%22)&from=-5min&format=json";
+            metric.type = requestType;
+            MetricService.updateMetricRequests(metric).then (
+                function (result) {
+                    $log.info(result);
+                    WebSocketService.sendMetricRequest(JSON.stringify(metric));
+                    $rootScope.$broadcast('metricRequestReceived');
+                },
+                function (reject) {
+                    $log.info(reject);
+                    Materialize.toast(reject, 5000);
+                }
+            );
+        }
+
+        //Modifies Vader modal to provide necessary information to modal.
+        $scope.openVaderEditor = function(metricRequest) {
+            $scope.editVader = true;
+            var metric = angular.copy(metricRequest);
+            metric.url = metric.url.substring(65, metricRequest.url.length - 46)
+            $scope.metricRequest = metric;
+            $("#modal5").openModal();
+        }
+
+        //opens a modal for configuring a metric monitor
+        $scope.openMetricModal = function() {
+            $scope.editVader = false;
+            var def = {
+                url: "veritas.market-data-service.MDS-SERVER.service.MarketDataService.addQuote.m15_rate",
+                metricDetail: "",
+                threshold: 0,
+                type:"ADD"
+            }
+            $scope.metricRequest = def;
+
+            $("#modal5").openModal();
+        }
     });

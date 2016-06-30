@@ -11,7 +11,7 @@ angular.module('Enforcer.Dashboard')
          ** Card Object
          ** ===================================================================================== */
 
-        //used for all items displayed on the dashboard and audits
+        //Object used for all items displayed on the dashboard and audits
         var Card = function(data) {
             if (isReport(data)) {
                 this.header = data.processId;
@@ -22,7 +22,7 @@ angular.module('Enforcer.Dashboard')
                 this.status = data.status;
                 this.type = "Report";
             }
-            else {
+            else if (isMetric(data)) {
                 this.header = data.metricDetail;
                 this.headerDetail = data.average;
                 this.classPath = data.target;
@@ -30,6 +30,15 @@ angular.module('Enforcer.Dashboard')
                 this.timeStamp = data.timeStamp;
                 this.status = data.status;
                 this.type = "Metric";
+            }
+            else {
+                this.header = data.header;
+                this.headerDetail = data.headerDetail;
+                this.classPath = data.classPath;
+                this.detail = data.detail;
+                this.timeStamp = data.timeStamp;
+                this.status = data.status;
+                this.type = data.type;
             }
         };
 
@@ -40,11 +49,18 @@ angular.module('Enforcer.Dashboard')
             return false;
         }
 
+        function isMetric(data) {
+            if (data.target != null)
+                return true;
+
+            return false;
+        }
+
 
         /** ========================================================================================
          ** Init
          ** ===================================================================================== */
-        //currently necessary to distinguish between a category drop and a detail drop
+        //Necessary to distinguish between a category drop and a detail drop
         var detailDrop = false;
 
         var init = function() {
@@ -70,13 +86,10 @@ angular.module('Enforcer.Dashboard')
             //Audits which match unique report query
             $scope.returnedAudits = [];
 
-            //Report currently being viewed in Report Detail modal
-            $scope.detailReport;
+            //Card currently being viewed in Card Detail modal
+            $scope.detailedCard;
 
             refreshSettings();
-
-            //refreshCards();
-            //refreshReports();
 
             // Check reports every $scope.settings.escalationTime
             setInterval(function () {
@@ -122,7 +135,22 @@ angular.module('Enforcer.Dashboard')
         //Listens to WebSocketService for new metrics
         $scope.$on('metricsReceived', function() {
             $scope.checkForMetric();
-        })
+        });
+
+        //Listens for new Metric Requests from StatusCtrl
+        $scope.$on('metricRequestReceived', function() {
+            MetricService.getRecentRequest().then (
+                function(result) {
+                    if (result.type == "EDIT") {
+                        cleanMetrics(result);
+                        refreshMetricsForEdit(result);
+                    }
+                    else {
+                        cleanMetrics(result);
+                    }
+                }
+            );
+        });
 
         /** ========================================================================================
          ** Functions
@@ -157,7 +185,6 @@ angular.module('Enforcer.Dashboard')
                     MetricService.updateMetrics(returnedMetric).then(
                         function(result) {
                             $scope.new.push(new Card(returnedMetric));
-                            $rootScope.$broadcast('metricAdded');
                             metricAddedToast(returnedMetric);
                             log(result);
                         },
@@ -173,38 +200,130 @@ angular.module('Enforcer.Dashboard')
             );
         }
 
-        //ToDo: Metrics which are still above threshold be moved to new
+        //Mainly for Metrics: updates metric card with most recent metric report.
         function updateMetricCard(update) {
 
             var card = new Card(update);
+            var oldCard;
             for (var i = 0; i < $scope.new.length; i++) {
-                if ($scope.new[i].classPath == update.classPath) {
-                    log("New Updating...")
-                    moveCard($scope.new[i], update.status);
+                if ($scope.new[i].classPath == card.classPath && $scope.new[i].header == card.header) {
+                    oldCard = angular.copy($scope.new[i]);
+
+                    $scope.new[i].header = card.header;
+                    $scope.new[i].headerDetail = card.headerDetail;
+                    $scope.new[i].classPath = card.classPath;
+                    $scope.new[i].detail = card.detail;
+                    $scope.new[i].timeStamp = card.timeStamp;
+                    $scope.new[i].status = oldCard.status;
+                    $scope.new[i].type = card.type;
+
+                    var newAudit = createUpdateAudit(oldCard, card, "Update");
+                    addAudit(newAudit);
                     return;
                 }
             }
             for (var i = 0; i < $scope.acknowledged.length; i++) {
-                if ($scope.acknowledged[i].classPath == update.classPath) {
-                    log("Ack Updating...")
-                    moveCard($scope.acknowledged[i], update.status);
+                if ($scope.acknowledged[i].classPath == card.classPath && $scope.acknowledged[i].header == card.header) {
+                    oldCard = angular.copy($scope.acknowledged[i]);
+
+                    $scope.acknowledged[i].header = card.header;
+                    $scope.acknowledged[i].headerDetail = card.headerDetail;
+                    $scope.acknowledged[i].classPath = card.classPath;
+                    $scope.acknowledged[i].detail = card.detail;
+                    $scope.acknowledged[i].timeStamp = card.timeStamp;
+                    $scope.acknowledged[i].status = oldCard.status;
+                    $scope.acknowledged[i].type = card.type;
+
+                    var newAudit = createUpdateAudit(oldCard, card, "Update");
+                    addAudit(newAudit);
                     return;
                 }
             }
             for (var i = 0; i < $scope.escalated.length; i++) {
-                if ($scope.escalated[i].classPath == update.classPath) {
-                    log("Esc Updating...")
-                    moveCard($scope.escalated[i], update.status);
+                if ($scope.escalated[i].classPath == card.classPath && $scope.escalated[i].header == card.header) {
+                    oldCard = angular.copy($scope.escalated[i]);
+
+                    $scope.escalated[i].header = card.header;
+                    $scope.escalated[i].headerDetail = card.headerDetail;
+                    $scope.escalated[i].classPath = card.classPath;
+                    $scope.escalated[i].detail = card.detail;
+                    $scope.escalated[i].timeStamp = card.timeStamp;
+                    $scope.escalated[i].status = oldCard.status;
+                    $scope.escalated[i].type = card.type;
+
+                    var newAudit = createUpdateAudit(oldCard, card, "Update");
+                    addAudit(newAudit);
                     return;
                 }
             }
             for (var i = 0; i < $scope.history.length; i++) {
-                if ($scope.history[i].classPath == update.classPath) {
-                    log("Hist Updating...")
-                    moveCard($scope.history[i], update.status);
+                if ($scope.history[i].classPath == card.classPath && $scope.history[i].header == card.header) {
+                    oldCard = angular.copy($scope.history[i]);
+
+                    $scope.history[i].header = card.header;
+                    $scope.history[i].headerDetail = card.headerDetail;
+                    $scope.history[i].classPath = card.classPath;
+                    $scope.history[i].detail = card.detail;
+                    $scope.history[i].timeStamp = card.timeStamp;
+                    $scope.history[i].status = oldCard.status;
+                    $scope.history[i].type = card.type;
+
+                    var newAudit = createUpdateAudit(oldCard, card, "Update");
+                    addAudit(newAudit);
                     return;
                 }
             }
+        }
+
+        //When a request to REMOVE or EDIT come in, remove any Cards associated with the Vader
+        function cleanMetrics(req) {
+            var clean = [];
+
+            for(var i = 0; i < $scope.new.length; i++) {
+                if ($scope.new[i].header == req.metricDetail){
+                    clean.push(i);
+                }
+            }
+            for (var i = clean.length-1; i >= 0; i--) {
+                $scope.new.splice(clean[i], 1);
+            }
+            clean = [];
+            for(var i = 0; i < $scope.acknowledged.length; i++) {
+                if ($scope.acknowledged[i].header == req.metricDetail)
+                    clean.push(i);
+            }
+            for (var i = clean.length-1; i >= 0 ; i--) {
+                $scope.acknowledged.splice(clean[i], 1);
+            }
+            clean = [];
+            for(var i = 0; i < $scope.escalated.length; i++) {
+                if ($scope.escalated[i].header == req.metricDetail)
+                    clean.push(i);
+            }
+            for (var i = clean.length-1; i >= 0 ; i--) {
+                $scope.escalated.splice(clean[i], 1);
+            }
+            clean = [];
+            for(var i = 0; i < $scope.history.length; i++) {
+                if ($scope.history[i].header == req.metricDetail)
+                    clean.push(i);
+            }
+            for (var i = clean.length-1; i >= 0 ; i--) {
+                $scope.history.splice(clean[i], 1);
+            }
+        }
+
+        //If the request was EDIT, refresh the dashboard with the edited Vader metrics
+        function refreshMetricsForEdit(req) {
+            MetricService.getMetrics().then(
+                function(result) {
+                    for (var i = 0; i < result.length; i++) {
+                        if (result[i].header = req.metricDetail) {
+                            $scope.new.push(new Card(result[i]));
+                        }
+                    }
+                }
+            );
         }
 
         // Calls the SettingsService and retrieves the updated settings
@@ -268,10 +387,6 @@ angular.module('Enforcer.Dashboard')
                     }
                 );
             }
-
-            MetricService.getMetrics().then (function(metrics) {
-                log(metrics);
-            });
         }
 
         // Adds cards to their appropriate sub-list
@@ -327,7 +442,7 @@ angular.module('Enforcer.Dashboard')
             addAudit(newAudit);
 
             $scope.$apply(function() {
-                $scope.removeCard(report);
+                //$scope.removeCard(report);
                 moveCard(report, "Escalated");
             });
 
@@ -364,10 +479,33 @@ angular.module('Enforcer.Dashboard')
                 "newStatus" : newStatus,
                 "type" : card.type,
                 "movedTime" : new Date().getTime(),
-                "userAcf2Id" : userAcf2Id
+                "userAcf2Id" : userAcf2Id,
+                "update" : false
             }
 
             return audit;
+        }
+
+        //Audits specifically for when a Card is updated
+        function createUpdateAudit(oldCard, card, userAcf2Id) {
+
+            var audit = {
+                "_id" : "",
+                "header" : card.header,
+                "oldHeaderDetail" : oldCard.headerDetail,
+                "headerDetail" : card.headerDetail,
+                "classPath" : card.classPath,
+                "oldDetail" : oldCard.detail,
+                "detail" : card.detail,
+                "timeStamp" : oldCard.timeStamp,
+                "status" : oldCard.status,
+                "type" : card.type,
+                "movedTime" : new Date().getTime(),
+                "userAcf2Id" : userAcf2Id,
+                "update" : true
+            }
+
+            return audit
         }
 
         //Creates toast specifically for when a new report comes in from DeathStar
@@ -403,11 +541,11 @@ angular.module('Enforcer.Dashboard')
 
             moveCard(data, newStatus);
 
-            $scope.removeCard(data);
+            //$scope.removeCard(data);
 
             addAudit(newAudit);
 
-            increaseHeight("#newList");
+            //increaseHeight("#newList");
         }
 
         // When a card is dropped into Acknowledged, remove it from any list it was in,
@@ -424,11 +562,11 @@ angular.module('Enforcer.Dashboard')
 
             moveCard(data, newStatus);
 
-            $scope.removeCard(data);
+            //$scope.removeCard(data);
 
             addAudit(newAudit);
 
-            increaseHeight("#acknowledgedList");
+            //increaseHeight("#acknowledgedList");
         }
 
         // When a card is dropped into Escalated, remove it from any list it was in,
@@ -445,11 +583,11 @@ angular.module('Enforcer.Dashboard')
 
             moveCard(data, newStatus);
 
-            $scope.removeCard(data);
+            //$scope.removeCard(data);
 
             addAudit(newAudit);
 
-            increaseHeight("#escalatedList");
+            //increaseHeight("#escalatedList");
         }
 
         // When a card is dropped into History, create audit item,
@@ -466,11 +604,11 @@ angular.module('Enforcer.Dashboard')
 
             moveCard(data, newStatus);
 
-            $scope.removeCard(data);
+            //$scope.removeCard(data);
 
             addAudit(newAudit);
 
-            increaseHeight("#historyList");
+            //increaseHeight("#historyList");
 
         }
 
@@ -485,10 +623,33 @@ angular.module('Enforcer.Dashboard')
             AnimationFactory.playAnimation("#detailDrop", "fadeIn");
         }
 
-        //Query for matching audits and set as report to be detailed when there is a drop in the detail box
+        //Distinguishes between report and metric for view on detail drop
+        $scope.reportOrMetric;
+        //Query for matching audits and also get data type that will modify the modal
         $scope.getReportDetails=function(data,evt){
             detailDrop = true;
-            $scope.detailReport = data;
+            if (data.type == "Report") {
+                ReportService.findReport(data).then (
+                    function(report) {
+                        $scope.detailedCard = report;
+                        $scope.reportOrMetric = true;
+                    },
+                    function (reject) {
+                        $log.info(reject);
+                    }
+                );
+            }
+            else {
+                MetricService.findMetric(data).then (
+                    function(metric) {
+                        $scope.detailedCard = metric;
+                        $scope.reportOrMetric = false;
+                    },
+                    function(reject) {
+                        $log.info(reject);
+                    }
+                )
+            }
             $("#modal4").openModal();
             AuditService.getAuditTrail().then(
                 function(returnedAuditTrail) {
@@ -503,8 +664,14 @@ angular.module('Enforcer.Dashboard')
             );
         }
 
+        //Reset scope variables
+        $scope.closeDetailModal = function() {
+            $scope.returnedAudits = [];
+            $scope.showDetailBox = false;
+        }
+
         // Reduces the height of a column when a card leaves
-        $scope.removeCard = function(data) {
+        /*$scope.removeCard = function(data) {
 
             if ($scope.new.indexOf(data) > -1)
                 reduceHeight("#newList");
@@ -515,23 +682,23 @@ angular.module('Enforcer.Dashboard')
             else if ($scope.history.indexOf(data) > -1)
                 reduceHeight("#historyList");
 
-        }
+        }*/
 
         // Reduces the height by one card for a given column
-        function reduceHeight(columnId) {
+        /*function reduceHeight(columnId) {
 
             var object = $(columnId);
 
             if (object.height() > 650)
                 object.height("-=165");
-        }
+        }*/
 
         // Increases the height by one card for a given column
-        function increaseHeight(columnId) {
+        /*function increaseHeight(columnId) {
 
             var object = $(columnId);
             object.height("+=165");
-        }
+        }*/
 
         // Logs message to console and prints toast if applicable
         function log (message) {

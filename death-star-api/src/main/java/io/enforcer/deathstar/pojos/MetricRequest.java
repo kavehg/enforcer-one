@@ -1,4 +1,4 @@
-package io.enforcer.vader.pojos;
+package io.enforcer.deathstar.pojos;
 
 /**
  * Created by SCHIAJ2 on 6/23/2016.
@@ -17,14 +17,16 @@ public class MetricRequest {
     public String url;
     public String metricDetail;
     public float threshold;
+    public String type;
 
     /** ========================================================================================
      ** Constructors
      ** ===================================================================================== */
 
-    public MetricRequest(String url, String metricDetail, float threshold) {
+    public MetricRequest(String url, String metricDetail, float threshold, String type) {
         this.url = url;
         this.metricDetail = metricDetail;
         this.threshold = threshold;
+        this.type = type;
     }
 }

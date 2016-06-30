@@ -1,6 +1,7 @@
 package io.enforcer.vader;
 
 import io.enforcer.deathstar.DeathStarClient;
+import io.enforcer.deathstar.pojos.MetricRequest;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -22,28 +23,14 @@ public class Vader {
 
     private DeathStarClient deathstar;
     private GraphiteMaster graphiteMaster;
+    private MetricRequest req;
 
-    public static void main (String[] args) {
-        Logger globalLogger = Logger.getLogger("");
-        Handler[] handlers = globalLogger.getHandlers();
-        for(Handler handler : handlers) {
-            globalLogger.removeHandler(handler);
-        }
-
-        // Configure console logger & set levels
-        consoleHandler.setLevel(Level.INFO);
-        globalLogger.addHandler(consoleHandler);
-        globalLogger.setLevel(Level.ALL);
-
-        new Vader(args[0]);
-    }
-
-    public Vader (String jsonString) {
-
+    public Vader (MetricRequest req) {
         deathstar = connectToDeathStar();
 
         if (deathstar != null) {
-            graphiteMaster = new GraphiteMaster(jsonString);
+            this.req = req;
+            graphiteMaster = new GraphiteMaster(req);
             graphiteMaster.startMetricMonitoring();
         } else {
             logger.log(Level.SEVERE, "Could not connect ot DeathStar");
@@ -81,5 +68,7 @@ public class Vader {
     public static VaderConfiguration getConfig() {
         return config;
     }
+
+    public GraphiteMaster getGraphiteMaster() { return this.graphiteMaster; }
 
 }

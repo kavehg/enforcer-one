@@ -5,6 +5,7 @@ body {
     font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
     font-weight: 400;
     font-size: 0.9em;
+    overflow: hidden;
 }
 
 .New {
@@ -39,7 +40,7 @@ body {
     padding-right: 5%;
     width: 25%;
     height: 20%;
-    top: 70%;
+    top: 75%;
     left: 0%;
     margin-left: 37.5%;
     margin-right: 37.5%;
@@ -54,4 +55,14 @@ body {
 .Report {
     background-color: #FFFFFF !important;
     color: #000000 !important;
+}
+
+.card-container {
+    height: 750px !important;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+[ng-drag].dragging {
+    opacity: 0;
 }
