@@ -69,6 +69,25 @@ angular.module('Enforcer.Dashboard')
             return deferred.promise;
         }
 
+        function cleanAudits(data) {
+            var deferred = $q.defer();
+            var clean = [];
+            if (audits.length > 0) {
+                for (var i = 0; i < audits.length; i++) {
+                    if (audits[i].header == data) {
+                        console.log("CLEEAAANNN");
+                        clean.push(i);
+                    }
+                }
+                for (var i = clean.length-1; i >= 0; i--) {
+                    audits.splice(i, 1);
+                }
+                deferred.resolve("AuditService: Audits cleaned");
+            }
+            else { deferred.reject("AuditService: No audits to clean"); }
+            return deferred.promise;
+        }
+
         /** ========================================================================================
          ** Return
          ** ===================================================================================== */
@@ -77,7 +96,8 @@ angular.module('Enforcer.Dashboard')
         return {
 
             getAuditTrail: getAuditTrail,
-            addAudit: addAudit
+            addAudit: addAudit,
+            cleanAudits: cleanAudits
         };
 
     }]);

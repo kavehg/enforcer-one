@@ -34,11 +34,8 @@ import io.netty.util.CharsetUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -201,8 +198,15 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     private boolean checkMetricValidity(String url) {
         try {
             URL http = new URL(url);
+
             BufferedReader reader = new BufferedReader(new InputStreamReader(http.openStream()));
-            if (reader.readLine().equals("[]")){
+            StringBuilder invalid = new StringBuilder();
+            for (int i = 0; i < 2; i++) {
+                char c = (char) reader.read();
+                invalid.append(c);
+            }
+
+            if (invalid.toString().equals("[]")){
                 logger.log(Level.INFO, "Metric Request Invalid");
                 return false;
             }

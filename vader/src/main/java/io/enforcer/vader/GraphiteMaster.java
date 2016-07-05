@@ -126,12 +126,12 @@ public class GraphiteMaster {
         float currentAverage = 0;
         int nullCounter = 0;
         for (float data : currentMetric.datapoints) {
-            currentAverage += data;
-            if (data == -1) {
-                nullCounter += 1;
+            if (data != -1) {
+                currentAverage += data;
             }
+            else { nullCounter += 1; }
+
         }
-        //ToDo: Average not accurate, 5th datapoint is usually null
         currentAverage = currentAverage / ((float) 5.0 - (float) nullCounter);
         currentMetric.average = currentAverage;
         if (currentAverage > request.threshold) { return -2; }

@@ -1,0 +1,70 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\NodeJS\\node.exe',
+1 verbose cli   'C:\\Program Files\\NodeJS\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install',
+1 verbose cli   'angular-animate1.4.3' ]
+2 info using npm@3.9.5
+3 info using node@v6.2.2
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readLocalPackageData
+7 silly fetchPackageMetaData angular-animate1.4.3
+8 silly fetchNamedPackageData angular-animate1.4.3
+9 silly mapToRegistry name angular-animate1.4.3
+10 silly mapToRegistry using default registry
+11 silly mapToRegistry registry https://registry.npmjs.org/
+12 silly mapToRegistry data Result {
+12 silly mapToRegistry   raw: 'angular-animate1.4.3',
+12 silly mapToRegistry   scope: null,
+12 silly mapToRegistry   name: 'angular-animate1.4.3',
+12 silly mapToRegistry   rawSpec: '',
+12 silly mapToRegistry   spec: 'latest',
+12 silly mapToRegistry   type: 'tag' }
+13 silly mapToRegistry uri https://registry.npmjs.org/angular-animate1.4.3
+14 verbose request uri https://registry.npmjs.org/angular-animate1.4.3
+15 verbose request no auth needed
+16 info attempt registry request try #1 at 9:51:57 AM
+17 verbose request id b6416fe00e9babae
+18 http request GET https://registry.npmjs.org/angular-animate1.4.3
+19 info retry will retry, error on last attempt: Error: self signed certificate in certificate chain
+20 info attempt registry request try #2 at 9:52:07 AM
+21 http request GET https://registry.npmjs.org/angular-animate1.4.3
+22 info retry will retry, error on last attempt: Error: self signed certificate in certificate chain
+23 info attempt registry request try #3 at 9:53:07 AM
+24 http request GET https://registry.npmjs.org/angular-animate1.4.3
+25 silly fetchPackageMetaData Error: self signed certificate in certificate chain
+25 silly fetchPackageMetaData     at Error (native)
+25 silly fetchPackageMetaData     at TLSSocket.<anonymous> (_tls_wrap.js:1060:38)
+25 silly fetchPackageMetaData     at emitNone (events.js:86:13)
+25 silly fetchPackageMetaData     at TLSSocket.emit (events.js:185:7)
+25 silly fetchPackageMetaData     at TLSSocket._finishInit (_tls_wrap.js:584:8)
+25 silly fetchPackageMetaData     at TLSWrap.ssl.onhandshakedone (_tls_wrap.js:416:38)
+25 silly fetchPackageMetaData  error for angular-animate1.4.3 { Error: self signed certificate in certificate chain
+25 silly fetchPackageMetaData     at Error (native)
+25 silly fetchPackageMetaData     at TLSSocket.<anonymous> (_tls_wrap.js:1060:38)
+25 silly fetchPackageMetaData     at emitNone (events.js:86:13)
+25 silly fetchPackageMetaData     at TLSSocket.emit (events.js:185:7)
+25 silly fetchPackageMetaData     at TLSSocket._finishInit (_tls_wrap.js:584:8)
+25 silly fetchPackageMetaData     at TLSWrap.ssl.onhandshakedone (_tls_wrap.js:416:38) code: 'SELF_SIGNED_CERT_IN_CHAIN' }
+26 silly rollbackFailedOptional Starting
+27 silly rollbackFailedOptional Finishing
+28 silly runTopLevelLifecycles Starting
+29 silly runTopLevelLifecycles Finishing
+30 silly install printInstalled
+31 verbose stack Error: self signed certificate in certificate chain
+31 verbose stack     at Error (native)
+31 verbose stack     at TLSSocket.<anonymous> (_tls_wrap.js:1060:38)
+31 verbose stack     at emitNone (events.js:86:13)
+31 verbose stack     at TLSSocket.emit (events.js:185:7)
+31 verbose stack     at TLSSocket._finishInit (_tls_wrap.js:584:8)
+31 verbose stack     at TLSWrap.ssl.onhandshakedone (_tls_wrap.js:416:38)
+32 verbose cwd C:\Users\SCHIAJ2\Workspace\enforcer-one
+33 error Windows_NT 6.1.7601
+34 error argv "C:\\Program Files\\NodeJS\\node.exe" "C:\\Program Files\\NodeJS\\node_modules\\npm\\bin\\npm-cli.js" "install" "angular-animate1.4.3"
+35 error node v6.2.2
+36 error npm  v3.9.5
+37 error code SELF_SIGNED_CERT_IN_CHAIN
+38 error self signed certificate in certificate chain
+39 error If you need help, you may report this error at:
+39 error     <https://github.com/npm/npm/issues>
+40 verbose exit [ 1, true ]

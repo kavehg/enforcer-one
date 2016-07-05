@@ -42,6 +42,9 @@ myModule.config(function($stateProvider, $urlRouterProvider, $httpProvider) {
                     templateUrl: 'src/enforcer/dashboard/templates/sidebar.html',
                     controller: 'StatusCtrl',
                     replace: true
+                },
+                'vaderDashboard@': {
+                    templateUrl: 'src/enforcer/dashboard/templates/vaderDashboard.html',
                 }
             }
         })

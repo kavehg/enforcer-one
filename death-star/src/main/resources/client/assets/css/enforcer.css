@@ -5,7 +5,6 @@ body {
     font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
     font-weight: 400;
     font-size: 0.9em;
-    overflow: hidden;
 }
 
 .New {
@@ -45,6 +44,7 @@ body {
     margin-left: 37.5%;
     margin-right: 37.5%;
     text-align: center;
+    z-index: 10;
 }
 /* Card Decorators */
 .Metric {

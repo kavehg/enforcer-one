@@ -232,6 +232,10 @@ angular.module('Enforcer.Dashboard')
             $('#modal1').closeModal();
         };
 
+        $scope.switchDashboards = function() {
+            $rootScope.$broadcast('switchDashboards');
+        };
+
         // Logs message to console and prints toast if applicable
         function log (message) {
 

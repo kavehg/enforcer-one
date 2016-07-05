@@ -51,7 +51,7 @@ angular.module('Enforcer.Dashboard')
             if (metric.target != null) {
                 if (metrics.length > 0) {
                     for (var i = 0; i < metrics.length; i++) {
-                        if (metrics[i].target == metric.target && metrics[i].header == metric.header) {
+                        if (metrics[i].target == metric.target && metrics[i].metricDetail == metric.metricDetail) {
                             //For when a metric is moved, retains datapoints
                             if (metric.datapoints.length == 0) {
                                 metric.datapoints = metrics[i].datapoints;
@@ -85,7 +85,7 @@ angular.module('Enforcer.Dashboard')
                  return deferred.promise;
                 }
             }
-            deferred.resolve("bleh");
+            deferred.resolve("Moved");
            return deferred.promise;
         }
 
@@ -94,7 +94,7 @@ angular.module('Enforcer.Dashboard')
             var deferred = $q.defer();
             if (metricRequests.length > 0) {
                 for (var i = 0; i < metricRequests.length; i++) {
-                    if (metricRequests[i].url == metricRequest.url && metricRequest.type !== "EDIT" && metricRequest.type !== "REMOVE") {
+                    if (metricRequests[i].url == metricRequest.url && metricRequest.type === "ADD") {
                         deferred.reject("Vader is already monitoring this Metric.");
                         return deferred.promise;
                     }

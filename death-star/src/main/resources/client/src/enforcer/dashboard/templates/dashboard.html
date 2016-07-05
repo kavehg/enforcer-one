@@ -1,5 +1,5 @@
 
-<div class="container" ng-controller="DashboardCtrl">
+<!--<div class="container" ng-controller="DashboardCtrl">-->
     <!--Needed for moving Cards out of overflow containers -->
     <div ng-drag-clone="">
         <div class="card {{clonedData.type}} hoverable">
@@ -43,7 +43,7 @@
         <div ng-drop="true" ng-drop-success="onDropCompleteNew($data,$event)" class="card-container col s3" ng-drag-start="onDrag($data,$event)">
             <ul id="newList">
 
-                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in new | filter: {status:status.name}" id="New-{{card.header}}{{card.headerDetail}}{{card.classPath}}">
+                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in allCards | filter: {status:status.name} | cardFilter: 'New'" id="New-{{card.header}}{{card.headerDetail}}{{card.classPath}}">
 
                     <div class="card {{card.type}} hoverable" ng-drag="true" ng-drag-data="card" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content">
@@ -63,7 +63,7 @@
         <div ng-drop="true" ng-drop-success="onDropCompleteAcknowledged($data,$event)" class="card-container col s3">
             <ul id="acknowledgedList">
 
-                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in acknowledged | filter: {status:status.name}" id="Acknowledged-{{card.header}}{{card.headerDetail}}{{card.classPath}}">
+                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in allCards | filter: {status:status.name} | cardFilter: 'Acknowledged'" id="Acknowledged-{{card.header}}{{card.headerDetail}}{{card.classPath}}">
 
                     <div class="card {{card.type}} hoverable" ng-drag="true" ng-drag-data="card" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content">
@@ -83,7 +83,7 @@
         <div ng-drop="true" ng-drop-success="onDropCompleteEscalated($data,$event)" class="card-container col s3">
             <ul id="escalatedList">
 
-                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in escalated | filter: {status:status.name}" id="Escalated-{{card.header}}{{card.headerDetail}}{{card.classPath}}">
+                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in allCards | filter: {status:status.name} | cardFilter: 'Escalated'" id="Escalated-{{card.header}}{{card.headerDetail}}{{card.classPath}}">
 
                     <div class="card {{card.type}} hoverable" ng-drag="true" ng-drag-data="card" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content">
@@ -103,7 +103,7 @@
         <div ng-drop="true" ng-drop-success="onDropCompleteHistory($data,$event)" class="card-container col s3">
             <ul id="historyList">
 
-                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in history | filter: {status:status.name}" id="History-{{card.header}}{{card.headerDetail}}{{card.classPath}}">
+                <li class="animated bounceIn" ng-center-anchor="true" ng-repeat="card in allCards | filter: {status:status.name} | cardFilter: 'History'" id="History-{{card.header}}{{card.headerDetail}}{{card.classPath}}">
 
                     <div class="card {{card.type}} hoverable" ng-drag="true" ng-drag-data="card" ng-drag-success="onDragComplete($data,$event)" ng-center-anchor="true">
                         <div class="card-content">
@@ -120,128 +120,7 @@
         </div>
     </div>
 
-    <!-- Single Report Detail Modal -->
-    <div id="modal4" class="modal modal-fixed-footer">
-        <div class="modal-content">
-            <!-- Information from card laid out for easier reading -->
-            <h4 class="grey-text text-darken-1">Card Details</h4>
-            <div class="row valign-wrapper" ng-show="reportOrMetric">
-                <div class="card {{detailedCard.type}} col s3">
-                    <div class="card-content">
-                        <span class="card-title"><strong>{{detailedCard.processId}} | [{{detailedCard.host}}]</strong></span>
-                        <div class="type-bar {{detailedCard.status}}"></div>
-                        <p>{{detailedCard.mainClass}}</p>
-                        <p>{{detailedCard.processStateChange}}</p>
-                        <p class="right-align">{{detailedCard.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
-                    </div>
-                </div>
-                <div class="col s9">
-                    <ul class="collection">
-                        <li class="collection-item"><span style="font-weight: bold;">Process Id - </span><span class="grey-text text-darken-1">{{detailedCard.processId}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Host - </span><span class="grey-text text-darken-1">{{detailedCard.host}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Main Class - </span><span class="grey-text text-darken-1">{{detailedCard.mainClass}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Process State - </span><span class="grey-text text-darken-1">{{detailedCard.processStateChange}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Time/Date - </span><span class="grey-text text-darken-1">{{detailedCard.timeStamp}}</span></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="row valign-wrapper" ng-show="!reportOrMetric">
-                <div class="card {{detailedCard.type}} col s3">
-                    <div class="card-content">
-                        <span class="card-title"><strong>{{detailedCard.metricDetail}} | [{{detailedCard.average}}]</strong></span>
-                        <div class="type-bar {{detailedCard.status}}"></div>
-                        <p>{{detailedCard.target}}</p>
-                        <p>{{detailedCard.threshold}}</p>
-                        <p class="right-align">{{detailReport.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
-                    </div>
-                </div>
-                <div class="col s9">
-                    <ul class="collection">
-                        <li class="collection-item"><span style="font-weight: bold;">Vader Label - </span><span class="grey-text text-darken-1">{{detailedCard.metricDetail}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Current Metric Size - </span><span class="grey-text text-darken-1">{{detailedCard.average}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Data Points (5min) - </span><span class="grey-text text-darken-1">{{detailedCard.datapoints}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Metric Path - </span><span class="grey-text text-darken-1">{{detailedCard.target}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Threshold - </span><span class="grey-text text-darken-1">{{detailedCard.threshold}}</span></li>
-                        <li class="collection-item"><span style="font-weight: bold;">Time/Date - </span><span class="grey-text text-darken-1">{{detailedCard.timeStamp}}</span></li>
-                    </ul>
-                </div>
-            </div>
 
-            <!-- Details Input. Allows user to attach additional information, objectives, progress, etc to the report-->
-            <h4 class="grey-text text-darken-1">Additional Information</h4>
-            <div class="row">
-                <div class="row">
-                    <div class="input-field col s12">
-                        <i class="material-icons prefix">mode_edit</i>
-                        <textarea id="details_form" class="materialize-textarea" ng-model="detailReport.details">{{detailedCard.details}}</textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Unique Change Log History for dropped Report-->
-            <h4 class="grey-text text-darken-1"> Change Log </h4>
-            <div ng-repeat="audit in returnedAudits">
-                <div ng-show="{{audit.update}}" class="row valign-wrapper">
-                    <div class="center-align col s2">
-                        <i class="large material-icons">account_circle</i>
-                        <p class="text-gray bold" style="bottom: 0; font-weight: bold;">{{audit.userAcf2Id}}</p>
-                    </div>
-                    <div class="card {{audit.type}} col s3" >
-                        <div class="card-content">
-                            <span class="card-title"><strong>{{audit.header}} | [{{audit.oldHeaderDetail}}]</strong></span>
-                            <div class="type-bar {{audit.status}}"></div>
-                            <p>{{audit.classPath}}</p>
-                            <p>{{audit.oldDetail}}</p>
-                            <p class="right-align">{{audit.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
-                        </div>
-                    </div>
-                    <div class="col s3 center-align">
-                        <i class="large material-icons">trending_flat</i>
-                        <p style="font-weight: bold;">{{audit.movedTime | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
-                    </div>
-                    <div class="card {{audit.type}} col s3" >
-                        <div class="card-content">
-                            <span class="card-title"><strong>{{audit.header}} | [{{audit.headerDetail}}]</strong></span>
-                            <div class="type-bar {{audit.status}}"></div>
-                            <p>{{audit.classPath}}</p>
-                            <p>{{audit.detail}}</p>
-                            <p class="right-align">{{audit.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
-                        </div>
-                    </div>
-                </div>
-                <div ng-show="!{{audit.update}}" class="row valign-wrapper">
-                    <div class="center-align col s2">
-                        <i class="large material-icons">account_circle</i>
-                        <p class="text-gray bold" style="bottom: 0; font-weight: bold;">{{audit.userAcf2Id}}</p>
-                    </div>
-                    <div class="card {{audit.type}} col s3" >
-                        <div class="card-content">
-                            <span class="card-title"><strong>{{audit.header}} | [{{audit.headerDetail}}]</strong></span>
-                            <div class="type-bar {{audit.oldStatus}}"></div>
-                            <p>{{audit.classPath}}</p>
-                            <p>{{audit.detail}}</p>
-                            <p class="right-align">{{audit.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
-                        </div>
-                    </div>
-                    <div class="col s3 center-align">
-                        <i class="large material-icons">trending_flat</i>
-                        <p style="font-weight: bold;">{{audit.movedTime | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
-                    </div>
-                    <div class="card {{audit.type}} col s3" >
-                        <div class="card-content">
-                            <span class="card-title"><strong>{{audit.header}} | [{{audit.headerDetail}}]</strong></span>
-                            <div class="type-bar {{audit.newStatus}}"></div>
-                            <p>{{audit.classPath}}</p>
-                            <p>{{audit.detail}}</p>
-                            <p class="right-align">{{audit.timeStamp | date: 'yyyy/MM/dd HH:mm:ss'}}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <a href="#!" class="modal-action modal-close waves-effect waves-light btn-flat purple white-text" ng-click="closeDetailModal()">Ok</a>
-        </div>
     </div>
 
-</div>
+<!--</div>-->

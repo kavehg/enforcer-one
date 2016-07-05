@@ -61,7 +61,7 @@ angular.module('Enforcer.Dashboard')
         // Calls to functions inside this service from external controllers
         return {
             overwriteSettings: overwriteSettings,
-            getSettings: getSettings
+            getSettings: getSettings,
         };
 
     }]);
