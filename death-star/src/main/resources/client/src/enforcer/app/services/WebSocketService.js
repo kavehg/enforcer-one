@@ -79,7 +79,7 @@ angular.module('Enforcer.Common')
         ws.onmessage = function(message) {
 
             if (isJson(message.data)) {
-                console.log("Received message: " + JSON.stringify(message.data));
+                //console.log("Received message: " + JSON.stringify(message.data));
 
                 var theMsg = JSON.parse(message.data);
 

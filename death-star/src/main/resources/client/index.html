@@ -62,7 +62,7 @@
     <body>
 
     <!-- Sidebar -->
-    <div ng-controller="StatusCtrl">
+    <div ng-controller="StatusCtrl" class="z-depth-2" style="background: white;">
         <!--<div ui-view="sidebar"></div>-->
         <div class="menu-wrap">
             <nav class="menu" style="box-shadow:none">
@@ -101,7 +101,7 @@
                 </div>
                 <div class="row">
                     <div class="input-field col s4">
-                        <input id="threshold" type="number" step="0.01" ng-model="metricRequest.threshold">
+                        <input id="threshold" type="number" step="0.0000000001" ng-model="metricRequest.threshold">
                         <label class="active" for="threshold">Threshold</label>
                     </div>
                 </div>
@@ -119,8 +119,8 @@
 
         <!-- Page Header -->
         <div class="row">
-            <div class="col s1"><button class="menu-button" id="open-button">Open Menu</button></div>
-            <div class="col s4 offset-s4 center-align"><h3 class="grey-text text-darken-1">Enforcer One</h3></div>
+            <div class="col s1"><button class="menu-button" style="color:white;"id="open-button"></button></div>
+            <div class="col s4 offset-s4 center-align" style="margin-bottom:10px;"><h3 class="grey-text text-darken-1">Enforcer One</h3></div>
         </div>
 
     </div>
@@ -131,6 +131,7 @@
         <div class="container" ng-controller="DashboardCtrl">
             <div ui-view ng-show="!dashboardSwitch" id="Dashboard" class="animated"></div>
             <div ui-view="vaderDashboard" ng-show="dashboardSwitch" id="VaderDashboard" class="animated"></div>
+
             <!-- Single Report Detail Modal -->
             <div id="modal4" class="modal modal-fixed-footer">
                 <div class="modal-content">
@@ -191,7 +192,7 @@
 
                     <!-- Unique Change Log History for dropped Report-->
                     <h4 class="grey-text text-darken-1"> Change Log </h4>
-                    <div ng-repeat="audit in returnedAudits">
+                    <div ng-repeat="audit in returnedAudits.shown">
                         <div ng-show="{{audit.update}}" class="row valign-wrapper">
                             <div class="center-align col s2">
                                 <i class="large material-icons">account_circle</i>
@@ -249,10 +250,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row center-align" ng-show="returnedAudits.snapshot.length > returnedAudits.shown.length">
+                        <a class="waves-effect waves-light btn-flat white-text blue darken-1" style="width:80%;" ng-click="showMoreAudits()">Show More</a>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <a href="#!" class="modal-action modal-close waves-effect waves-light btn-flat purple white-text" ng-click="closeDetailModal()">Ok</a>
+                    <a href="#!" class="modal-action modal-close waves-effect waves-light btn-flat blue white-text" ng-click="closeDetailModal()">Ok</a>
                 </div>
+            </div>
         </div>
 
 
@@ -262,9 +267,9 @@
                 <i class="large material-icons">settings</i>
             </a>
             <ul>
-                <li><a href="#modal3" class="btn-floating blue modal-trigger tooltipped" data-delay="25" data-tooltip="User Profile" data-position="left"><i class="material-icons">perm_identity</i></i></a></li>
-                <li><a ng-click="switchDashboards()" class="btn-floating teal tooltipped" data-delay="25" data-tooltip="Switch Dashboards" data-position="left"><i class="material-icons">swap_horiz</i></i></a></li>
-                <li><a href="#modal2" class="btn-floating pink modal-trigger tooltipped" data-delay="25" data-tooltip="Change Log" data-position="left">{{changeLogCount}}<!--<i class="material-icons">view_list</i>--></a></li>
+                <li><a href="#modal3" class="btn-floating blue modal-trigger tooltipped" data-delay="25" data-tooltip="User Profile" data-position="left"><i class="material-icons">perm_identity</i></a></li>
+                <li><a ng-click="switchDashboards()" class="btn-floating teal tooltipped" data-delay="25" data-tooltip="Switch Dashboards" data-position="left"><i class="material-icons">swap_horiz</i></a></li>
+                <li><a href="#modal2" class="btn-floating pink modal-trigger tooltipped" data-delay="25" data-tooltip="Change Log" data-position="left" ng-click="resetShowAuditsThrough()">{{changeLogCount}}<!--<i class="material-icons">view_list</i>--></a></li>
                 <li><a ng-click="openSettings()" class="btn-floating purple tooltipped" data-delay="25" data-tooltip="App Settings" data-position="left"><i class="material-icons">settings_applications</i></a></li>
                 <li><a id="connectionStatus" class="btn-floating red tooltipped" data-delay="25" data-tooltip="Connection: {{connection}}" data-position="left"><i class="material-icons">settings_ethernet</i></a></li>
             </ul>

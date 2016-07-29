@@ -85,7 +85,7 @@ angular.module('Enforcer.Dashboard')
                  return deferred.promise;
                 }
             }
-            deferred.resolve("Moved");
+            deferred.resolve("Metric Service: Moved");
            return deferred.promise;
         }
 

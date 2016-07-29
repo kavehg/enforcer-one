@@ -236,6 +236,10 @@ angular.module('Enforcer.Dashboard')
             $rootScope.$broadcast('switchDashboards');
         };
 
+        $scope.resetShowAuditsThrough = function() {
+            $rootScope.$broadcast('openChangeLog');
+        }
+
         // Logs message to console and prints toast if applicable
         function log (message) {
 

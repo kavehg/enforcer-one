@@ -75,7 +75,6 @@ angular.module('Enforcer.Dashboard')
             if (audits.length > 0) {
                 for (var i = 0; i < audits.length; i++) {
                     if (audits[i].header == data) {
-                        console.log("CLEEAAANNN");
                         clean.push(i);
                     }
                 }
@@ -94,10 +93,8 @@ angular.module('Enforcer.Dashboard')
 
         // Calls to functions inside this service from external controllers
         return {
-
             getAuditTrail: getAuditTrail,
             addAudit: addAudit,
-            cleanAudits: cleanAudits
         };
 
     }]);

@@ -79,7 +79,10 @@ angular.module('Enforcer.Dashboard')
             $scope.allCards = [];
 
             //Audits which match unique report query
-            $scope.returnedAudits = [];
+            $scope.returnedAudits = {
+                snapshot: [],
+                shown: []
+            };
 
             //Card currently being viewed in Card Detail modal
             $scope.detailedCard;
@@ -531,9 +534,13 @@ angular.module('Enforcer.Dashboard')
 
         //Distinguishes between report and metric for view on detail drop
         $scope.reportOrMetric;
+        $scope.showAuditsThrough;
         //Query for matching audits and also get data type that will modify the modal
         $scope.getReportDetails=function(data,evt){
             detailDrop = true;
+            $scope.returnedAudits.shown = [];
+            $scope.returnedAudits.snapshot = [];
+            $scope.showAuditsThrough = 10;
             if (data.type == "Report") {
                 ReportService.findReport(data).then (
                     function(report) {
@@ -559,52 +566,36 @@ angular.module('Enforcer.Dashboard')
             $("#modal4").openModal();
             AuditService.getAuditTrail().then(
                 function(returnedAuditTrail) {
-                    for (var i = 0; i < returnedAuditTrail.length; i++) {
-                        if (returnedAuditTrail[i].header == data.header && returnedAuditTrail[i].classPath == data.classPath && returnedAuditTrail[i].detail == data.detail) {
-                            $scope.returnedAudits.push(returnedAuditTrail[i]);
+                    var allAudits = angular.copy(returnedAuditTrail).reverse();
+                    for (var i = 0; i < allAudits.length; i++) {
+                        if (allAudits[i].header == data.header && allAudits[i].classPath == data.classPath && allAudits[i].detail == data.detail) {
+                            $scope.returnedAudits.snapshot.push(allAudits[i]);
                         }
                     }
+                    $scope.showAuditsThrough = $scope.returnedAudits.snapshot.length > $scope.showAuditsThrough ? $scope.showAuditsThrough : $scope.returnedAudits.snapshot.length;
+                    $scope.returnedAudits.shown = angular.copy($scope.returnedAudits.snapshot).splice(0, $scope.showAuditsThrough);
                 }, function(err) {
                     log("Could not retrieve audits.");
                 }
             );
         }
 
-        //Reset scope variables
-        $scope.closeDetailModal = function() {
-            $scope.returnedAudits = [];
-            $scope.showDetailBox = false;
+        $scope.showMoreAudits = function() {
+            var prevShown = angular.copy($scope.showAuditsThrough);
+            $scope.showAuditsThrough += 10;
+            $scope.showAuditsThrough = $scope.showAuditsThrough > $scope.returnedAudits.snapshot.length ? $scope.returnedAudits.snapshot.length : $scope.showAuditsThrough;
+            console.log($scope.showAuditsThrough);
+            for (var i = prevShown; i < $scope.showAuditsThrough; i++) {
+                $scope.returnedAudits.shown.push($scope.returnedAudits.snapshot[i]);
+            }
         }
 
-        // Reduces the height of a column when a card leaves
-        /*$scope.removeCard = function(data) {
-
-            if ($scope.new.indexOf(data) > -1)
-                reduceHeight("#newList");
-            else if ($scope.escalated.indexOf(data) > -1)
-                reduceHeight("#escalatedList");
-            else if ($scope.acknowledged.indexOf(data) > -1)
-                reduceHeight("#acknowledgedList");
-            else if ($scope.history.indexOf(data) > -1)
-                reduceHeight("#historyList");
-
-        }*/
-
-        // Reduces the height by one card for a given column
-        /*function reduceHeight(columnId) {
-
-            var object = $(columnId);
-
-            if (object.height() > 650)
-                object.height("-=165");
-        }*/
-
-        // Increases the height by one card for a given column
-        /*function increaseHeight(columnId) {
-
-            var object = $(columnId);
-            object.height("+=165");
-        }*/
+        //Reset scope variables
+        $scope.closeDetailModal = function() {
+            $scope.returnedAudits.snapshot = [];
+            $scope.returnedAudits.shown = [];
+            $scope.showDetailBox = false;
+        }
 
         // Logs message to console and prints toast if applicable
         function log (message) {
@@ -639,7 +630,6 @@ angular.module('Enforcer.Dashboard')
         function changeDashboards() {
 
             if ($('#Dashboard').hasClass("ng-hide")) {
-                //$('#Dashboard').css ("opacity", 0);
                 $('#VaderDashboard').addClass("fadeOutLeft").one('animationend', function() {
                     $('#VaderDashboard').removeClass("fadeOutLeft");
 

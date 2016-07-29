@@ -1,7 +1,7 @@
 <div class="modal-content">
     <h4 class="grey-text text-darken-1">Change Log</h4>
-    <div ng-repeat="audit in auditTrail">
-        <div ng-show="{{audit.update}}" class="row valign-wrapper">
+    <div ng-repeat="audit in auditTrail.shownAudits">
+        <div ng-show="{{audit.update}}" class="row valign-wrapper animated slideInDown">
             <div class="center-align col s2">
                 <i class="large material-icons">account_circle</i>
                 <p class="text-gray bold" style="bottom: 0; font-weight: bold;">{{audit.userAcf2Id}}</p>
@@ -29,7 +29,7 @@
                 </div>
             </div>
         </div>
-        <div ng-show="!{{audit.update}}" class="row valign-wrapper">
+        <div ng-show="!{{audit.update}}" class="row valign-wrapper animated slideInDown">
             <div class="center-align col s2">
                 <i class="large material-icons">account_circle</i>
                 <p class="text-gray bold" style="bottom: 0; font-weight: bold;">{{audit.userAcf2Id}}</p>
@@ -57,5 +57,8 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row center-align" ng-show="auditTrail.snapshotLength > showAuditsThrough">
+        <a class="waves-effect waves-light btn-flat white-text blue darken-1" style="width:80%;" ng-click="showMoreAudits()">Show More</a>
     </div>
 </div>

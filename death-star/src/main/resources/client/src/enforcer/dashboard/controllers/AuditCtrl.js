@@ -34,7 +34,11 @@ angular.module('Enforcer.Dashboard')
          ** Scope Variables
          ** ===================================================================================== */
 
-        $scope.auditTrail = [];
+        $scope.auditTrail = {
+            shownAudits: [],
+            snapshotLength: 0
+        };
+        $scope.showAuditsThrough = 10;
 
         /** ========================================================================================
          ** Broadcast Listeners
@@ -50,16 +54,20 @@ angular.module('Enforcer.Dashboard')
             refreshAudits();
         });
 
+        $scope.$on('openChangeLog', function() {
+            $scope.showAuditsThrough = 10;
+            $scope.auditTrail.shownAudits = $scope.auditTrail.shownAudits.length < $scope.showAuditsThrough ? $scope.auditTrail.shownAudits : $scope.auditTrail.shownAudits.splice(0, $scope.showAuditsThrough);
+        });
+
         /** ========================================================================================
          ** Functions
          ** ===================================================================================== */
 
-        // Calls the SettingsService and retrrieves the updated settings
+        // Calls the SettingsService and retrieves the updated settings
         function refreshSettings() {
             // If promise received is resolved
             SettingsService.getSettings().then(
                 function(returnedSettings) {
-
                     $scope.received = true;
                     $scope.settings = returnedSettings;
                     log('AuditCtrl: Settings Refreshed');
@@ -77,8 +85,10 @@ angular.module('Enforcer.Dashboard')
             AuditService.getAuditTrail().then(
                 function(returnedAuditTrail) {
                     $scope.received = true;
-                    $scope.auditTrail = returnedAuditTrail;
-                    var audit = $scope.auditTrail[$scope.auditTrail.length - 1];
+                    var allAudits = angular.copy(returnedAuditTrail).reverse();
+                    $scope.auditTrail.snapshotLength = allAudits.length;
+                    $scope.auditTrail.shownAudits = allAudits.length < $scope.showAuditsThrough ? allAudits.splice(0, allAudits.length) : allAudits.splice(0, $scope.showAuditsThrough);
+                    var audit = $scope.auditTrail.shownAudits[0];
                     if (audit.update) {
                         reportAuditUpdateToast(audit);
                     }
@@ -127,5 +137,20 @@ angular.module('Enforcer.Dashboard')
             Materialize.toast(toast, 5000);
         }
 
-
+        $scope.showMoreAudits = function() {
+            var prevShown = angular.copy($scope.showAuditsThrough);
+                $scope.showAuditsThrough += 10;
+                AuditService.getAuditTrail().then(
+                    function(returnedAuditTrail) {
+                        var allAudits = angular.copy(returnedAuditTrail).reverse();
+                        $scope.showAuditsThrough = allAudits.length > $scope.showAuditsThrough ? $scope.showAuditsThrough : allAudits.length;
+                        for (var i = prevShown; i < $scope.showAuditsThrough; i++) {
+                            $scope.auditTrail.shownAudits.push(allAudits[i]);
+                        }
+                    },
+                    function(err) {
+                        log(err);
+                    }
+                );
+        }
     });

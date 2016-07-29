@@ -1,10 +1,10 @@
 
 
 <div ng-repeat="vader in vaders" class="row">
-    <div style="margin-right: 75%;">
-        <h3 class="Metric" style="padding-left: 10px; border-radius: 2px;">{{vader.metricDetail}}</h3>
-    </div>
-    <div class="grey darken-1 horizline"></div>
+    <!--<div>-->
+        <h3 class="Metric z-depth-2" style="padding:10px;border-radius:2px;display:inline-block;">{{vader.metricDetail}}</h3>
+    <!--</div>-->
+    <div class="grey darken-1 horizline" style="position:relative;"></div>
     <div ng-repeat="metric in allCards | metricFilter: vader" class="col s3" ng-click="getReportDetails(metric)">
         <div class="card {{metric.type}} hoverable">
             <div class="card-content">
