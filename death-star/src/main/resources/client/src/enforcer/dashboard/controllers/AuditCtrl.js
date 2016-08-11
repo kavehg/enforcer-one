@@ -132,9 +132,11 @@ angular.module('Enforcer.Dashboard')
         }
 
         function reportAuditUpdateToast(audit) {
+            var classPathInfo = audit.classPath.split('.');
+            var updatedPathString = classPathInfo.splice(classPathInfo.length - 3, 3).join('.');
             AnimationFactory.playAnimation("#gear-button", "bounce");
-            var toast = "<p>" + audit.type + " <span class='"+audit.status+"'>"+audit.header+"</span> Updated: "+audit.headerDetail+"</p>"
-            Materialize.toast(toast, 5000);
+            var toast = "<p>" + audit.type + " Update <span class='"+audit.status+"'>"+audit.header +"</span> " + updatedPathString + ": " + audit.headerDetail + "</p>"
+            Materialize.toast(toast, 10000);
         }
 
         $scope.showMoreAudits = function() {

@@ -67,12 +67,12 @@
         <div class="menu-wrap">
             <nav class="menu" style="box-shadow:none">
                 <div class="icon-list">
-                    <a><span style="margin-left:0px; font-size:1.05em">Monitored Hosts</span></a>
+                    <a><span style="margin-left:0px; font-size:1.05em; border-bottom: 2px solid #b0bec5;">Monitored Hosts</span></a>
                     <a class="tooltipped green-text" ng-mouseover="calculateTimeDiff(status)" data-position="right" data-delay="25" data-tooltip="Last Heartbeat: {{timeDiff}}s" ng-repeat="status in statuses" id="text-{{status.xwingId}}">
                         <i class="material-icons" style="float:left">verified_user</i><span>{{status.host}}</span>
                     </a>
-                    <a><span style="margin-left:0px; font-size:1.05em">Monitored Metrics</span></a>
-                    <a class="tooltiped green-text" ng-mouseover="initializeTooltip()" data-position="right" data-delay="25" data-tooltip="Click to Edit Vader" ng-click="openVaderEditor(metric)"ng-repeat="metric in monitoredMetricRequests" id="text-{{metric.url}}">
+                    <a><span style="margin-left:0px; font-size:1.05em;border-bottom: 2px solid #b0bec5;">Monitored Metrics</span></a>
+                    <a class="green-text vader" ng-click="openVaderEditor(metric)"ng-repeat="metric in monitoredMetricRequests" style="cursor: pointer;" id="text-{{metric.url}}">
                         <i class="material-icons" style="float:left">verified_user</i><span>{{metric.metricDetail}}</span>
                     </a>
                 </div>
@@ -101,7 +101,7 @@
                 </div>
                 <div class="row">
                     <div class="input-field col s4">
-                        <input id="threshold" type="number" step="0.0000000001" ng-model="metricRequest.threshold">
+                        <input id="threshold" type="number" step="0.01" ng-model="metricRequest.threshold">
                         <label class="active" for="threshold">Threshold</label>
                     </div>
                 </div>

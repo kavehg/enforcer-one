@@ -5,6 +5,7 @@ body {
     font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
     font-weight: 400;
     font-size: 0.9em;
+    overflow: hidden;
 }
 
 .New {
@@ -65,4 +66,8 @@ body {
 
 [ng-drag].dragging {
     opacity: 0;
+}
+
+.vader:hover {
+    background-color: white;
 }
